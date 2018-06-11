@@ -1,14 +1,44 @@
 {
-  "name": "joinPage",
+  "name": "parsec-bridge-ui",
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "./node_modules/.bin/parcel index.html"
+    "start": "./node_modules/.bin/parcel index.html",
+    "precommit": "./node_modules/.bin/lint-staged"
+  },
+  "lint-staged": {
+    "*.js": [
+      "prettier --write",
+      "git add",
+      "eslint"
+    ]
+  },
+  "prettier": {
+    "printWidth": 80,
+    "tabWidth": 2,
+    "useTabs": false,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5",
+    "bracketSpacing": true
   },
   "devDependencies": {
-    "parcel-bundler": "^1.8.1"
+    "parcel-bundler": "^1.8.1",
+    "babel-core": "^6.26.3",
+    "babel-eslint": "^8.2.3",
+    "babel-preset-env": "^1.6.1",
+    "eslint": "^4.19.1",
+    "eslint-config-airbnb": "^16.1.0",
+    "eslint-config-airbnb-base": "^12.1.0",
+    "eslint-config-prettier": "^2.9.0",
+    "eslint-plugin-import": "^2.11.0",
+    "eslint-plugin-jest": "^21.17.0",
+    "husky": "^0.14.3",
+    "jest": "^23.0.1",
+    "lint-staged": "^7.0.5",
+    "prettier": "^1.12.1"
   },
   "dependencies": {
     "ethereumjs-util": "^5.2.0",
