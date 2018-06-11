@@ -5,7 +5,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "./node_modules/.bin/parcel index.html",
+    "start": "./node_modules/.bin/parcel src/index.html",
     "precommit": "./node_modules/.bin/lint-staged"
   },
   "lint-staged": {
