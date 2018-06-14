@@ -15,26 +15,31 @@ export default class App extends React.Component {
   }
 
   componentDidMount() {
-    const { account } = this.props;
     const web3 = getWeb3();
-    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
-    promisifyWeb3Call(token.balanceOf, account).then(balance => {
-      this.setState({ balance });
-    });
-
-    const bridge = getWeb3(true)
+    this.token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    this.bridge = getWeb3(true)
       .eth.contract(bridgeAbi)
       .at(bridgeAddress);
-    const allEvents = bridge.allEvents({ toBlock: 'latest' });
+
+    this.loadData();
+    const allEvents = this.bridge.allEvents({ toBlock: 'latest' });
     allEvents.watch(() => {
-      promisifyWeb3Call(token.balanceOf, account).then(balance => {
-        this.setState({ balance });
-      });
+      this.loadData();
+    });
+  }
+
+  loadData() {
+    const { account } = this.props;
+    Promise.all([
+      promisifyWeb3Call(this.token.balanceOf, account),
+      promisifyWeb3Call(this.bridge.lastCompleteEpoch),
+    ]).then(([balance, lastCompleteEpoch]) => {
+      this.setState({ balance, lastCompleteEpoch });
     });
   }
 
   render() {
-    const { balance } = this.state;
+    const { balance, lastCompleteEpoch } = this.state;
     const { decimals, symbol } = this.props;
     if (!balance) {
       return null;
@@ -44,6 +49,7 @@ export default class App extends React.Component {
         <p>
           Balance: {Number(balance.div(decimals))} {symbol}
         </p>
+        <p>Last complete epoch: {Number(lastCompleteEpoch)}</p>
         <hr />
         <Deposit {...this.props} balance={balance} />
         <hr />
