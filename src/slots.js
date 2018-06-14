@@ -191,7 +191,7 @@ export default class Slots extends React.Component {
 
   renderSlots() {
     const { slots, signerAddr, stakes } = this.state;
-    const { decimals, symbol, balance } = this.props;
+    const { decimals, symbol, balance, account } = this.props;
     const bal = balance.div(decimals).toNumber();
 
     return (
@@ -201,7 +201,7 @@ export default class Slots extends React.Component {
             <th style={cellStyle} />
             {slots.map((slot, i) => (
               <th style={cellStyle} key={i}>
-                Slot {i} {addrCmp(slot.signer, signerAddr) && '(owner)'}
+                Slot {i} {addrCmp(slot.owner, account) && '(owner)'}
               </th>
             ))}
           </tr>
