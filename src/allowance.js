@@ -5,7 +5,7 @@ import promisifyWeb3Call from './promisifyWeb3Call';
 import { token as tokenAbi } from './abis';
 import { bridgeAddress, tokenAddress } from './addrs';
 
-export default class Deposit extends React.Component {
+export default class Allowance extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -24,8 +24,8 @@ export default class Deposit extends React.Component {
 
     promisifyWeb3Call(token.approve.sendTransaction, bridgeAddress, value, {
       from: account,
-    }).then(depositTxHash => {
-      console.log('deposit', depositTxHash); // eslint-disable-line
+    }).then(approveTxHash => {
+      console.log('approve', approveTxHash); // eslint-disable-line
       this.setState({ value: 0 });
     });
   }
@@ -37,11 +37,15 @@ export default class Deposit extends React.Component {
 
     return (
       <form onSubmit={this.handleSubmit}>
-        <h2>Deposit</h2>
+        <h2>Allowance</h2>
+        <p>
+          To be able to buy a slot you need to set allowance on token contract
+          first
+        </p>
         <input
           value={value}
           onChange={e => this.setState({ value: Number(e.target.value) })}
-        />
+        />{' '}
         {symbol}
         <br />
         <button type="submit" disabled={!value || value > bal}>

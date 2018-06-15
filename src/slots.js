@@ -2,8 +2,8 @@ import React, { Fragment } from 'react'; // eslint-disable-line
 import ethUtil from 'ethereumjs-util';
 import getWeb3 from './getWeb3';
 import promisifyWeb3Call from './promisifyWeb3Call';
-import { bridge as bridgeAbi, token as tokenAbi } from './abis';
-import { bridgeAddress, tokenAddress } from './addrs';
+import { bridge as bridgeAbi } from './abis';
+import { bridgeAddress } from './addrs';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -133,26 +133,18 @@ export default class Slots extends React.Component {
     const stake = new BigNumber(this.state.stakes[slotId]).mul(decimals);
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
-    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
 
-    promisifyWeb3Call(token.approve.sendTransaction, bridgeAddress, stake, {
-      from: account,
-    })
-      .then(approveTxHash => {
-        console.log('approve', approveTxHash); // eslint-disable-line
-        return promisifyWeb3Call(
-          bridge.bet.sendTransaction,
-          slotId,
-          stake,
-          signerAddr,
-          `0x${tenderAddr}`, // ToDo: workaround while tenderAddr should be address instead string
-          { from: account }
-        );
-      })
-      .then(betTxHash => {
-        console.log('bet', betTxHash); // eslint-disable-line
-        this.setStake(slotId, undefined);
-      });
+    promisifyWeb3Call(
+      bridge.bet.sendTransaction,
+      slotId,
+      stake,
+      signerAddr,
+      `0x${tenderAddr}`, // ToDo: workaround while tenderAddr should be address instead string
+      { from: account }
+    ).then(betTxHash => {
+      console.log('bet', betTxHash); // eslint-disable-line
+      this.setStake(slotId, undefined);
+    });
   }
 
   renderRow(title, key, newKey, renderer) {

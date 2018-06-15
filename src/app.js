@@ -1,5 +1,6 @@
 import React from 'react';
 import Slots from './slots'; // eslint-disable-line
+import Allowance from './allowance'; // eslint-disable-line
 import Deposit from './deposit'; // eslint-disable-line
 import promisifyWeb3Call from './promisifyWeb3Call';
 import getWeb3 from './getWeb3';
@@ -11,20 +12,31 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       balance: null,
+      allowance: null,
     };
   }
 
   componentDidMount() {
-    const web3 = getWeb3();
-    this.token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    // const web3 = getWeb3();
+    this.token = getWeb3(true)
+      .eth.contract(tokenAbi)
+      .at(tokenAddress);
     this.bridge = getWeb3(true)
       .eth.contract(bridgeAbi)
       .at(bridgeAddress);
 
     this.loadData();
-    const allEvents = this.bridge.allEvents({ toBlock: 'latest' });
-    allEvents.watch(() => {
+
+    const bridgeEvents = this.bridge.allEvents({ toBlock: 'latest' });
+    bridgeEvents.watch(() => {
       this.loadData();
+    });
+
+    const approvalEvents = this.token.Approval({ toBlock: 'latest' });
+    approvalEvents.watch((err, e) => {
+      if (e.args.owner === this.props.account) {
+        this.loadData();
+      }
     });
   }
 
@@ -32,16 +44,17 @@ export default class App extends React.Component {
     const { account } = this.props;
     Promise.all([
       promisifyWeb3Call(this.token.balanceOf, account),
+      promisifyWeb3Call(this.token.allowance, account, bridgeAddress),
       promisifyWeb3Call(this.bridge.lastCompleteEpoch),
-    ]).then(([balance, lastCompleteEpoch]) => {
-      this.setState({ balance, lastCompleteEpoch });
+    ]).then(([balance, allowance, lastCompleteEpoch]) => {
+      this.setState({ balance, allowance, lastCompleteEpoch });
     });
   }
 
   render() {
-    const { balance, lastCompleteEpoch } = this.state;
+    const { balance, lastCompleteEpoch, allowance } = this.state;
     const { decimals, symbol } = this.props;
-    if (!balance) {
+    if (!balance || !allowance) {
       return null;
     }
     return (
@@ -49,11 +62,16 @@ export default class App extends React.Component {
         <p>
           Balance: {Number(balance.div(decimals))} {symbol}
         </p>
+        <p>
+          Allowance: {Number(allowance.div(decimals))} {symbol}
+        </p>
         <p>Last complete epoch: {Number(lastCompleteEpoch)}</p>
         <hr />
-        <Deposit {...this.props} balance={balance} />
+        <Allowance {...this.props} balance={balance} />
         <hr />
-        <Slots {...this.props} balance={balance} />
+        <Deposit {...this.props} balance={allowance} />
+        <hr />
+        <Slots {...this.props} balance={allowance} />
       </div>
     );
   }
