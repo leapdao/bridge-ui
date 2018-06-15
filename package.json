@@ -5,8 +5,9 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "./node_modules/.bin/parcel src/index.html",
-    "precommit": "./node_modules/.bin/lint-staged"
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html",
+    "precommit": "lint-staged"
   },
   "lint-staged": {
     "*.js": [
