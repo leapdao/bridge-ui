@@ -2,8 +2,8 @@ import React from 'react';
 
 import getWeb3 from './getWeb3';
 import promisifyWeb3Call from './promisifyWeb3Call';
-import { token as tokenAbi } from './abis';
-import { bridgeAddress, tokenAddress } from './addrs';
+import { bridge as bridgeAbi } from './abis';
+import { bridgeAddress } from './addrs';
 
 export default class Deposit extends React.Component {
   constructor(props) {
@@ -20,9 +20,9 @@ export default class Deposit extends React.Component {
     const { BigNumber } = getWeb3();
     const value = new BigNumber(this.state.value).mul(decimals);
     const web3 = getWeb3(true);
-    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
-    promisifyWeb3Call(token.approve.sendTransaction, bridgeAddress, value, {
+    promisifyWeb3Call(bridge.deposit.sendTransaction, value, {
       from: account,
     }).then(depositTxHash => {
       console.log('deposit', depositTxHash); // eslint-disable-line
