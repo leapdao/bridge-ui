@@ -2,8 +2,8 @@ import React from 'react';
 
 import getWeb3 from './getWeb3';
 import promisifyWeb3Call from './promisifyWeb3Call';
-import { bridge as bridgeAbi } from './abis';
-import { bridgeAddress } from './addrs';
+import { bridge as bridgeAbi, token as tokenAbi } from './abis';
+import { bridgeAddress, tokenAddress } from './addrs';
 
 export default class Deposit extends React.Component {
   constructor(props) {
@@ -22,12 +22,31 @@ export default class Deposit extends React.Component {
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
-    promisifyWeb3Call(bridge.deposit.sendTransaction, value, {
-      from: account,
-    }).then(depositTxHash => {
-      console.log('deposit', depositTxHash); // eslint-disable-line
-      this.setState({ value: 0 });
-    });
+    if (this.props.allowance.lt(value)) {
+      // do approveAndCall to token
+      const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+      const data = bridge.deposit.getData(account, value);
+      promisifyWeb3Call(
+        token.approveAndCall.sendTransaction,
+        bridgeAddress,
+        value,
+        data,
+        {
+          from: account,
+        }
+      ).then(depositTxHash => {
+        console.log('deposit', depositTxHash); // eslint-disable-line
+        this.setState({ value: 0 });
+      });
+    } else {
+      // call bridge directly
+      promisifyWeb3Call(bridge.deposit.sendTransaction, account, value, {
+        from: account,
+      }).then(depositTxHash => {
+        console.log('deposit', depositTxHash); // eslint-disable-line
+        this.setState({ value: 0 });
+      });
+    }
   }
 
   render() {

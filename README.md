@@ -25,7 +25,7 @@ Mainnet: N/A
 ## Run locally
 
 ```
-BRIDGE_ADDR=0x59298cae9934ea981a60f216fe4bd508be9e804b TOKEN_ADDR=0xa6794e7663add37e44ae6bb1e8544b8de1e238cb yarn start
+BRIDGE_ADDR=0x78f353c5e92a6e86418b18815fcec3cc47a2d508 TOKEN_ADDR=0x258daf43d711831b8fd59137f42030784293e9e6 yarn start
 ```
 
 ## Build for deployment
@@ -33,7 +33,7 @@ BRIDGE_ADDR=0x59298cae9934ea981a60f216fe4bd508be9e804b TOKEN_ADDR=0xa6794e7663ad
 Provide proper addresses for token and bridge contracts.
 
 ```
-BRIDGE_ADDR=0x59298cae9934ea981a60f216fe4bd508be9e804b TOKEN_ADDR=0xa6794e7663add37e44ae6bb1e8544b8de1e238cb yarn run build
+BRIDGE_ADDR=0x78f353c5e92a6e86418b18815fcec3cc47a2d508 TOKEN_ADDR=0x258daf43d711831b8fd59137f42030784293e9e6 yarn run build
 ```
 
 ## Deploy to S3

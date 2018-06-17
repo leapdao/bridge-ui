@@ -69,9 +69,9 @@ export default class App extends React.Component {
         <hr />
         <Allowance {...this.props} balance={balance} />
         <hr />
-        <Deposit {...this.props} balance={allowance} />
+        <Deposit {...this.props} balance={balance} allowance={allowance} />
         <hr />
-        <Slots {...this.props} balance={allowance} />
+        <Slots {...this.props} balance={balance} allowance={allowance} />
       </div>
     );
   }
