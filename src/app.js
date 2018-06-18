@@ -82,7 +82,11 @@ export default class App extends React.Component {
             <Deposit {...props} {...this.props} balance={balance} />
           )}
         />
-        <Route path="/faucet" exact render={props => <Faucet {...props} />} />
+        <Route
+          path="/faucet"
+          exact
+          render={props => <Faucet {...props} {...this.props} />}
+        />
       </div>
     );
   }

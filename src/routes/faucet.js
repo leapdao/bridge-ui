@@ -6,6 +6,28 @@ const api = requestApi(URL);
 
 const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
 
+const buttonCss = `
+.twitter-share-button {
+  inherit: none;
+  height: 24px;
+  display: inline-block;
+  border-radius: 3px;
+  background: linear-gradient(#FEFEFE 0%, #DFDFDF 100%);
+  border: 1px solid #ccc;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 2px;
+
+  font-weight: bold;
+  font-size: 18px;
+
+  color: #333333;
+  text-decoration: none;
+}
+.twitter-share-button:hover {
+  background: linear-gradient(#f7f7f7 0%, #d9d9d9 100%);
+}`;
+
 export default class Faucet extends React.Component {
   constructor(props) {
     super(props);
@@ -35,7 +57,9 @@ export default class Faucet extends React.Component {
   }
 
   render() {
+    const { account } = this.props;
     const { value, sending, error, success } = this.state;
+    const tweetText = `Requesting faucet funds into ${account} on the @Parsec_Labs test network.`;
 
     return (
       <form onSubmit={this.handleSubmit}>
@@ -60,6 +84,19 @@ export default class Faucet extends React.Component {
         <button type="submit" disabled={sending}>
           Submit
         </button>
+        <hr />
+        <a
+          href={`https://twitter.com/intent/tweet?text=${tweetText}`}
+          target="_blank"
+          className="twitter-share-button"
+        >
+          Make a tweet
+        </a>
+
+        <style
+          type="text/css"
+          dangerouslySetInnerHTML={{ __html: buttonCss }}
+        />
       </form>
     );
   }
