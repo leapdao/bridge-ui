@@ -8,6 +8,7 @@ You can:
 
 - View and buy slots
 - Make deposit
+- Get some tokens
 - ...
 
 ## Links
