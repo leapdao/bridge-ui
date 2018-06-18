@@ -5,8 +5,11 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react'; // eslint-disable-line
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
+import { Form, Input, Divider, Button } from 'antd';
+
 import getWeb3 from '../getWeb3';
 import promisifyWeb3Call from '../promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
@@ -84,14 +87,6 @@ export default class Slots extends React.Component {
     this.handleTenderAddrChange = this.handleChange.bind(this, 'tenderAddr');
   }
 
-  handleChange(key, e) {
-    const value = e.target.value.trim();
-    window.localStorage.setItem(key, value);
-    this.setState({
-      [key]: value,
-    });
-  }
-
   componentDidMount() {
     this.refreshSlots();
     const web3 = getWeb3(true);
@@ -99,14 +94,6 @@ export default class Slots extends React.Component {
     const allEvents = bridge.allEvents({ toBlock: 'latest' });
     allEvents.watch(() => {
       this.refreshSlots();
-    });
-  }
-
-  refreshSlots() {
-    const web3 = getWeb3();
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
-    readSlots(web3, bridge).then(slots => {
-      this.setState({ slots });
     });
   }
 
@@ -130,6 +117,22 @@ export default class Slots extends React.Component {
           [i]: undefined,
         }),
       };
+    });
+  }
+
+  refreshSlots() {
+    const web3 = getWeb3();
+    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
+    readSlots(web3, bridge).then(slots => {
+      this.setState({ slots });
+    });
+  }
+
+  handleChange(key, e) {
+    const value = e.target.value.trim();
+    window.localStorage.setItem(key, value);
+    this.setState({
+      [key]: value,
     });
   }
 
@@ -237,24 +240,34 @@ export default class Slots extends React.Component {
 
               return (
                 <td key={i} style={formCellStyle}>
-                  <input
-                    value={stakes[i] || ''}
-                    style={{ width: 60, font: 'inherit' }}
-                    onChange={e => {
-                      this.setStake(i, e.target.value);
+                  <div
+                    style={{
+                      whiteSpace: 'nowrap',
+                      marginBottom: 10,
+                      display: 'flex',
+                      alignItems: 'center',
                     }}
-                  />&nbsp;
-                  {symbol}&nbsp;
-                  <button
+                  >
+                    <Input
+                      value={stakes[i] || ''}
+                      style={{ width: 150, font: 'inherit' }}
+                      onChange={e => {
+                        this.setStake(i, e.target.value);
+                      }}
+                      addonAfter={symbol}
+                    />&nbsp;
+                    <span style={{ fontSize: 11 }}>{`${
+                      minValue > 0 ? `>= ${minValue}` : ''
+                    }`}</span>
+                  </div>
+                  <Button
+                    type="primary"
                     disabled={!stakes[i] || !signerAddr || stakes[i] > bal}
                     onClick={() => this.handleBet(i)}
                   >
-                    Bet
-                  </button>
+                    Stake
+                  </Button>
                   <br />
-                  {minValue > 0 && (
-                    <span style={{ fontSize: 11 }}> >= {minValue}</span>
-                  )}
                 </td>
               );
             })}
@@ -269,24 +282,27 @@ export default class Slots extends React.Component {
     const slotsTable = this.renderSlots();
 
     return (
-      <div>
-        <h2>Slots</h2>
-        <p>
-          Validator address:{' '}
-          <input
-            value={signerAddr}
-            onChange={this.handleSignerChange}
-            style={{ width: 300 }}
-          />
-        </p>
-        <p>
-          Validator ID:{' '}
-          <input
-            value={tenderAddr}
-            onChange={this.handleTenderAddrChange}
-            style={{ width: 300 }}
-          />
-        </p>
+      <Fragment>
+        <h1>Slots auction</h1>
+        <Form layout="inline">
+          <Form.Item>
+            <Input
+              addonBefore="Validator address"
+              value={signerAddr}
+              onChange={this.handleSignerChange}
+              style={{ width: 500 }}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Input
+              addonBefore="Validator ID"
+              value={tenderAddr}
+              onChange={this.handleTenderAddrChange}
+              style={{ width: 450 }}
+            />
+          </Form.Item>
+        </Form>
+        <Divider />
         <div style={{ position: 'relative' }}>
           <div
             style={{
@@ -309,7 +325,14 @@ export default class Slots extends React.Component {
             {slotsTable}
           </div>
         </div>
-      </div>
+      </Fragment>
     );
   }
 }
+
+Slots.propTypes = {
+  decimals: PropTypes.object.isRequired,
+  account: PropTypes.string.isRequired,
+  symbol: PropTypes.string.isRequired,
+  balance: PropTypes.object.isRequired,
+};

@@ -38,6 +38,8 @@
     "eslint-config-prettier": "^2.9.0",
     "eslint-plugin-import": "^2.11.0",
     "eslint-plugin-jest": "^21.17.0",
+    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-react": "^7.9.1",
     "husky": "^0.14.3",
     "jest": "^23.0.1",
     "lint-staged": "^7.0.5",
@@ -45,7 +47,9 @@
     "prettier": "^1.12.1"
   },
   "dependencies": {
+    "antd": "^3.6.2",
     "ethereumjs-util": "^5.2.0",
+    "prop-types": "^15.6.1",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-router": "^4.3.1",

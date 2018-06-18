@@ -5,35 +5,16 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Form, Input, Button, Divider, Alert } from 'antd';
+
 import requestApi from '../api';
 
 const URL = 'https://sarrsmlpsg.execute-api.eu-west-1.amazonaws.com/v0';
 const api = requestApi(URL);
 
 const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
-
-const buttonCss = `
-.twitter-share-button {
-  inherit: none;
-  height: 24px;
-  display: inline-block;
-  border-radius: 3px;
-  background: linear-gradient(#FEFEFE 0%, #DFDFDF 100%);
-  border: 1px solid #ccc;
-  padding-left: 8px;
-  padding-right: 8px;
-  padding-top: 2px;
-
-  font-weight: bold;
-  font-size: 18px;
-
-  color: #333333;
-  text-decoration: none;
-}
-.twitter-share-button:hover {
-  background: linear-gradient(#f7f7f7 0%, #d9d9d9 100%);
-}`;
 
 export default class Faucet extends React.Component {
   constructor(props) {
@@ -69,42 +50,47 @@ export default class Faucet extends React.Component {
     const tweetText = `Requesting faucet funds into ${account} on the @Parsec_Labs test network.`;
 
     return (
-      <form onSubmit={this.handleSubmit}>
-        <h2>Get tokens</h2>
-        {success && <p style={{ color: '#00a' }}>{success}</p>}
-        {error && <p style={{ color: '#d00' }}>{error}</p>}
-        <label>
-          Tweet url (tweet should countain your address):<br />
-          <input
-            value={value}
-            style={{ width: 400 }}
-            onChange={e =>
-              this.setState({
-                value: e.target.value,
-                success: null,
-                error: null,
-              })
-            }
-          />
-        </label>
-        <br />
-        <button type="submit" disabled={sending}>
-          Submit
-        </button>
-        <hr />
-        <a
-          href={`https://twitter.com/intent/tweet?text=${tweetText}`}
-          target="_blank"
-          className="twitter-share-button"
-        >
-          Make a tweet
-        </a>
+      <Fragment>
+        <h1>Get tokens</h1>
+        <Form onSubmit={this.handleSubmit} layout="inline">
+          {success && <Alert type="success" message={success} />}
+          {error && <Alert type="error" message={error} />}
+          {(success || error) && <Divider />}
 
-        <style
-          type="text/css"
-          dangerouslySetInnerHTML={{ __html: buttonCss }}
-        />
-      </form>
+          <Form.Item>
+            <Input
+              addonBefore="Tweet url"
+              value={value}
+              style={{ width: 400 }}
+              onChange={e =>
+                this.setState({
+                  value: e.target.value,
+                  success: null,
+                  error: null,
+                })
+              }
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button htmlType="submit" type="primary" loading={sending}>
+              Request tokens
+            </Button>
+          </Form.Item>
+          <Divider />
+          <Button
+            href={`https://twitter.com/intent/tweet?text=${tweetText}`}
+            target="_blank"
+            className="twitter-share-button"
+          >
+            Make a tweet
+          </Button>
+        </Form>
+      </Fragment>
     );
   }
 }
+
+Faucet.propTypes = {
+  account: PropTypes.string.isRequired,
+};
