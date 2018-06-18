@@ -5,7 +5,9 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import React, { Fragment } from 'react';
+import PropTypes from 'prop-types';
+import { Form, Input, Button } from 'antd';
 
 import getWeb3 from '../getWeb3';
 import promisifyWeb3Call from '../promisifyWeb3Call';
@@ -52,18 +54,36 @@ export default class Deposit extends React.Component {
     const bal = Number(balance.div(decimals));
 
     return (
-      <form onSubmit={this.handleSubmit}>
-        <h2>Deposit</h2>
-        <input
-          value={value}
-          onChange={e => this.setState({ value: Number(e.target.value) })}
-        />
-        {symbol}
-        <br />
-        <button type="submit" disabled={!value || value > bal}>
-          Submit
-        </button>
-      </form>
+      <Fragment>
+        <h1>Make a deposit</h1>
+        <Form onSubmit={this.handleSubmit} layout="inline">
+          <Form.Item>
+            <Input
+              value={value}
+              onChange={e => this.setState({ value: Number(e.target.value) })}
+              addonAfter={symbol}
+              style={{ width: 300 }}
+            />
+          </Form.Item>
+
+          <Form.Item>
+            <Button
+              htmlType="submit"
+              type="primary"
+              disabled={!value || value > bal}
+            >
+              Deposit
+            </Button>
+          </Form.Item>
+        </Form>
+      </Fragment>
     );
   }
 }
+
+Deposit.propTypes = {
+  decimals: PropTypes.object.isRequired,
+  account: PropTypes.string.isRequired,
+  symbol: PropTypes.string.isRequired,
+  balance: PropTypes.object.isRequired,
+};

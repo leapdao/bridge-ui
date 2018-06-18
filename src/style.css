@@ -1,0 +1,9 @@
+.logo {
+  margin-right: 20px;
+  flex-shrink: 0;
+}
+
+.balance {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
