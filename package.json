@@ -2,7 +2,7 @@
   "name": "parsec-bridge-ui",
   "version": "1.0.0",
   "main": "index.js",
-  "license": "MIT",
+  "license": "GPLv3",
   "private": true,
   "scripts": {
     "start": "parcel src/index.html",
