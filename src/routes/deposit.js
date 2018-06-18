@@ -22,31 +22,21 @@ export default class Deposit extends React.Component {
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
-    if (this.props.allowance.lt(value)) {
-      // do approveAndCall to token
-      const token = web3.eth.contract(tokenAbi).at(tokenAddress);
-      const data = bridge.deposit.getData(account, value);
-      promisifyWeb3Call(
-        token.approveAndCall.sendTransaction,
-        bridgeAddress,
-        value,
-        data,
-        {
-          from: account,
-        }
-      ).then(depositTxHash => {
-        console.log('deposit', depositTxHash); // eslint-disable-line
-        this.setState({ value: 0 });
-      });
-    } else {
-      // call bridge directly
-      promisifyWeb3Call(bridge.deposit.sendTransaction, account, value, {
+    // do approveAndCall to token
+    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    const data = bridge.deposit.getData(account, value);
+    promisifyWeb3Call(
+      token.approveAndCall.sendTransaction,
+      bridgeAddress,
+      value,
+      data,
+      {
         from: account,
-      }).then(depositTxHash => {
-        console.log('deposit', depositTxHash); // eslint-disable-line
-        this.setState({ value: 0 });
-      });
-    }
+      }
+    ).then(depositTxHash => {
+      console.log('deposit', depositTxHash); // eslint-disable-line
+      this.setState({ value: 0 });
+    });
   }
 
   render() {

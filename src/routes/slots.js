@@ -64,7 +64,6 @@ const formCellStyle = Object.assign(
 export default class Slots extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props, bridgeAddress, tokenAddress);
 
     const signerAddr = window.localStorage.getItem('signerAddr');
     const tenderAddr = window.localStorage.getItem('tenderAddr');
@@ -135,41 +134,25 @@ export default class Slots extends React.Component {
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
-    if (this.props.allowance.lt(stake)) {
-      // do approveAndCall to token
-      const data = bridge.bet.getData(
-        slotId,
-        stake,
-        signerAddr,
-        `0x${tenderAddr}`,
-        account
-      );
-      const token = web3.eth.contract(tokenAbi).at(tokenAddress);
-      promisifyWeb3Call(
-        token.approveAndCall.sendTransaction,
-        bridgeAddress,
-        stake,
-        data,
-        { from: account }
-      ).then(betTxHash => {
-        console.log('bet', betTxHash); // eslint-disable-line
-        this.setStake(slotId, undefined);
-      });
-    } else {
-      // call bridge directly
-      promisifyWeb3Call(
-        bridge.bet.sendTransaction,
-        slotId,
-        stake,
-        signerAddr,
-        `0x${tenderAddr}`, // ToDo: workaround while tenderAddr should be address instead string
-        account,
-        { from: account }
-      ).then(betTxHash => {
-        console.log('bet', betTxHash); // eslint-disable-line
-        this.setStake(slotId, undefined);
-      });
-    }
+    // do approveAndCall to token
+    const data = bridge.bet.getData(
+      slotId,
+      stake,
+      signerAddr,
+      `0x${tenderAddr}`,
+      account
+    );
+    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    promisifyWeb3Call(
+      token.approveAndCall.sendTransaction,
+      bridgeAddress,
+      stake,
+      data,
+      { from: account }
+    ).then(betTxHash => {
+      console.log('bet', betTxHash); // eslint-disable-line
+      this.setStake(slotId, undefined);
+    });
   }
 
   renderRow(title, key, newKey, renderer) {
