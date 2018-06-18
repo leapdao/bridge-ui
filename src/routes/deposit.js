@@ -1,11 +1,11 @@
 import React from 'react';
 
-import getWeb3 from './getWeb3';
-import promisifyWeb3Call from './promisifyWeb3Call';
-import { token as tokenAbi } from './abis';
-import { bridgeAddress, tokenAddress } from './addrs';
+import getWeb3 from '../getWeb3';
+import promisifyWeb3Call from '../promisifyWeb3Call';
+import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
+import { bridgeAddress, tokenAddress } from '../addrs';
 
-export default class Allowance extends React.Component {
+export default class Deposit extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -20,12 +20,21 @@ export default class Allowance extends React.Component {
     const { BigNumber } = getWeb3();
     const value = new BigNumber(this.state.value).mul(decimals);
     const web3 = getWeb3(true);
-    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
-    promisifyWeb3Call(token.approve.sendTransaction, bridgeAddress, value, {
-      from: account,
-    }).then(approveTxHash => {
-      console.log('approve', approveTxHash); // eslint-disable-line
+    // do approveAndCall to token
+    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    const data = bridge.deposit.getData(account, value);
+    promisifyWeb3Call(
+      token.approveAndCall.sendTransaction,
+      bridgeAddress,
+      value,
+      data,
+      {
+        from: account,
+      }
+    ).then(depositTxHash => {
+      console.log('deposit', depositTxHash); // eslint-disable-line
       this.setState({ value: 0 });
     });
   }
@@ -37,15 +46,11 @@ export default class Allowance extends React.Component {
 
     return (
       <form onSubmit={this.handleSubmit}>
-        <h2>Allowance</h2>
-        <p>
-          To be able to buy a slot you need to set allowance on token contract
-          first
-        </p>
+        <h2>Deposit</h2>
         <input
           value={value}
           onChange={e => this.setState({ value: Number(e.target.value) })}
-        />{' '}
+        />
         {symbol}
         <br />
         <button type="submit" disabled={!value || value > bal}>

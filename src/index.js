@@ -1,5 +1,6 @@
 import React from 'react'; // eslint-disable-line
 import ReactDOM from 'react-dom';
+import { BrowserRouter } from 'react-router-dom'; // eslint-disable-line
 
 import * as abis from './abis';
 import App from './app'; // eslint-disable-line
@@ -22,11 +23,13 @@ Promise.all([
 ]).then(([accounts, decimals, symbol]) => {
   const web3 = getWeb3();
   ReactDOM.render(
-    <App
-      account={accounts[0]}
-      decimals={new web3.BigNumber(10).pow(decimals)}
-      symbol={symbol}
-    />,
+    <BrowserRouter>
+      <App
+        account={accounts[0]}
+        decimals={new web3.BigNumber(10).pow(decimals)}
+        symbol={symbol}
+      />
+    </BrowserRouter>,
     document.getElementById('app')
   );
 });

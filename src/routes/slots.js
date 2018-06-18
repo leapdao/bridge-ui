@@ -1,9 +1,9 @@
 import React, { Fragment } from 'react'; // eslint-disable-line
 import ethUtil from 'ethereumjs-util';
-import getWeb3 from './getWeb3';
-import promisifyWeb3Call from './promisifyWeb3Call';
-import { bridge as bridgeAbi, token as tokenAbi } from './abis';
-import { bridgeAddress, tokenAddress } from './addrs';
+import getWeb3 from '../getWeb3';
+import promisifyWeb3Call from '../promisifyWeb3Call';
+import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
+import { bridgeAddress, tokenAddress } from '../addrs';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -134,41 +134,25 @@ export default class Slots extends React.Component {
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
-    if (this.props.allowance.lt(stake)) {
-      // do approveAndCall to token
-      const data = bridge.bet.getData(
-        slotId,
-        stake,
-        signerAddr,
-        `0x${tenderAddr}`,
-        account
-      );
-      const token = web3.eth.contract(tokenAbi).at(tokenAddress);
-      promisifyWeb3Call(
-        token.approveAndCall.sendTransaction,
-        bridgeAddress,
-        stake,
-        data,
-        { from: account }
-      ).then(betTxHash => {
-        console.log('bet', betTxHash); // eslint-disable-line
-        this.setStake(slotId, undefined);
-      });
-    } else {
-      // call bridge directly
-      promisifyWeb3Call(
-        bridge.bet.sendTransaction,
-        slotId,
-        stake,
-        signerAddr,
-        `0x${tenderAddr}`, // ToDo: workaround while tenderAddr should be address instead string
-        account,
-        { from: account }
-      ).then(betTxHash => {
-        console.log('bet', betTxHash); // eslint-disable-line
-        this.setStake(slotId, undefined);
-      });
-    }
+    // do approveAndCall to token
+    const data = bridge.bet.getData(
+      slotId,
+      stake,
+      signerAddr,
+      `0x${tenderAddr}`,
+      account
+    );
+    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
+    promisifyWeb3Call(
+      token.approveAndCall.sendTransaction,
+      bridgeAddress,
+      stake,
+      data,
+      { from: account }
+    ).then(betTxHash => {
+      console.log('bet', betTxHash); // eslint-disable-line
+      this.setStake(slotId, undefined);
+    });
   }
 
   renderRow(title, key, newKey, renderer) {
