@@ -3,6 +3,7 @@ import { Route } from 'react-router'; // eslint-disable-line
 import { Link } from 'react-router-dom'; // eslint-disable-line
 import Slots from './routes/slots'; // eslint-disable-line
 import Deposit from './routes/deposit'; // eslint-disable-line
+import Faucet from './routes/faucet'; // eslint-disable-line
 import promisifyWeb3Call from './promisifyWeb3Call';
 import getWeb3 from './getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from './abis';
@@ -31,9 +32,9 @@ export default class App extends React.Component {
       this.loadData();
     });
 
-    const approvalEvents = this.token.Approval({ toBlock: 'latest' });
-    approvalEvents.watch((err, e) => {
-      if (e.args.owner === this.props.account) {
+    const transferEvents = this.token.Transfer({ toBlock: 'latest' });
+    transferEvents.watch((err, e) => {
+      if (e.args.to === this.props.account) {
         this.loadData();
       }
     });
@@ -64,6 +65,8 @@ export default class App extends React.Component {
         <Link to="/">Slots auction</Link>
         {' | '}
         <Link to="/deposit">Make deposit</Link>
+        {' | '}
+        <Link to="/faucet">Get tokens</Link>
         <hr />
         <Route
           path="/"
@@ -79,6 +82,7 @@ export default class App extends React.Component {
             <Deposit {...props} {...this.props} balance={balance} />
           )}
         />
+        <Route path="/faucet" exact render={props => <Faucet {...props} />} />
       </div>
     );
   }
