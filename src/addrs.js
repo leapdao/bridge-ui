@@ -1,3 +1,5 @@
+console.log(process.env);
+
 if (!process.env.BRIDGE_ADDR) {
   console.error(
     'Missing Bridge contract address. Please rebuild with BRIDGE_ADDR env variable set'

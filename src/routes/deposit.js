@@ -1,9 +1,9 @@
 import React from 'react';
 
-import getWeb3 from './getWeb3';
-import promisifyWeb3Call from './promisifyWeb3Call';
-import { bridge as bridgeAbi, token as tokenAbi } from './abis';
-import { bridgeAddress, tokenAddress } from './addrs';
+import getWeb3 from '../getWeb3';
+import promisifyWeb3Call from '../promisifyWeb3Call';
+import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
+import { bridgeAddress, tokenAddress } from '../addrs';
 
 export default class Deposit extends React.Component {
   constructor(props) {

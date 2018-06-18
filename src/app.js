@@ -1,7 +1,8 @@
 import React from 'react';
-import Slots from './slots'; // eslint-disable-line
-import Allowance from './allowance'; // eslint-disable-line
-import Deposit from './deposit'; // eslint-disable-line
+import { Route } from 'react-router'; // eslint-disable-line
+import { Link } from 'react-router-dom'; // eslint-disable-line
+import Slots from './routes/slots'; // eslint-disable-line
+import Deposit from './routes/deposit'; // eslint-disable-line
 import promisifyWeb3Call from './promisifyWeb3Call';
 import getWeb3 from './getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from './abis';
@@ -12,12 +13,10 @@ export default class App extends React.Component {
     super(props);
     this.state = {
       balance: null,
-      allowance: null,
     };
   }
 
   componentDidMount() {
-    // const web3 = getWeb3();
     this.token = getWeb3(true)
       .eth.contract(tokenAbi)
       .at(tokenAddress);
@@ -44,17 +43,16 @@ export default class App extends React.Component {
     const { account } = this.props;
     Promise.all([
       promisifyWeb3Call(this.token.balanceOf, account),
-      promisifyWeb3Call(this.token.allowance, account, bridgeAddress),
       promisifyWeb3Call(this.bridge.lastCompleteEpoch),
-    ]).then(([balance, allowance, lastCompleteEpoch]) => {
-      this.setState({ balance, allowance, lastCompleteEpoch });
+    ]).then(([balance, lastCompleteEpoch]) => {
+      this.setState({ balance, lastCompleteEpoch });
     });
   }
 
   render() {
-    const { balance, lastCompleteEpoch, allowance } = this.state;
+    const { balance, lastCompleteEpoch } = this.state;
     const { decimals, symbol } = this.props;
-    if (!balance || !allowance) {
+    if (!balance) {
       return null;
     }
     return (
@@ -63,10 +61,24 @@ export default class App extends React.Component {
           Balance: {Number(balance.div(decimals))} {symbol}
         </p>
         <p>Last complete epoch: {Number(lastCompleteEpoch)}</p>
+        <Link to="/">Slots auction</Link>
+        {' | '}
+        <Link to="/deposit">Make deposit</Link>
         <hr />
-        <Deposit {...this.props} balance={balance} allowance={allowance} />
-        <hr />
-        <Slots {...this.props} balance={balance} allowance={allowance} />
+        <Route
+          path="/"
+          exact
+          render={props => (
+            <Slots {...props} {...this.props} balance={balance} />
+          )}
+        />
+        <Route
+          path="/deposit"
+          exact
+          render={props => (
+            <Deposit {...props} {...this.props} balance={balance} />
+          )}
+        />
       </div>
     );
   }

@@ -1,9 +1,9 @@
 import React, { Fragment } from 'react'; // eslint-disable-line
 import ethUtil from 'ethereumjs-util';
-import getWeb3 from './getWeb3';
-import promisifyWeb3Call from './promisifyWeb3Call';
-import { bridge as bridgeAbi, token as tokenAbi } from './abis';
-import { bridgeAddress, tokenAddress } from './addrs';
+import getWeb3 from '../getWeb3';
+import promisifyWeb3Call from '../promisifyWeb3Call';
+import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
+import { bridgeAddress, tokenAddress } from '../addrs';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -64,6 +64,7 @@ const formCellStyle = Object.assign(
 export default class Slots extends React.Component {
   constructor(props) {
     super(props);
+    console.log(props, bridgeAddress, tokenAddress);
 
     const signerAddr = window.localStorage.getItem('signerAddr');
     const tenderAddr = window.localStorage.getItem('tenderAddr');
