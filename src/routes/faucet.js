@@ -67,13 +67,7 @@ export default class Faucet extends React.Component {
         {success && <p style={{ color: '#00a' }}>{success}</p>}
         {error && <p style={{ color: '#d00' }}>{error}</p>}
         <label>
-          Tweet url (<a
-            href="https://twitter.com/intent/tweet?text=Requesting%20faucet%20funds%20into%200x0000000000000000000000000000000000000000%20on%20the%20%40Parsec_Labs%20test%20network."
-            target="_about:blank"
-          >
-            tweet
-          </a>{' '}
-          should countain your address):<br />
+          Tweet url (tweet should countain your address):<br />
           <input
             value={value}
             style={{ width: 400 }}
