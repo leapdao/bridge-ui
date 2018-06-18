@@ -62,12 +62,7 @@ export default class App extends React.Component {
         <p>
           Balance: {Number(balance.div(decimals))} {symbol}
         </p>
-        <p>
-          Allowance: {Number(allowance.div(decimals))} {symbol}
-        </p>
         <p>Last complete epoch: {Number(lastCompleteEpoch)}</p>
-        <hr />
-        <Allowance {...this.props} balance={balance} />
         <hr />
         <Deposit {...this.props} balance={balance} allowance={allowance} />
         <hr />
