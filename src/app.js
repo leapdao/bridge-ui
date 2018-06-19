@@ -15,6 +15,7 @@ import { Layout, Menu } from 'antd';
 import Slots from './routes/slots'; // eslint-disable-line
 import Deposit from './routes/deposit'; // eslint-disable-line
 import Faucet from './routes/faucet'; // eslint-disable-line
+import Info from './routes/info'; // eslint-disable-line
 import promisifyWeb3Call from './promisifyWeb3Call';
 import getWeb3 from './getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from './abis';
@@ -103,6 +104,9 @@ class App extends React.Component {
             <Menu.Item key="/faucet">
               <Link to="/faucet">Get tokens</Link>
             </Menu.Item>
+            <Menu.Item key="/info">
+              <Link to="/info">Chain info</Link>
+            </Menu.Item>
           </Menu>
 
           <span className="balance">
@@ -138,6 +142,11 @@ class App extends React.Component {
               path="/faucet"
               exact
               render={props => <Faucet {...props} {...this.props} />}
+            />
+            <Route
+              path="/info"
+              exact
+              render={props => <Info {...props} {...this.props} />}
             />
           </div>
         </Layout.Content>

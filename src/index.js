@@ -27,7 +27,8 @@ Promise.all([
   promisifyWeb3Call(window.web3.eth.getAccounts),
   promisifyWeb3Call(token.decimals),
   promisifyWeb3Call(token.symbol),
-]).then(([accounts, decimals, symbol]) => {
+  promisifyWeb3Call(getWeb3().version.getNetwork),
+]).then(([accounts, decimals, symbol, network]) => {
   const web3 = getWeb3();
   ReactDOM.render(
     <BrowserRouter>
@@ -35,6 +36,7 @@ Promise.all([
         account={accounts[0]}
         decimals={new web3.BigNumber(10).pow(decimals)}
         symbol={symbol}
+        network={network}
       />
     </BrowserRouter>,
     document.getElementById('app')
