@@ -151,8 +151,12 @@ App.propTypes = {
   decimals: PropTypes.object.isRequired,
   account: PropTypes.string.isRequired,
   symbol: PropTypes.string.isRequired,
-  balance: PropTypes.object.isRequired,
+  balance: PropTypes.object,
   location: PropTypes.object.isRequired,
+};
+
+App.defaultProps = {
+  balance: null,
 };
 
 export default withRouter(App);

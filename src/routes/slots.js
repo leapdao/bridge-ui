@@ -298,7 +298,7 @@ export default class Slots extends React.Component {
               addonBefore="Validator ID"
               value={tenderAddr}
               onChange={this.handleTenderAddrChange}
-              style={{ width: 450 }}
+              style={{ width: 620 }}
             />
           </Form.Item>
         </Form>
