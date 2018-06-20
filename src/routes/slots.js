@@ -10,10 +10,10 @@ import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider, Button } from 'antd';
 
-import getWeb3 from '../getWeb3';
-import promisifyWeb3Call from '../promisifyWeb3Call';
-import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
-import { bridgeAddress, tokenAddress } from '../addrs';
+import getWeb3 from '../utils/getWeb3';
+import promisifyWeb3Call from '../utils/promisifyWeb3Call';
+import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
+import { bridgeAddress, tokenAddress } from '../utils/addrs';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);

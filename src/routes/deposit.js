@@ -9,10 +9,10 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button } from 'antd';
 
-import getWeb3 from '../getWeb3';
-import promisifyWeb3Call from '../promisifyWeb3Call';
-import { bridge as bridgeAbi, token as tokenAbi } from '../abis';
-import { bridgeAddress, tokenAddress } from '../addrs';
+import getWeb3 from '../utils/getWeb3';
+import promisifyWeb3Call from '../utils/promisifyWeb3Call';
+import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
+import { bridgeAddress, tokenAddress } from '../utils/addrs';
 
 export default class Deposit extends React.Component {
   constructor(props) {

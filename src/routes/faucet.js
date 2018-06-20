@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button, Divider, Alert } from 'antd';
 
-import requestApi from '../api';
+import requestApi from '../utils/api';
 
 const URL = 'https://sarrsmlpsg.execute-api.eu-west-1.amazonaws.com/v0';
 const api = requestApi(URL);

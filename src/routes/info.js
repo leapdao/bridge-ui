@@ -7,14 +7,8 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { bridgeAddress, tokenAddress } from '../addrs';
-
-const NETWORKS = {
-  1: 'Mainnet',
-  3: 'Ropsten',
-  4: 'Rinkeby',
-  42: 'Kovan',
-};
+import { bridgeAddress, tokenAddress } from '../utils/addrs';
+import { NETWORKS } from '../utils';
 
 const Info = ({ network }) => {
   return (

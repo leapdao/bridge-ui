@@ -8,22 +8,22 @@ import 'antd/dist/antd.css';
 
 import React from 'react';
 import PropTypes from 'prop-types';
-import { Route, withRouter } from 'react-router'; // eslint-disable-line
-import { Link } from 'react-router-dom'; // eslint-disable-line
+import { Route, withRouter } from 'react-router';
+import { Link } from 'react-router-dom';
 import { Layout, Menu } from 'antd';
 
-import Slots from './routes/slots'; // eslint-disable-line
-import Deposit from './routes/deposit'; // eslint-disable-line
-import Faucet from './routes/faucet'; // eslint-disable-line
-import Info from './routes/info'; // eslint-disable-line
-import promisifyWeb3Call from './promisifyWeb3Call';
-import getWeb3 from './getWeb3';
-import { token as tokenAbi, bridge as bridgeAbi } from './abis';
-import { tokenAddress, bridgeAddress } from './addrs';
+import Slots from '../routes/slots';
+import Deposit from '../routes/deposit';
+import Faucet from '../routes/faucet';
+import Info from '../routes/info';
+import promisifyWeb3Call from '../utils/promisifyWeb3Call';
+import getWeb3 from '../utils/getWeb3';
+import { token as tokenAbi, bridge as bridgeAbi } from '../utils/abis';
+import { tokenAddress, bridgeAddress } from '../utils/addrs';
 
-import parsecLabsLogo from './parseclabs.svg';
+import parsecLabsLogo from '../parseclabs.svg';
 
-import './style.css';
+import '../style.css';
 
 class App extends React.Component {
   constructor(props) {
@@ -41,23 +41,28 @@ class App extends React.Component {
       .eth.contract(bridgeAbi)
       .at(bridgeAddress);
 
-    this.loadData();
+    this.loadData(this.props.account);
 
     const bridgeEvents = this.bridge.allEvents({ toBlock: 'latest' });
     bridgeEvents.watch(() => {
-      this.loadData();
+      this.loadData(this.props.account);
     });
 
     const transferEvents = this.token.Transfer({ toBlock: 'latest' });
     transferEvents.watch((err, e) => {
       if (e.args.to === this.props.account) {
-        this.loadData();
+        this.loadData(this.props.account);
       }
     });
   }
 
-  loadData() {
-    const { account } = this.props;
+  componentWillReceiveProps(nextProps) {
+    if (this.props.account !== nextProps.account) {
+      this.loadData(nextProps.account);
+    }
+  }
+
+  loadData(account) {
     Promise.all([promisifyWeb3Call(this.token.balanceOf, account)]).then(
       ([balance]) => {
         this.setState({ balance });
@@ -160,12 +165,7 @@ App.propTypes = {
   decimals: PropTypes.object.isRequired,
   account: PropTypes.string.isRequired,
   symbol: PropTypes.string.isRequired,
-  balance: PropTypes.object,
   location: PropTypes.object.isRequired,
-};
-
-App.defaultProps = {
-  balance: null,
 };
 
 export default withRouter(App);
