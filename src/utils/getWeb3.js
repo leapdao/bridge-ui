@@ -6,6 +6,7 @@
  */
 
 import Web3 from 'web3';
+import { NETWORKS } from '.';
 
 let web3;
 let injectedWeb3;
@@ -13,9 +14,8 @@ let injectedWeb3;
 export default (injected = false) => {
   if (!injected && !web3) {
     web3 = new Web3();
-    web3.setProvider(
-      new web3.providers.HttpProvider('https://rinkeby.infura.io')
-    );
+    const network = NETWORKS[process.env.NETWORK_ID] || NETWORKS[4];
+    web3.setProvider(new web3.providers.HttpProvider(network.provider));
   }
 
   if (injected && !injectedWeb3) {
