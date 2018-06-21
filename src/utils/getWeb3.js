@@ -18,7 +18,7 @@ export default (injected = false) => {
     );
   }
 
-  if (!injected && !injectedWeb3) {
+  if (injected && !injectedWeb3) {
     injectedWeb3 = new Web3();
     injectedWeb3.setProvider(window.web3.currentProvider);
   }
