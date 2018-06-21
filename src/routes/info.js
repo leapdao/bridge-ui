@@ -16,7 +16,7 @@ const Info = ({ network }) => {
       <h1>Chain info</h1>
       <dl className="info">
         <dt>Network</dt>
-        <dd>{NETWORKS[network] || network}</dd>
+        <dd>{NETWORKS[network].name || network}</dd>
         <dt>Bridge contract address</dt>
         <dd>{bridgeAddress}</dd>
         <dt>Token contract address</dt>

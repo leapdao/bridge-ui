@@ -85,7 +85,9 @@ export default class Web3Wrapper extends React.Component {
 
     if (mmNetwork !== network) {
       return (
-        <Message>You need to switch MetaMask to {NETWORKS[network]}</Message>
+        <Message>
+          You need to switch MetaMask to {NETWORKS[network].name}
+        </Message>
       );
     }
 
@@ -93,6 +95,7 @@ export default class Web3Wrapper extends React.Component {
       account,
       decimals,
       symbol,
+      network,
     });
   }
 }
