@@ -93,6 +93,7 @@ export default class Web3Wrapper extends React.Component {
       account,
       decimals,
       symbol,
+      network,
     });
   }
 }
