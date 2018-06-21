@@ -31,7 +31,9 @@ export default class Web3Wrapper extends React.Component {
     Promise.all([
       promisifyWeb3Call(getWeb3(true).eth.getAccounts),
       promisifyWeb3Call(token.decimals),
-      promisifyWeb3Call(token.symbol),
+      promisifyWeb3Call(token.symbol).catch(e =>
+        console.error('Failed to read token symbol', e)
+      ),
       promisifyWeb3Call(getWeb3().version.getNetwork),
       promisifyWeb3Call(getWeb3(true).version.getNetwork),
     ]).then(([accounts, decimals, symbol, network, mmNetwork]) => {
@@ -81,6 +83,10 @@ export default class Web3Wrapper extends React.Component {
 
     if (!account) {
       return <Message>You need to unlock MetaMask</Message>;
+    }
+
+    if (!symbol) {
+      return <Message>No contract at {tokenAddress}</Message>;
     }
 
     if (mmNetwork !== network) {
