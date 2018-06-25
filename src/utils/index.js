@@ -4,3 +4,5 @@ export const NETWORKS = {
   4: { name: 'Rinkeby', provider: 'https://rinkeby.infura.io' },
   42: { name: 'Kovan', provider: 'https://kovan.infura.io' },
 };
+
+export const DEFAULT_NETWORK = '4';

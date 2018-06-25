@@ -13,6 +13,8 @@ import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import { bridgeAddress, tokenAddress } from '../utils/addrs';
+import Web3SubmitWarning from '../components/web3SubmitWarning';
+import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 export default class Deposit extends React.Component {
   constructor(props) {
@@ -49,13 +51,16 @@ export default class Deposit extends React.Component {
   }
 
   render() {
-    const { symbol, balance, decimals } = this.props;
+    const { symbol, balance, decimals, account, network } = this.props;
     const { value } = this.state;
-    const bal = Number(balance.div(decimals));
+    const bal = balance && Number(balance.div(decimals));
 
     return (
       <Fragment>
         <h1>Make a deposit</h1>
+
+        <Web3SubmitWarning account={account} network={network} />
+
         <Form onSubmit={this.handleSubmit} layout="inline">
           <Form.Item>
             <Input
@@ -67,13 +72,17 @@ export default class Deposit extends React.Component {
           </Form.Item>
 
           <Form.Item>
-            <Button
-              htmlType="submit"
-              type="primary"
-              disabled={!value || value > bal}
-            >
-              Deposit
-            </Button>
+            <Web3SubmitWrapper account={account} network={network}>
+              {canSendTx => (
+                <Button
+                  htmlType="submit"
+                  type="primary"
+                  disabled={!canSendTx || !value || value > bal}
+                >
+                  Deposit
+                </Button>
+              )}
+            </Web3SubmitWrapper>
           </Form.Item>
         </Form>
       </Fragment>
@@ -83,7 +92,8 @@ export default class Deposit extends React.Component {
 
 Deposit.propTypes = {
   decimals: PropTypes.object.isRequired,
-  account: PropTypes.string.isRequired,
+  account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
-  balance: PropTypes.object.isRequired,
+  balance: PropTypes.object,
+  network: PropTypes.string.isRequired,
 };

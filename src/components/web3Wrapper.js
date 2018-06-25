@@ -6,7 +6,7 @@ import getWeb3 from '../utils/getWeb3';
 import * as abis from '../utils/abis';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { tokenAddress } from '../utils/addrs';
-import { NETWORKS } from '../utils';
+import { DEFAULT_NETWORK } from '../utils';
 import Message from './message';
 
 export default class Web3Wrapper extends React.Component {
@@ -14,13 +14,12 @@ export default class Web3Wrapper extends React.Component {
     super(props);
     this.state = {
       ready: false,
+      network: process.env.NETWORK_ID || DEFAULT_NETWORK,
     };
   }
 
   componentDidMount() {
-    if (window.web3) {
-      this.loadData();
-    }
+    this.loadData();
   }
 
   loadData() {
@@ -28,50 +27,36 @@ export default class Web3Wrapper extends React.Component {
       .eth.contract(abis.token)
       .at(tokenAddress);
 
-    Promise.all([
-      promisifyWeb3Call(getWeb3(true).eth.getAccounts),
+    const promises = [
       promisifyWeb3Call(token.decimals),
       promisifyWeb3Call(token.symbol).catch(e =>
         console.error('Failed to read token symbol', e)
       ),
-      promisifyWeb3Call(getWeb3().version.getNetwork),
-      promisifyWeb3Call(getWeb3(true).version.getNetwork),
-    ]).then(([accounts, decimals, symbol, network, mmNetwork]) => {
+    ];
+
+    if (window.web3) {
+      promises.push(promisifyWeb3Call(getWeb3(true).eth.getAccounts));
+
+      setInterval(() => {
+        promisifyWeb3Call(getWeb3(true).eth.getAccounts).then(accounts =>
+          this.setState({ account: accounts[0] })
+        );
+      }, 1000);
+    }
+
+    Promise.all(promises).then(([decimals, symbol, accounts]) => {
       const web3 = getWeb3();
       this.setState({
-        account: accounts[0],
+        account: accounts && accounts[0],
         decimals: new web3.BigNumber(10).pow(decimals),
         symbol,
-        network,
-        mmNetwork,
         ready: true,
       });
     });
-
-    setInterval(() => {
-      promisifyWeb3Call(getWeb3(true).eth.getAccounts).then(accounts =>
-        this.setState({ account: accounts[0] })
-      );
-    }, 1000);
   }
 
   render() {
-    const { ready, account, network, mmNetwork, decimals, symbol } = this.state;
-    if (!window.web3) {
-      return (
-        <Message>
-          You need to{' '}
-          <a
-            href="https://metamask.io/"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            install MetaMask
-          </a>{' '}
-          first
-        </Message>
-      );
-    }
+    const { ready, account, network, decimals, symbol } = this.state;
 
     if (!ready) {
       return (
@@ -81,20 +66,8 @@ export default class Web3Wrapper extends React.Component {
       );
     }
 
-    if (!account) {
-      return <Message>You need to unlock MetaMask</Message>;
-    }
-
     if (!symbol) {
       return <Message>No contract at {tokenAddress}</Message>;
-    }
-
-    if (mmNetwork !== network) {
-      return (
-        <Message>
-          You need to switch MetaMask to {NETWORKS[network].name}
-        </Message>
-      );
     }
 
     return cloneElement(this.props.children, {

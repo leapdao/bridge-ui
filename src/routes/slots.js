@@ -14,6 +14,8 @@ import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import { bridgeAddress, tokenAddress } from '../utils/addrs';
+import Web3SubmitWrapper from '../components/web3SubmitWrapper';
+import Web3SubmitWarning from '../components/web3SubmitWarning';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -76,25 +78,31 @@ export default class Slots extends React.Component {
     super(props);
 
     const signerAddr = window.localStorage.getItem('signerAddr');
-    const tenderAddr = window.localStorage.getItem('tenderAddr');
+    const tenderPubKey = window.localStorage.getItem('tenderPubKey');
     this.state = {
       slots: [],
       stakes: {},
       signerAddr,
-      tenderAddr,
+      tenderPubKey,
     };
     this.handleSignerChange = this.handleChange.bind(this, 'signerAddr');
-    this.handleTenderAddrChange = this.handleChange.bind(this, 'tenderAddr');
+    this.handleTenderPubKeyChange = this.handleChange.bind(
+      this,
+      'tenderPubKey'
+    );
   }
 
   componentDidMount() {
     this.refreshSlots();
-    const web3 = getWeb3(true);
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
-    const allEvents = bridge.allEvents({ toBlock: 'latest' });
-    allEvents.watch(() => {
-      this.refreshSlots();
-    });
+    if (window.web3) {
+      // need to use websocket provider for watching events without MetaMask
+      const web3 = getWeb3(true);
+      const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
+      const allEvents = bridge.allEvents({ toBlock: 'latest' });
+      allEvents.watch(() => {
+        this.refreshSlots();
+      });
+    }
   }
 
   setStake(i, stake) {
@@ -138,7 +146,7 @@ export default class Slots extends React.Component {
 
   handleBet(slotId) {
     const { decimals, account } = this.props;
-    const { signerAddr, tenderAddr } = this.state;
+    const { signerAddr, tenderPubKey } = this.state;
     const { BigNumber } = getWeb3();
     const stake = new BigNumber(this.state.stakes[slotId]).mul(decimals);
     const web3 = getWeb3(true);
@@ -149,7 +157,7 @@ export default class Slots extends React.Component {
       slotId,
       stake,
       signerAddr,
-      `0x${tenderAddr}`,
+      `0x${tenderPubKey}`,
       account
     );
     const token = web3.eth.contract(tokenAbi).at(tokenAddress);
@@ -200,9 +208,9 @@ export default class Slots extends React.Component {
   }
 
   renderSlots() {
-    const { slots, signerAddr, stakes } = this.state;
-    const { decimals, symbol, balance, account } = this.props;
-    const bal = balance.div(decimals).toNumber();
+    const { slots, signerAddr, stakes, tenderPubKey } = this.state;
+    const { decimals, symbol, balance, account, network } = this.props;
+    const bal = balance && Number(balance.div(decimals));
 
     return (
       <table style={{ borderCollapse: 'collapse' }}>
@@ -211,16 +219,44 @@ export default class Slots extends React.Component {
             <th style={cellStyle} />
             {slots.map((slot, i) => (
               <th style={cellStyle} key={i}>
-                Slot {i} {addrCmp(slot.owner, account) && '(owner)'}
+                Slot {i} {account && addrCmp(slot.owner, account) && '(owner)'}
               </th>
             ))}
           </tr>
         </thead>
         <tbody>
           {this.renderRow('Owner', 'owner', 'newOwner')}
-          {this.renderRow('Validator addr', 'signer', 'newSigner')}
-          {this.renderRow('Validator ID', 'tendermint', 'newTendermint', val =>
-            val.replace('0x', '').toUpperCase()
+          {this.renderRow('Validator addr', 'signer', 'newSigner', val => (
+            <span
+              style={{
+                backgroundColor:
+                  signerAddr && addrCmp(val, signerAddr)
+                    ? '#ff0'
+                    : 'transparent',
+              }}
+            >
+              {val}
+            </span>
+          ))}
+          {this.renderRow(
+            'Validator ID',
+            'tendermint',
+            'newTendermint',
+            val => {
+              const key = val.replace('0x', '').toUpperCase();
+              return (
+                <span
+                  style={{
+                    backgroundColor:
+                      tenderPubKey && tenderPubKey.toUpperCase() === key
+                        ? '#ff0'
+                        : 'transparent',
+                  }}
+                >
+                  {key}
+                </span>
+              );
+            }
           )}
           {this.renderRow(
             'Stake',
@@ -240,34 +276,43 @@ export default class Slots extends React.Component {
 
               return (
                 <td key={i} style={formCellStyle}>
-                  <div
-                    style={{
-                      whiteSpace: 'nowrap',
-                      marginBottom: 10,
-                      display: 'flex',
-                      alignItems: 'center',
-                    }}
-                  >
-                    <Input
-                      value={stakes[i] || ''}
-                      style={{ width: 150, font: 'inherit' }}
-                      onChange={e => {
-                        this.setStake(i, e.target.value);
-                      }}
-                      addonAfter={symbol}
-                    />&nbsp;
-                    <span style={{ fontSize: 11 }}>{`${
-                      minValue > 0 ? `>= ${minValue}` : ''
-                    }`}</span>
-                  </div>
-                  <Button
-                    type="primary"
-                    disabled={!stakes[i] || !signerAddr || stakes[i] > bal}
-                    onClick={() => this.handleBet(i)}
-                  >
-                    Stake
-                  </Button>
-                  <br />
+                  <Web3SubmitWrapper account={account} network={network}>
+                    {canSubmitTx =>
+                      canSubmitTx && (
+                        <Fragment>
+                          <div
+                            style={{
+                              whiteSpace: 'nowrap',
+                              marginBottom: 10,
+                              display: 'flex',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Input
+                              value={stakes[i] || ''}
+                              style={{ width: 150, font: 'inherit' }}
+                              onChange={e => {
+                                this.setStake(i, e.target.value);
+                              }}
+                              addonAfter={symbol}
+                            />&nbsp;
+                            <span style={{ fontSize: 11 }}>{`${
+                              minValue > 0 ? `>= ${minValue}` : ''
+                            }`}</span>
+                          </div>
+                          <Button
+                            type="primary"
+                            disabled={
+                              !stakes[i] || !signerAddr || stakes[i] > bal
+                            }
+                            onClick={() => this.handleBet(i)}
+                          >
+                            Stake
+                          </Button>
+                        </Fragment>
+                      )
+                    }
+                  </Web3SubmitWrapper>
                 </td>
               );
             })}
@@ -278,7 +323,8 @@ export default class Slots extends React.Component {
   }
 
   render() {
-    const { signerAddr, tenderAddr } = this.state;
+    const { signerAddr, tenderPubKey } = this.state;
+    const { account, network } = this.props;
     const slotsTable = this.renderSlots();
 
     return (
@@ -296,8 +342,8 @@ export default class Slots extends React.Component {
           <Form.Item>
             <Input
               addonBefore="Validator ID"
-              value={tenderAddr}
-              onChange={this.handleTenderAddrChange}
+              value={tenderPubKey}
+              onChange={this.handleTenderPubKeyChange}
               style={{ width: 620 }}
             />
           </Form.Item>
@@ -311,6 +357,7 @@ export default class Slots extends React.Component {
               height: 'calc(100% - 20px)',
               width: 101,
               overflow: 'hidden',
+              zIndex: 1,
             }}
           >
             {slotsTable}
@@ -325,6 +372,8 @@ export default class Slots extends React.Component {
             {slotsTable}
           </div>
         </div>
+
+        <Web3SubmitWarning account={account} network={network} />
       </Fragment>
     );
   }
@@ -332,7 +381,8 @@ export default class Slots extends React.Component {
 
 Slots.propTypes = {
   decimals: PropTypes.object.isRequired,
-  account: PropTypes.string.isRequired,
+  account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
-  balance: PropTypes.object.isRequired,
+  network: PropTypes.string.isRequired,
+  balance: PropTypes.object,
 };

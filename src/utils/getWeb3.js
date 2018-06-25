@@ -6,7 +6,7 @@
  */
 
 import Web3 from 'web3';
-import { NETWORKS } from '.';
+import { NETWORKS, DEFAULT_NETWORK } from '.';
 
 let web3;
 let injectedWeb3;
@@ -14,7 +14,7 @@ let injectedWeb3;
 export default (injected = false) => {
   if (!injected && !web3) {
     web3 = new Web3();
-    const network = NETWORKS[process.env.NETWORK_ID] || NETWORKS[4];
+    const network = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
     web3.setProvider(new web3.providers.HttpProvider(network.provider));
   }
 

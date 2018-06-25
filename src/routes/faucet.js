@@ -47,7 +47,6 @@ export default class Faucet extends React.Component {
   render() {
     const { account } = this.props;
     const { value, sending, error, success } = this.state;
-    const tweetText = `Requesting faucet funds into ${account} on the @Parsec_Labs test network.`;
 
     return (
       <Fragment>
@@ -77,14 +76,18 @@ export default class Faucet extends React.Component {
               Request tokens
             </Button>
           </Form.Item>
-          <Divider />
-          <Button
-            href={`https://twitter.com/intent/tweet?text=${tweetText}`}
-            target="_blank"
-            className="twitter-share-button"
-          >
-            Make a tweet
-          </Button>
+          {account && (
+            <Fragment>
+              <Divider />
+              <Button
+                href={`https://twitter.com/intent/tweet?text=${`Requesting faucet funds into ${account} on the @Parsec_Labs test network.`}`}
+                target="_blank"
+                className="twitter-share-button"
+              >
+                Make a tweet
+              </Button>
+            </Fragment>
+          )}
         </Form>
       </Fragment>
     );
@@ -92,5 +95,5 @@ export default class Faucet extends React.Component {
 }
 
 Faucet.propTypes = {
-  account: PropTypes.string.isRequired,
+  account: PropTypes.string,
 };

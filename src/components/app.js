@@ -6,7 +6,7 @@
  */
 import 'antd/dist/antd.css';
 
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
@@ -20,6 +20,7 @@ import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import getWeb3 from '../utils/getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from '../utils/abis';
 import { tokenAddress, bridgeAddress } from '../utils/addrs';
+import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 import parsecLabsLogo from '../parseclabs.svg';
 
@@ -34,26 +35,32 @@ class App extends React.Component {
   }
 
   componentDidMount() {
-    this.token = getWeb3(true)
-      .eth.contract(tokenAbi)
-      .at(tokenAddress);
-    this.bridge = getWeb3(true)
-      .eth.contract(bridgeAbi)
-      .at(bridgeAddress);
+    if (window.web3) {
+      this.token = getWeb3(true)
+        .eth.contract(tokenAbi)
+        .at(tokenAddress);
+      this.bridge = getWeb3(true)
+        .eth.contract(bridgeAbi)
+        .at(bridgeAddress);
 
-    this.loadData(this.props.account);
+      const bridgeEvents = this.bridge.allEvents({ toBlock: 'latest' });
+      bridgeEvents.watch(() => {
+        if (this.props.account) {
+          this.loadData(this.props.account);
+        }
+      });
 
-    const bridgeEvents = this.bridge.allEvents({ toBlock: 'latest' });
-    bridgeEvents.watch(() => {
+      const transferEvents = this.token.Transfer({ toBlock: 'latest' });
+      transferEvents.watch((err, e) => {
+        if (e.args.to === this.props.account) {
+          this.loadData(this.props.account);
+        }
+      });
+    }
+
+    if (this.props.account) {
       this.loadData(this.props.account);
-    });
-
-    const transferEvents = this.token.Transfer({ toBlock: 'latest' });
-    transferEvents.watch((err, e) => {
-      if (e.args.to === this.props.account) {
-        this.loadData(this.props.account);
-      }
-    });
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -63,19 +70,19 @@ class App extends React.Component {
   }
 
   loadData(account) {
-    Promise.all([promisifyWeb3Call(this.token.balanceOf, account)]).then(
-      ([balance]) => {
-        this.setState({ balance });
-      }
-    );
+    if (this.token) {
+      Promise.all([promisifyWeb3Call(this.token.balanceOf, account)]).then(
+        ([balance]) => {
+          this.setState({ balance });
+        }
+      );
+    }
   }
 
   render() {
     const { balance } = this.state;
-    const { decimals, symbol } = this.props;
-    if (!balance) {
-      return null;
-    }
+    const { decimals, symbol, account, network } = this.props;
+
     return (
       <Layout style={{ minHeight: '100vh' }}>
         <Layout.Header
@@ -115,10 +122,19 @@ class App extends React.Component {
           </Menu>
 
           <span className="balance">
-            Balance:{' '}
-            <strong>
-              {Number(balance.div(decimals))} {symbol}
-            </strong>
+            <Web3SubmitWrapper account={account} network={network}>
+              {canSubmitTx =>
+                canSubmitTx &&
+                balance && (
+                  <Fragment>
+                    Balance:{' '}
+                    <strong>
+                      {Number(balance.div(decimals))} {symbol}
+                    </strong>
+                  </Fragment>
+                )
+              }
+            </Web3SubmitWrapper>
           </span>
         </Layout.Header>
         <Layout.Content
@@ -163,8 +179,9 @@ class App extends React.Component {
 
 App.propTypes = {
   decimals: PropTypes.object.isRequired,
-  account: PropTypes.string.isRequired,
+  account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
+  network: PropTypes.string.isRequired,
   location: PropTypes.object.isRequired,
 };
 
