@@ -65,7 +65,10 @@ export default class Deposit extends React.Component {
           <Form.Item>
             <Input
               value={value}
-              onChange={e => this.setState({ value: Number(e.target.value) })}
+              onChange={e => this.setState({ value: e.target.value })}
+              onBlur={() =>
+                this.setState(state => ({ value: Number(state.value) || 0 }))
+              }
               addonAfter={symbol}
               style={{ width: 300 }}
             />

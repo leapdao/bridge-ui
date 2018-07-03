@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
-import { Form, Input, Divider, Button } from 'antd';
+import { Form, Input, Divider } from 'antd';
 
 import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
@@ -16,6 +16,7 @@ import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import { bridgeAddress, tokenAddress } from '../utils/addrs';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
+import StakeForm from '../components/stakeForm';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -210,7 +211,6 @@ export default class Slots extends React.Component {
   renderSlots() {
     const { slots, signerAddr, stakes, tenderPubKey } = this.state;
     const { decimals, symbol, balance, account, network } = this.props;
-    const bal = balance && Number(balance.div(decimals));
 
     return (
       <table style={{ borderCollapse: 'collapse' }}>
@@ -279,37 +279,15 @@ export default class Slots extends React.Component {
                   <Web3SubmitWrapper account={account} network={network}>
                     {canSubmitTx =>
                       canSubmitTx && (
-                        <Fragment>
-                          <div
-                            style={{
-                              whiteSpace: 'nowrap',
-                              marginBottom: 10,
-                              display: 'flex',
-                              alignItems: 'center',
-                            }}
-                          >
-                            <Input
-                              value={stakes[i] || ''}
-                              style={{ width: 150, font: 'inherit' }}
-                              onChange={e => {
-                                this.setStake(i, e.target.value);
-                              }}
-                              addonAfter={symbol}
-                            />&nbsp;
-                            <span style={{ fontSize: 11 }}>{`${
-                              minValue > 0 ? `>= ${minValue}` : ''
-                            }`}</span>
-                          </div>
-                          <Button
-                            type="primary"
-                            disabled={
-                              !stakes[i] || !signerAddr || stakes[i] > bal
-                            }
-                            onClick={() => this.handleBet(i)}
-                          >
-                            Stake
-                          </Button>
-                        </Fragment>
+                        <StakeForm
+                          value={stakes[i]}
+                          onChange={value => this.setStake(i, value)}
+                          symbol={symbol}
+                          disabled={!signerAddr}
+                          onSubmit={() => this.handleBet(i)}
+                          minValue={minValue}
+                          maxValue={balance && Number(balance.div(decimals))}
+                        />
                       )
                     }
                   </Web3SubmitWrapper>
