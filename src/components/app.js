@@ -19,7 +19,7 @@ import Info from '../routes/info';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import getWeb3 from '../utils/getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from '../utils/abis';
-import { tokenAddress, bridgeAddress } from '../utils/addrs';
+import { bridgeAddress } from '../utils/addrs';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 import parsecLabsLogo from '../parseclabs.svg';
@@ -36,6 +36,7 @@ class App extends React.Component {
 
   componentDidMount() {
     if (window.web3) {
+      const { tokenAddress } = this.props;
       this.token = getWeb3(true)
         .eth.contract(tokenAbi)
         .at(tokenAddress);
@@ -181,6 +182,7 @@ App.propTypes = {
   decimals: PropTypes.object.isRequired,
   account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
+  tokenAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
   location: PropTypes.object.isRequired,
 };

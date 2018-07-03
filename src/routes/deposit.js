@@ -12,7 +12,7 @@ import { Form, Input, Button } from 'antd';
 import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
-import { bridgeAddress, tokenAddress } from '../utils/addrs';
+import { bridgeAddress } from '../utils/addrs';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
@@ -27,7 +27,7 @@ export default class Deposit extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    const { decimals, account } = this.props;
+    const { decimals, account, tokenAddress } = this.props;
     const { BigNumber } = getWeb3();
     const value = new BigNumber(this.state.value).mul(decimals);
     const web3 = getWeb3(true);
@@ -97,6 +97,7 @@ Deposit.propTypes = {
   decimals: PropTypes.object.isRequired,
   account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
+  tokenAddress: PropTypes.string.isRequired,
   balance: PropTypes.object,
   network: PropTypes.string.isRequired,
 };
