@@ -22,7 +22,7 @@ class StakeForm extends React.Component {
   }
 
   get disabled() {
-    const { minValue, maxValue, disabled } = this.props;
+    const { minValue, maxValue, disabled, ownStake } = this.props;
     const { value } = this.state;
 
     if (value === 0 || value === '0') {
@@ -30,7 +30,10 @@ class StakeForm extends React.Component {
     }
 
     return (
-      disabled || !value || Number(value) > maxValue || Number(value) < minValue
+      disabled ||
+      !value ||
+      Number(value) > maxValue + ownStake ||
+      Number(value) < minValue
     );
   }
 
@@ -81,6 +84,7 @@ StakeForm.propTypes = {
   value: PropTypes.number,
   minValue: PropTypes.number,
   maxValue: PropTypes.number,
+  ownStake: PropTypes.number,
   onChange: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   disabled: PropTypes.bool,
