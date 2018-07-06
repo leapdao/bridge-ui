@@ -4,11 +4,13 @@ import { Input, Button } from 'antd';
 
 import getWeb3 from '../utils/getWeb3';
 
-class StakeForm extends React.Component {
+const fieldValue = v => String(v >= 0 ? v : '');
+
+class StakeForm extends React.PureComponent {
   constructor(props) {
     super(props);
     this.state = {
-      value: String(props.value || ''),
+      value: fieldValue(props.value),
     };
     this.handleUpdate = this.handleUpdate.bind(this);
   }
@@ -16,7 +18,7 @@ class StakeForm extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (nextProps.value !== this.props.value) {
       this.setState({
-        value: String(nextProps.value || ''),
+        value: fieldValue(nextProps.value),
       });
     }
   }
@@ -43,7 +45,6 @@ class StakeForm extends React.Component {
     const { BigNumber } = getWeb3();
     const minStake = new BigNumber(minValue);
     const zero = value === 0 || value === '0';
-
     onChange(zero ? 0 : Math.max(Number(minStake), Number(value)));
   }
 
