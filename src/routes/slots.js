@@ -107,23 +107,10 @@ export default class Slots extends React.Component {
   }
 
   setStake(i, stake) {
-    const { decimals } = this.props;
-    const { BigNumber } = getWeb3();
-    const slot = this.state.slots[i];
-    const minStake = BigNumber.max(slot.stake, slot.newStake).mul(1.05);
-
     this.setState(state => {
-      if (stake) {
-        return {
-          stakes: Object.assign({}, state.stakes, {
-            [i]: Math.max(Number(minStake.div(decimals)), Number(stake)),
-          }),
-        };
-      }
-
       return {
         stakes: Object.assign({}, state.stakes, {
-          [i]: undefined,
+          [i]: isNaN(Number(stake)) ? undefined : stake,
         }),
       };
     });

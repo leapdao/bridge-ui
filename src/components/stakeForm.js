@@ -2,12 +2,15 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Input, Button } from 'antd';
 
+import getWeb3 from '../utils/getWeb3';
+
 class StakeForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       value: String(props.value || ''),
     };
+    this.handleUpdate = this.handleUpdate.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -21,13 +24,28 @@ class StakeForm extends React.Component {
   get disabled() {
     const { minValue, maxValue, disabled } = this.props;
     const { value } = this.state;
+
+    if (value === 0 || value === '0') {
+      return false;
+    }
+
     return (
       disabled || !value || Number(value) > maxValue || Number(value) < minValue
     );
   }
 
+  handleUpdate() {
+    const { minValue, onChange } = this.props;
+    const { value } = this.state;
+    const { BigNumber } = getWeb3();
+    const minStake = new BigNumber(minValue);
+    const zero = value === 0 || value === '0';
+
+    onChange(zero ? 0 : Math.max(Number(minStake), Number(value)));
+  }
+
   render() {
-    const { symbol, onChange, minValue, onSubmit } = this.props;
+    const { symbol, minValue, onSubmit } = this.props;
     const { value } = this.state;
 
     return (
@@ -44,7 +62,7 @@ class StakeForm extends React.Component {
             value={value || ''}
             style={{ width: 150, font: 'inherit' }}
             onChange={e => this.setState({ value: e.target.value })}
-            onBlur={() => onChange(value)}
+            onBlur={this.handleUpdate}
             addonAfter={symbol}
           />&nbsp;
           <span style={{ fontSize: 11 }}>{`${
