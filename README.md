@@ -26,7 +26,7 @@ Mainnet: N/A
 ## Run locally
 
 ```
-NETWORK_ID=4 BRIDGE_ADDR=0x78f353c5e92a6e86418b18815fcec3cc47a2d508 TOKEN_ADDR=0x258daf43d711831b8fd59137f42030784293e9e6 yarn start
+NETWORK_ID=4 BRIDGE_ADDR=0x099303c83fda47570b255a8fcebf5f8dd86e015e yarn start
 ```
 
 ## Build for deployment
@@ -34,13 +34,12 @@ NETWORK_ID=4 BRIDGE_ADDR=0x78f353c5e92a6e86418b18815fcec3cc47a2d508 TOKEN_ADDR=0
 Provide proper network id and addresses for token and bridge contracts.
 
 ```
-NETWORK_ID=4 BRIDGE_ADDR=0x78f353c5e92a6e86418b18815fcec3cc47a2d508 TOKEN_ADDR=0x258daf43d711831b8fd59137f42030784293e9e6 yarn run build
+NETWORK_ID=4 BRIDGE_ADDR=0x099303c83fda47570b255a8fcebf5f8dd86e015e yarn run build
 ```
 
 ## Deploy to S3
 
-Dev:
-`yarn run deploy:dev`
+Dev: `yarn run deploy:dev`
 
 Testnet: `yarn run deploy:testnet`
 

@@ -7,10 +7,10 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { bridgeAddress, tokenAddress } from '../utils/addrs';
+import { bridgeAddress } from '../utils/addrs';
 import { NETWORKS } from '../utils';
 
-const Info = ({ network }) => {
+const Info = ({ network, tokenAddress }) => {
   return (
     <Fragment>
       <h1>Chain info</h1>
@@ -30,4 +30,5 @@ export default Info;
 
 Info.propTypes = {
   network: PropTypes.string.isRequired,
+  tokenAddress: PropTypes.string.isRequired,
 };
