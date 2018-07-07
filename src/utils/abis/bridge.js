@@ -61,6 +61,15 @@ export default [
   },
   {
     constant: true,
+    inputs: [],
+    name: 'tokenCount',
+    outputs: [{ name: '', type: 'uint16' }],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
     inputs: [{ name: '', type: 'bytes32' }],
     name: 'periods',
     outputs: [
