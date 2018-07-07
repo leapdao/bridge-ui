@@ -27,7 +27,7 @@ export default class Web3Wrapper extends React.Component {
       .eth.contract(abis.bridge)
       .at(bridgeAddress);
 
-    promisifyWeb3Call(bridge.token).then(tokenAddress => {
+    promisifyWeb3Call(bridge.tokens, 0).then(([tokenAddress]) => {
       console.log(tokenAddress);
       this.setState({ tokenAddress });
       const token = getWeb3()
