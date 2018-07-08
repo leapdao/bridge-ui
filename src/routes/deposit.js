@@ -134,7 +134,9 @@ export default class Deposit extends React.Component {
                 <Button
                   htmlType="submit"
                   type="primary"
-                  disabled={!canSendTx || !value || value > bal}
+                  disabled={
+                    !canSendTx || !value || value > selectedToken.balance
+                  }
                 >
                   Deposit
                 </Button>
