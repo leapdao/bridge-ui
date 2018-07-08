@@ -15,7 +15,7 @@ import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import { bridgeAddress } from '../utils/addrs';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
-import { range } from '../utils';
+import getBridgeTokens from '../utils/getBridgeTokens';
 
 export default class Deposit extends React.Component {
   constructor(props) {
@@ -37,32 +37,31 @@ export default class Deposit extends React.Component {
   }
 
   componentDidMount() {
-    this.getTokens().then(tokens => {
+    getBridgeTokens().then(tokens => {
       this.setState(state => ({ tokens: state.tokens.concat(tokens) }));
+      this.fetchTokenBalances(this.props.account);
     });
   }
 
-  async getTokens() {
-    const web3 = getWeb3(true);
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
-    const tokenCount = await promisifyWeb3Call(bridge.tokenCount);
-    const tokensPromises = range(1, tokenCount - 1).map(async pos => {
-      const tokenRecord = await promisifyWeb3Call(bridge.tokens, pos);
-      const token = web3.eth.contract(tokenAbi).at(tokenRecord[0]);
-      const [symbol, decimals, balance] = await Promise.all([
-        promisifyWeb3Call(token.symbol),
-        promisifyWeb3Call(token.decimals),
-        promisifyWeb3Call(token.balanceOf, this.props.account),
-      ]);
-      return {
-        address: tokenRecord[0],
-        symbol,
-        decimals: Number(decimals),
-        balance: Number(balance.div(10 ** decimals)),
-        color: pos,
-      };
-    });
-    return Promise.all(tokensPromises);
+  componentWillReceiveProps(nextProps) {
+    if (this.props.account !== nextProps.account) {
+      this.fetchTokenBalances(nextProps.account);
+    }
+  }
+
+  fetchTokenBalances(account) {
+    return Promise.all(
+      this.state.tokens.map(tokenData => {
+        const token = getWeb3(true)
+          .eth.contract(tokenAbi)
+          .at(tokenData.address);
+        return promisifyWeb3Call(token.balanceOf, account).then(balance =>
+          Object.assign(tokenData, {
+            balance: Number(balance.div(10 ** tokenData.decimals)),
+          })
+        );
+      })
+    );
   }
 
   handleSubmit(e) {
@@ -135,7 +134,9 @@ export default class Deposit extends React.Component {
                 <Button
                   htmlType="submit"
                   type="primary"
-                  disabled={!canSendTx || !value || value > bal}
+                  disabled={
+                    !canSendTx || !value || value > selectedToken.balance
+                  }
                 >
                   Deposit
                 </Button>
