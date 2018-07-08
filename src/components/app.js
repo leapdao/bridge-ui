@@ -10,7 +10,8 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
-import { Layout, Menu } from 'antd';
+import MediaQuery from 'react-responsive';
+import { Dropdown, Icon, Layout, Menu } from 'antd';
 
 import Slots from '../routes/slots';
 import Deposit from '../routes/deposit';
@@ -84,6 +85,27 @@ class App extends React.Component {
     const { balance } = this.state;
     const { decimals, symbol, account, network } = this.props;
 
+    const menu = horizontal => (
+      <Menu
+        selectedKeys={[this.props.location.pathname]}
+        mode={horizontal ? 'horizontal' : 'vertical'}
+        style={{ lineHeight: '64px', width: '100%' }}
+      >
+        <Menu.Item key="/">
+          <Link to="/">Slots auction</Link>
+        </Menu.Item>
+        <Menu.Item key="/deposit">
+          <Link to="/deposit">Make deposit</Link>
+        </Menu.Item>
+        <Menu.Item key="/faucet">
+          <Link to="/faucet">Get tokens</Link>
+        </Menu.Item>
+        <Menu.Item key="/info">
+          <Link to="/info">Chain info</Link>
+        </Menu.Item>
+      </Menu>
+    );
+
     return (
       <Layout style={{ minHeight: '100vh' }}>
         <Layout.Header
@@ -103,40 +125,42 @@ class App extends React.Component {
               alt=""
             />
           </Link>
-          <Menu
-            selectedKeys={[this.props.location.pathname]}
-            mode="horizontal"
-            style={{ lineHeight: '64px', width: '100%' }}
-          >
-            <Menu.Item key="/">
-              <Link to="/">Slots auction</Link>
-            </Menu.Item>
-            <Menu.Item key="/deposit">
-              <Link to="/deposit">Make deposit</Link>
-            </Menu.Item>
-            <Menu.Item key="/faucet">
-              <Link to="/faucet">Get tokens</Link>
-            </Menu.Item>
-            <Menu.Item key="/info">
-              <Link to="/info">Chain info</Link>
-            </Menu.Item>
-          </Menu>
 
-          <span className="balance">
-            <Web3SubmitWrapper account={account} network={network}>
-              {canSubmitTx =>
-                canSubmitTx &&
-                balance && (
-                  <Fragment>
-                    Balance:{' '}
-                    <strong>
-                      {Number(balance.div(decimals))} {symbol}
-                    </strong>
-                  </Fragment>
-                )
-              }
-            </Web3SubmitWrapper>
-          </span>
+          <MediaQuery minWidth={919}>{menu(true)}</MediaQuery>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <span className="balance">
+              <Web3SubmitWrapper account={account} network={network}>
+                {canSubmitTx =>
+                  canSubmitTx &&
+                  balance && (
+                    <Fragment>
+                      Balance:{' '}
+                      <strong>
+                        {Number(balance.div(decimals))} {symbol}
+                      </strong>
+                    </Fragment>
+                  )
+                }
+              </Web3SubmitWrapper>
+            </span>
+            <MediaQuery maxWidth={918}>
+              <Dropdown
+                overlay={menu(false)}
+                placement="bottomRight"
+                style={{ flexGrow: 1 }}
+              >
+                <a
+                  className="ant-dropdown-link"
+                  href="#"
+                  style={{
+                    paddingTop: 8,
+                  }}
+                >
+                  <Icon type="bars" style={{ fontSize: 24 }} />
+                </a>
+              </Dropdown>
+            </MediaQuery>
+          </div>
         </Layout.Header>
         <Layout.Content
           style={{
