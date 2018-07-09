@@ -24,7 +24,7 @@ export default class Deposit extends React.Component {
     const psc = {
       address: props.tokenAddress,
       symbol: props.symbol,
-      decimals: props.decimals,
+      decimals: Math.log10(props.decimals),
       color: 0,
     };
 
