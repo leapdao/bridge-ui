@@ -16,6 +16,7 @@ import { Dropdown, Icon, Layout, Menu } from 'antd';
 import Slots from '../routes/slots';
 import Deposit from '../routes/deposit';
 import Faucet from '../routes/faucet';
+import RegisterToken from '../routes/registerToken';
 import Info from '../routes/info';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import getWeb3 from '../utils/getWeb3';
@@ -97,6 +98,9 @@ class App extends React.Component {
         <Menu.Item key="/deposit">
           <Link to="/deposit">Make deposit</Link>
         </Menu.Item>
+        <Menu.Item key="/registerToken">
+          <Link to="/registerToken">Register token</Link>
+        </Menu.Item>
         <Menu.Item key="/faucet">
           <Link to="/faucet">Get tokens</Link>
         </Menu.Item>
@@ -126,7 +130,7 @@ class App extends React.Component {
             />
           </Link>
 
-          <MediaQuery minWidth={919}>{menu(true)}</MediaQuery>
+          <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
               <Web3SubmitWrapper account={account} network={network}>
@@ -143,7 +147,7 @@ class App extends React.Component {
                 }
               </Web3SubmitWrapper>
             </span>
-            <MediaQuery maxWidth={918}>
+            <MediaQuery maxWidth={1048}>
               <Dropdown
                 overlay={menu(false)}
                 placement="bottomRight"
@@ -183,6 +187,11 @@ class App extends React.Component {
               render={props => (
                 <Deposit {...props} {...this.props} balance={balance} />
               )}
+            />
+            <Route
+              path="/registerToken"
+              exact
+              render={props => <RegisterToken {...props} {...this.props} />}
             />
             <Route
               path="/faucet"

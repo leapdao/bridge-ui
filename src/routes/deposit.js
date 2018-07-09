@@ -21,12 +21,7 @@ export default class Deposit extends React.Component {
   constructor(props) {
     super(props);
 
-    const psc = {
-      address: props.tokenAddress,
-      symbol: props.symbol,
-      decimals: Math.log10(props.decimals),
-      color: 0,
-    };
+    const psc = { color: 0, symbol: 'PSC' };
 
     this.state = {
       value: 0,
@@ -38,7 +33,7 @@ export default class Deposit extends React.Component {
 
   componentDidMount() {
     getBridgeTokens().then(tokens => {
-      this.setState(state => ({ tokens: state.tokens.concat(tokens) }));
+      this.setState({ tokens, selectedToken: tokens[0] });
       this.fetchTokenBalances(this.props.account);
     });
   }
@@ -91,9 +86,8 @@ export default class Deposit extends React.Component {
   }
 
   render() {
-    const { balance, decimals, account, network } = this.props;
+    const { account, network } = this.props;
     const { value, tokens, selectedToken } = this.state;
-    const bal = balance && Number(balance.div(decimals));
 
     const tokenSelect = (
       <Select
@@ -146,10 +140,12 @@ export default class Deposit extends React.Component {
         </Form>
 
         <dl className="info" style={{ marginTop: 10 }}>
+          <dt>Token name</dt>
+          <dd>{selectedToken.name}</dd>
           <dt>Token contract address</dt>
           <dd>{selectedToken.address}</dd>
           <dt>Token balance</dt>
-          <dd>{selectedToken.balance || bal}</dd>
+          <dd>{selectedToken.balance}</dd>
         </dl>
       </Fragment>
     );
@@ -157,10 +153,6 @@ export default class Deposit extends React.Component {
 }
 
 Deposit.propTypes = {
-  decimals: PropTypes.object.isRequired,
   account: PropTypes.string,
-  symbol: PropTypes.string.isRequired,
-  tokenAddress: PropTypes.string.isRequired,
-  balance: PropTypes.object,
   network: PropTypes.string.isRequired,
 };
