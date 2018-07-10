@@ -15,17 +15,19 @@ export default async () => {
   const web3 = getWeb3(true);
   const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
   const tokenCount = await promisifyWeb3Call(bridge.tokenCount);
-  const tokensPromises = range(1, tokenCount - 1).map(async pos => {
+  const tokensPromises = range(0, tokenCount - 1).map(async pos => {
     const tokenRecord = await promisifyWeb3Call(bridge.tokens, pos);
     const token = web3.eth.contract(tokenAbi).at(tokenRecord[0]);
-    const [symbol, decimals] = await Promise.all([
+    const [symbol, decimals, name] = await Promise.all([
       promisifyWeb3Call(token.symbol),
       promisifyWeb3Call(token.decimals),
+      promisifyWeb3Call(token.name),
     ]);
     return {
       address: tokenRecord[0],
       symbol,
       decimals: Number(decimals),
+      name,
       color: pos,
     };
   });
