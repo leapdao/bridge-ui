@@ -36,6 +36,7 @@ const readSlots = (web3, bridge) => {
     .then(slots =>
       slots.map(
         ([
+          eventCounter,
           owner,
           stake,
           signer,
@@ -46,6 +47,7 @@ const readSlots = (web3, bridge) => {
           newSigner,
           newTendermint,
         ]) => ({
+          eventCounter,
           owner,
           stake,
           signer,
