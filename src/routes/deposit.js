@@ -64,7 +64,9 @@ export default class Deposit extends React.Component {
     const { account } = this.props;
     const { BigNumber } = getWeb3();
     const { selectedToken } = this.state;
-    const value = new BigNumber(this.state.value).mul(selectedToken.decimals);
+    const value = new BigNumber(this.state.value).mul(
+      10 ** selectedToken.decimals
+    );
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
