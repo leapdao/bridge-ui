@@ -1,13 +1,18 @@
 {
-  "plugins": [
-    "transform-decorators-legacy",
-    ["transform-class-properties", { "loose": true }],
-    [
-      "transform-runtime",
-      {
-        "polyfill": false,
-        "regenerator": false
-      }
+    "presets": [
+        "es2015",
+        "stage-1"
+    ],
+    "plugins": [
+        "transform-decorators-legacy",
+        ["transform-class-properties", { "loose": true}],
+        [
+            "transform-runtime",
+            {
+                "polyfill": false,
+                "regenerator": false
+            }
+        ]
     ]
   ]
 }
