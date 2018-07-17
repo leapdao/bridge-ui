@@ -13,7 +13,6 @@ import { isValidAddress } from 'ethereumjs-util';
 import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi } from '../utils/abis';
-import { bridgeAddress } from '../utils/addrs';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import getBridgeTokens from '../utils/getBridgeTokens';
@@ -30,14 +29,14 @@ export default class RegisterToken extends React.Component {
   }
 
   componentDidMount() {
-    getBridgeTokens().then(tokens => {
+    getBridgeTokens(this.props.bridgeAddress).then(tokens => {
       this.setState({ tokens });
     });
   }
 
   handleSubmit(e) {
     e.preventDefault();
-    const { account } = this.props;
+    const { account, bridgeAddress } = this.props;
     const { tokenAddr } = this.state;
 
     const web3 = getWeb3(true);
@@ -109,4 +108,5 @@ export default class RegisterToken extends React.Component {
 RegisterToken.propTypes = {
   account: PropTypes.string,
   network: PropTypes.string.isRequired,
+  bridgeAddress: PropTypes.string.isRequired,
 };

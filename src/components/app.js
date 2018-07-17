@@ -21,7 +21,6 @@ import Info from '../routes/info';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import getWeb3 from '../utils/getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from '../utils/abis';
-import { bridgeAddress } from '../utils/addrs';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 import parsecLabsLogo from '../parseclabs.svg';
@@ -38,7 +37,7 @@ class App extends React.Component {
 
   componentDidMount() {
     if (window.web3) {
-      const { tokenAddress } = this.props;
+      const { tokenAddress, bridgeAddress } = this.props;
       this.token = getWeb3(true)
         .eth.contract(tokenAbi)
         .at(tokenAddress);
@@ -84,7 +83,16 @@ class App extends React.Component {
 
   render() {
     const { balance } = this.state;
-    const { decimals, symbol, account, network } = this.props;
+    const {
+      decimals,
+      symbol,
+      account,
+      network,
+      bridgeAddress,
+      defaultBridgeAddress,
+    } = this.props;
+    const urlSuffix =
+      bridgeAddress !== defaultBridgeAddress ? `#${bridgeAddress}` : '';
 
     const menu = horizontal => (
       <Menu
@@ -93,19 +101,19 @@ class App extends React.Component {
         style={{ lineHeight: '64px', width: '100%' }}
       >
         <Menu.Item key="/">
-          <Link to="/">Slots auction</Link>
+          <Link to={`/${urlSuffix}`}>Slots auction</Link>
         </Menu.Item>
         <Menu.Item key="/deposit">
-          <Link to="/deposit">Make deposit</Link>
+          <Link to={`/deposit${urlSuffix}`}>Make deposit</Link>
         </Menu.Item>
         <Menu.Item key="/registerToken">
-          <Link to="/registerToken">Register token</Link>
+          <Link to={`/registerToken${urlSuffix}`}>Register token</Link>
         </Menu.Item>
         <Menu.Item key="/faucet">
-          <Link to="/faucet">Get tokens</Link>
+          <Link to={`/faucet${urlSuffix}`}>Get tokens</Link>
         </Menu.Item>
         <Menu.Item key="/info">
-          <Link to="/info">Chain info</Link>
+          <Link to={`/info${urlSuffix}`}>Chain info</Link>
         </Menu.Item>
       </Menu>
     );
@@ -120,7 +128,7 @@ class App extends React.Component {
             justifyContent: 'space-between',
           }}
         >
-          <Link to="/">
+          <Link to={`/${urlSuffix}`}>
             <img
               src={parsecLabsLogo}
               width="196"
@@ -216,6 +224,8 @@ App.propTypes = {
   account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
   tokenAddress: PropTypes.string.isRequired,
+  bridgeAddress: PropTypes.string.isRequired,
+  defaultBridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
   location: PropTypes.object.isRequired,
 };

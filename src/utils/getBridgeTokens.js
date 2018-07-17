@@ -8,10 +8,9 @@
 import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
-import { bridgeAddress } from '../utils/addrs';
 import { range } from '../utils';
 
-export default async () => {
+export default async bridgeAddress => {
   const web3 = getWeb3(true);
   const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
   const tokenCount = await promisifyWeb3Call(bridge.tokenCount);

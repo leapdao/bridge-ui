@@ -5,9 +5,23 @@ import { Spin } from 'antd';
 import getWeb3 from '../utils/getWeb3';
 import * as abis from '../utils/abis';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
-import { bridgeAddress } from '../utils/addrs';
 import { DEFAULT_NETWORK } from '../utils';
 import Message from './message';
+
+if (!process.env.BRIDGE_ADDR) {
+  console.error(
+    'Missing Bridge contract address. Please rebuild with BRIDGE_ADDR env variable set'
+  );
+}
+
+const getBridgeAddress = () => {
+  const hash = window.location.hash.replace('#', '');
+  if (hash.startsWith('0x') && hash.length === 42) {
+    return hash;
+  }
+
+  return process.env.BRIDGE_ADDR;
+};
 
 export default class Web3Wrapper extends React.Component {
   constructor(props) {
@@ -25,7 +39,7 @@ export default class Web3Wrapper extends React.Component {
   loadData() {
     const bridge = getWeb3()
       .eth.contract(abis.bridge)
-      .at(bridgeAddress);
+      .at(getBridgeAddress());
 
     promisifyWeb3Call(bridge.tokens, 0).then(([tokenAddress]) => {
       this.setState({ tokenAddress });
@@ -86,6 +100,8 @@ export default class Web3Wrapper extends React.Component {
       symbol,
       network,
       tokenAddress,
+      bridgeAddress: getBridgeAddress(),
+      defaultBridgeAddress: process.env.BRIDGE_ADDR,
     });
   }
 }

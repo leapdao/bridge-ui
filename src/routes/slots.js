@@ -13,7 +13,6 @@ import { Form, Input, Divider } from 'antd';
 import getWeb3 from '../utils/getWeb3';
 import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
-import { bridgeAddress } from '../utils/addrs';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
@@ -100,7 +99,7 @@ export default class Slots extends React.Component {
     if (window.web3) {
       // need to use websocket provider for watching events without MetaMask
       const web3 = getWeb3(true);
-      const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
+      const bridge = web3.eth.contract(bridgeAbi).at(this.props.bridgeAddress);
       const allEvents = bridge.allEvents({ toBlock: 'latest' });
       allEvents.watch(() => {
         this.refreshSlots();
@@ -120,7 +119,7 @@ export default class Slots extends React.Component {
 
   refreshSlots() {
     const web3 = getWeb3();
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
+    const bridge = web3.eth.contract(bridgeAbi).at(this.props.bridgeAddress);
     readSlots(web3, bridge).then(slots => {
       this.setState({ slots });
     });
@@ -135,7 +134,7 @@ export default class Slots extends React.Component {
   }
 
   handleBet(slotId) {
-    const { decimals, account, tokenAddress } = this.props;
+    const { decimals, account, tokenAddress, bridgeAddress } = this.props;
     const { signerAddr, tenderPubKey } = this.state;
     const { BigNumber } = getWeb3();
     const stake = new BigNumber(this.state.stakes[slotId]).mul(decimals);
@@ -353,6 +352,7 @@ Slots.propTypes = {
   account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
   tokenAddress: PropTypes.string.isRequired,
+  bridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
   balance: PropTypes.object,
 };
