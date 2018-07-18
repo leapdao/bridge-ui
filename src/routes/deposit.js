@@ -25,15 +25,16 @@ export default class Deposit extends React.Component {
     this.state = {
       value: 0,
       tokens: [psc],
-      selectedToken: psc,
+      selectedColor: 0,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   componentDidMount() {
     getBridgeTokens(this.props.bridgeAddress).then(tokens => {
-      this.setState({ tokens, selectedToken: tokens[0] });
+      this.setState({ tokens, selectedColor: 0 });
       this.fetchTokenBalances(this.props.account);
+      this.watchTokenBalances();
     });
   }
 
@@ -43,18 +44,56 @@ export default class Deposit extends React.Component {
     }
   }
 
+  get selectedToken() {
+    const { selectedColor, tokens } = this.state;
+    return tokens[selectedColor];
+  }
+
+  watchTokenBalances() {
+    const handleEvent = cb => (err, e) => {
+      if (
+        e.args.to === this.props.account ||
+        e.args.from === this.props.account
+      ) {
+        cb();
+      }
+    };
+    this.state.tokens.forEach((tokenData, color) => {
+      const token = getWeb3(true)
+        .eth.contract(tokenAbi)
+        .at(tokenData.address);
+      const transferEvents = token.Transfer({ toBlock: 'latest' });
+      transferEvents.watch(
+        handleEvent(() => {
+          this.fetchTokenBalance(this.props.account, color);
+        })
+      );
+    });
+  }
+
+  /* eslint-disable class-methods-use-this */
+  fetchTokenBalance(account, color) {
+    const tokenData = this.state.tokens[color];
+    const token = getWeb3(true)
+      .eth.contract(tokenAbi)
+      .at(tokenData.address);
+    return promisifyWeb3Call(token.balanceOf, account).then(balance => {
+      this.setState(state => ({
+        tokens: Object.assign([], state.tokens, {
+          [color]: Object.assign({}, tokenData, {
+            balance: Number(balance.div(10 ** tokenData.decimals)),
+          }),
+        }),
+      }));
+    });
+  }
+  /* eslint-enable */
+
   fetchTokenBalances(account) {
     return Promise.all(
-      this.state.tokens.map(tokenData => {
-        const token = getWeb3(true)
-          .eth.contract(tokenAbi)
-          .at(tokenData.address);
-        return promisifyWeb3Call(token.balanceOf, account).then(balance =>
-          Object.assign(tokenData, {
-            balance: Number(balance.div(10 ** tokenData.decimals)),
-          })
-        );
-      })
+      this.state.tokens.map((_, color) =>
+        this.fetchTokenBalance(account, color)
+      )
     );
   }
 
@@ -62,16 +101,19 @@ export default class Deposit extends React.Component {
     e.preventDefault();
     const { account, bridgeAddress } = this.props;
     const { BigNumber } = getWeb3();
-    const { selectedToken } = this.state;
     const value = new BigNumber(this.state.value).mul(
-      10 ** selectedToken.decimals
+      10 ** this.selectedToken.decimals
     );
     const web3 = getWeb3(true);
     const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
 
     // do approveAndCall to token
-    const token = web3.eth.contract(tokenAbi).at(selectedToken.address);
-    const data = bridge.deposit.getData(account, value, selectedToken.color);
+    const token = web3.eth.contract(tokenAbi).at(this.selectedToken.address);
+    const data = bridge.deposit.getData(
+      account,
+      value,
+      this.selectedToken.color
+    );
     promisifyWeb3Call(
       token.approveAndCall.sendTransaction,
       bridgeAddress,
@@ -88,13 +130,13 @@ export default class Deposit extends React.Component {
 
   render() {
     const { account, network } = this.props;
-    const { value, tokens, selectedToken } = this.state;
+    const { value, tokens, selectedColor } = this.state;
 
     const tokenSelect = (
       <Select
-        defaultValue={selectedToken.color}
+        defaultValue={selectedColor}
         style={{ width: 80 }}
-        onChange={color => this.setState({ selectedToken: tokens[color] })}
+        onChange={color => this.setState({ selectedColor: color })}
       >
         {tokens.map(token => (
           <Select.Option key={token} value={token.color}>
@@ -130,7 +172,7 @@ export default class Deposit extends React.Component {
                   htmlType="submit"
                   type="primary"
                   disabled={
-                    !canSendTx || !value || value > selectedToken.balance
+                    !canSendTx || !value || value > this.selectedToken.balance
                   }
                 >
                   Deposit
@@ -142,11 +184,11 @@ export default class Deposit extends React.Component {
 
         <dl className="info" style={{ marginTop: 10 }}>
           <dt>Token name</dt>
-          <dd>{selectedToken.name}</dd>
+          <dd>{this.selectedToken.name}</dd>
           <dt>Token contract address</dt>
-          <dd>{selectedToken.address}</dd>
+          <dd>{this.selectedToken.address}</dd>
           <dt>Token balance</dt>
-          <dd>{selectedToken.balance}</dd>
+          <dd>{this.selectedToken.balance}</dd>
         </dl>
       </Fragment>
     );
