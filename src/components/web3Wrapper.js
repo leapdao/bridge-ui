@@ -58,9 +58,11 @@ export default class Web3Wrapper extends React.Component {
         promises.push(promisifyWeb3Call(getWeb3(true).eth.getAccounts));
 
         setInterval(() => {
-          promisifyWeb3Call(getWeb3(true).eth.getAccounts).then(accounts =>
-            this.setState({ account: accounts[0] })
-          );
+          promisifyWeb3Call(getWeb3(true).eth.getAccounts).then(accounts => {
+            if (this.state.account !== accounts[0]) {
+              this.setState({ account: accounts[0] });
+            }
+          });
         }, 1000);
       }
 
