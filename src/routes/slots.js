@@ -261,7 +261,9 @@ export default class Slots extends React.Component {
                 1.05
               );
               const minValue = minStake.div(decimals).toNumber();
-              const ownStake = addrCmp(slot.owner, account) ? minValue : 0;
+              const ownStake = addrCmp(slot.owner, account || '')
+                ? minValue
+                : 0;
 
               return (
                 <td key={i} style={formCellStyle}>
