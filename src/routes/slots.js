@@ -120,8 +120,11 @@ export default class Slots extends React.Component {
   refreshSlots() {
     const web3 = getWeb3();
     const bridge = web3.eth.contract(bridgeAbi).at(this.props.bridgeAddress);
-    readSlots(web3, bridge).then(slots => {
-      this.setState({ slots });
+    Promise.all([
+      readSlots(web3, bridge),
+      promisifyWeb3Call(bridge.lastCompleteEpoch),
+    ]).then(([slots, lastCompleteEpoch]) => {
+      this.setState({ slots, lastCompleteEpoch });
     });
   }
 
@@ -293,7 +296,7 @@ export default class Slots extends React.Component {
   }
 
   render() {
-    const { signerAddr, tenderPubKey } = this.state;
+    const { signerAddr, tenderPubKey, lastCompleteEpoch } = this.state;
     const { account, network } = this.props;
     const slotsTable = this.renderSlots();
 
@@ -319,6 +322,15 @@ export default class Slots extends React.Component {
           </Form.Item>
         </Form>
         <Divider />
+        {lastCompleteEpoch && (
+          <Fragment>
+            <p>
+              <strong>Last complete epoch:</strong> {Number(lastCompleteEpoch)}
+            </p>
+            <Divider />
+          </Fragment>
+        )}
+
         <div style={{ position: 'relative' }}>
           <div
             style={{
