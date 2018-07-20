@@ -132,6 +132,14 @@ export default class Deposit extends React.Component {
     const { account, network } = this.props;
     const { value, tokens, selectedColor } = this.state;
 
+    if (tokens.length === 0) {
+      return (
+        <div style={{ textAlign: 'center', margin: 50, fontSize: 18 }}>
+          You need to register some token first
+        </div>
+      );
+    }
+
     const tokenSelect = (
       <Select
         defaultValue={selectedColor}
