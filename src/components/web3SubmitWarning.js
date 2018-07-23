@@ -3,16 +3,17 @@ import PropTypes from 'prop-types';
 import { Alert } from 'antd';
 import { NETWORKS } from '../utils';
 import getWeb3 from '../utils/getWeb3';
-import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 
 class Web3SubmitWarning extends React.Component {
   constructor(props) {
     super(props);
     this.state = {};
     if (window.web3) {
-      promisifyWeb3Call(getWeb3(true).version.getNetwork).then(mmNetwork => {
-        this.setState({ mmNetwork });
-      });
+      getWeb3(true)
+        .eth.net.getId()
+        .then(mmNetwork => {
+          this.setState({ mmNetwork: String(mmNetwork) });
+        });
     }
   }
 

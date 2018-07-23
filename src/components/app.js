@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
+import BigNumber from 'bignumber.js';
 import { Dropdown, Icon, Layout, Menu } from 'antd';
 
 import Slots from '../routes/slots';
@@ -18,7 +19,6 @@ import Deposit from '../routes/deposit';
 import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
 import Info from '../routes/info';
-import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import getWeb3 from '../utils/getWeb3';
 import { token as tokenAbi, bridge as bridgeAbi } from '../utils/abis';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
@@ -38,22 +38,19 @@ class App extends React.Component {
   componentDidMount() {
     if (window.web3) {
       const { tokenAddress, bridgeAddress } = this.props;
-      this.token = getWeb3(true)
-        .eth.contract(tokenAbi)
-        .at(tokenAddress);
-      this.bridge = getWeb3(true)
-        .eth.contract(bridgeAbi)
-        .at(bridgeAddress);
+      const iWeb3 = getWeb3(true);
+      this.token = new iWeb3.eth.Contract(tokenAbi, tokenAddress);
+      this.bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
 
-      const bridgeEvents = this.bridge.allEvents({ toBlock: 'latest' });
-      bridgeEvents.watch(() => {
+      const bridgeEvents = this.bridge.events.allEvents({ toBlock: 'latest' });
+      bridgeEvents.on('data', () => {
         if (this.props.account) {
           this.loadData(this.props.account);
         }
       });
 
-      const transferEvents = this.token.Transfer({ toBlock: 'latest' });
-      transferEvents.watch((err, e) => {
+      const transferEvents = this.token.events.Transfer({ toBlock: 'latest' });
+      transferEvents.on('data', (err, e) => {
         if (e.args.to === this.props.account) {
           this.loadData(this.props.account);
         }
@@ -72,12 +69,15 @@ class App extends React.Component {
   }
 
   loadData(account) {
-    if (this.token) {
-      Promise.all([promisifyWeb3Call(this.token.balanceOf, account)]).then(
-        ([balance]) => {
-          this.setState({ balance });
-        }
-      );
+    if (this.token && this.props.canSubmitTx) {
+      this.token.methods
+        .balanceOf(account)
+        .call()
+        .then(balance => {
+          this.setState({
+            balance: new BigNumber(balance),
+          });
+        });
     }
   }
 
@@ -220,13 +220,14 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  decimals: PropTypes.object.isRequired,
+  decimals: PropTypes.number.isRequired,
   account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
   tokenAddress: PropTypes.string.isRequired,
   bridgeAddress: PropTypes.string.isRequired,
   defaultBridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
+  canSubmitTx: PropTypes.bool.isRequired,
   location: PropTypes.object.isRequired,
 };
 

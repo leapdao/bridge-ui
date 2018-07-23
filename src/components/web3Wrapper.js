@@ -4,7 +4,6 @@ import { Spin } from 'antd';
 
 import getWeb3 from '../utils/getWeb3';
 import * as abis from '../utils/abis';
-import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { DEFAULT_NETWORK } from '../utils';
 import Message from './message';
 
@@ -37,45 +36,50 @@ export default class Web3Wrapper extends React.Component {
   }
 
   loadData() {
-    const bridge = getWeb3()
-      .eth.contract(abis.bridge)
-      .at(getBridgeAddress());
+    const web3 = getWeb3();
+    const bridge = new web3.eth.Contract(abis.bridge, getBridgeAddress());
 
-    promisifyWeb3Call(bridge.tokens, 0).then(([tokenAddress]) => {
-      this.setState({ tokenAddress });
-      const token = getWeb3()
-        .eth.contract(abis.token)
-        .at(tokenAddress);
+    bridge.methods
+      .tokens(0)
+      .call()
+      .then()
+      .then(({ addr: tokenAddress }) => {
+        this.setState({ tokenAddress });
+        const token = new web3.eth.Contract(abis.token, tokenAddress);
 
-      const promises = [
-        promisifyWeb3Call(token.decimals),
-        promisifyWeb3Call(token.symbol).catch(e =>
-          console.error('Failed to read token symbol', e)
-        ),
-      ];
+        const promises = [
+          token.methods.decimals().call(),
+          token.methods
+            .symbol()
+            .call()
+            .catch(e => console.error('Failed to read token symbol', e)),
+        ];
 
-      if (window.web3) {
-        promises.push(promisifyWeb3Call(getWeb3(true).eth.getAccounts));
+        if (window.web3) {
+          const iWeb3 = getWeb3(true);
+          promises.push(iWeb3.eth.getAccounts());
+          promises.push(iWeb3.eth.net.getId());
 
-        setInterval(() => {
-          promisifyWeb3Call(getWeb3(true).eth.getAccounts).then(accounts => {
-            if (this.state.account !== accounts[0]) {
-              this.setState({ account: accounts[0] });
-            }
-          });
-        }, 1000);
-      }
-
-      Promise.all(promises).then(([decimals, symbol, accounts]) => {
-        const web3 = getWeb3();
-        this.setState({
-          account: accounts && accounts[0],
-          decimals: new web3.BigNumber(10).pow(decimals),
-          symbol,
-          ready: true,
-        });
+          setInterval(() => {
+            iWeb3.eth.getAccounts().then(accounts => {
+              if (this.state.account !== accounts[0]) {
+                this.setState({ account: accounts[0] });
+              }
+            });
+          }, 1000);
+        }
+        Promise.all(promises).then(
+          ([decimals, symbol, accounts, mmNetwork]) => {
+            this.setState({
+              account: accounts && accounts[0],
+              decimals: 10 ** decimals,
+              symbol,
+              ready: true,
+              mmNetwork: String(mmNetwork),
+            });
+          }
+        );
       });
-    });
   }
 
   render() {
@@ -83,6 +87,7 @@ export default class Web3Wrapper extends React.Component {
       ready,
       account,
       network,
+      mmNetwork,
       decimals,
       symbol,
       tokenAddress,
@@ -102,6 +107,7 @@ export default class Web3Wrapper extends React.Component {
       symbol,
       network,
       tokenAddress,
+      canSubmitTx: !!window.web3 && !!account && network === mmNetwork,
       bridgeAddress: getBridgeAddress(),
       defaultBridgeAddress: process.env.BRIDGE_ADDR,
     });

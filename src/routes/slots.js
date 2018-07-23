@@ -9,9 +9,9 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
+import BigNumber from 'bignumber.js';
 
 import getWeb3 from '../utils/getWeb3';
-import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
@@ -23,42 +23,46 @@ const addrCmp = (a1, a2) =>
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 const readSlots = (web3, bridge) => {
-  return promisifyWeb3Call(bridge.epochLength)
+  return bridge.methods
+    .epochLength()
+    .call()
     .then(epochLength => {
       const proms = [];
       for (let slotId = 0; slotId < epochLength; slotId += 1) {
-        proms.push(promisifyWeb3Call(bridge.getSlot, slotId));
+        proms.push(bridge.methods.getSlot(slotId).call());
       }
 
       return Promise.all(proms);
     })
-    .then(slots =>
-      slots.map(
-        ([
-          eventCounter,
-          owner,
-          stake,
-          signer,
-          tendermint,
-          activationEpoch,
-          newOwner,
-          newStake,
-          newSigner,
-          newTendermint,
-        ]) => ({
-          eventCounter,
-          owner,
-          stake,
-          signer,
-          tendermint,
-          activationEpoch: activationEpoch.toNumber(),
-          newOwner,
-          newStake,
-          newSigner,
-          newTendermint,
-        })
-      )
-    );
+    .then(slots => {
+      return slots.map(
+        ({
+          0: eventCounter,
+          1: owner,
+          2: stake,
+          3: signer,
+          4: tendermint,
+          5: activationEpoch,
+          6: newOwner,
+          7: newStake,
+          8: newSigner,
+          9: newTendermint,
+        }) => {
+          return {
+            eventCounter,
+            owner,
+            stake: new BigNumber(stake),
+            signer,
+            tendermint,
+            activationEpoch: Number(activationEpoch),
+            newOwner,
+            newStake: new BigNumber(newStake),
+            newSigner,
+            newTendermint,
+          };
+        }
+      );
+    });
 };
 
 const cellStyle = {
@@ -99,9 +103,9 @@ export default class Slots extends React.Component {
     if (window.web3) {
       // need to use websocket provider for watching events without MetaMask
       const web3 = getWeb3(true);
-      const bridge = web3.eth.contract(bridgeAbi).at(this.props.bridgeAddress);
-      const allEvents = bridge.allEvents({ toBlock: 'latest' });
-      allEvents.watch(() => {
+      const bridge = new web3.eth.Contract(bridgeAbi, this.props.bridgeAddress);
+      const allEvents = bridge.events.allEvents({ toBlock: 'latest' });
+      allEvents.on('data', () => {
         this.refreshSlots();
       });
     }
@@ -119,10 +123,10 @@ export default class Slots extends React.Component {
 
   refreshSlots() {
     const web3 = getWeb3();
-    const bridge = web3.eth.contract(bridgeAbi).at(this.props.bridgeAddress);
+    const bridge = new web3.eth.Contract(bridgeAbi, this.props.bridgeAddress);
     Promise.all([
       readSlots(web3, bridge),
-      promisifyWeb3Call(bridge.lastCompleteEpoch),
+      bridge.methods.lastCompleteEpoch().call(),
     ]).then(([slots, lastCompleteEpoch]) => {
       this.setState({ slots, lastCompleteEpoch });
     });
@@ -139,30 +143,22 @@ export default class Slots extends React.Component {
   handleBet(slotId) {
     const { decimals, account, tokenAddress, bridgeAddress } = this.props;
     const { signerAddr, tenderPubKey } = this.state;
-    const { BigNumber } = getWeb3();
     const stake = new BigNumber(this.state.stakes[slotId]).mul(decimals);
-    const web3 = getWeb3(true);
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
+    const iWeb3 = getWeb3(true);
+    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
 
     // do approveAndCall to token
-    const data = bridge.bet.getData(
-      slotId,
-      stake,
-      signerAddr,
-      `0x${tenderPubKey}`,
-      account
-    );
-    const token = web3.eth.contract(tokenAbi).at(tokenAddress);
-    promisifyWeb3Call(
-      token.approveAndCall.sendTransaction,
-      bridgeAddress,
-      stake,
-      data,
-      { from: account }
-    ).then(betTxHash => {
-      console.log('bet', betTxHash); // eslint-disable-line
-      this.setStake(slotId, undefined);
-    });
+    const data = bridge.methods
+      .bet(slotId, stake, signerAddr, `0x${tenderPubKey}`, account)
+      .encodeABI();
+    const token = new iWeb3.eth.Contract(tokenAbi, tokenAddress);
+    token.methods
+      .approveAndCall(bridgeAddress, stake, data)
+      .send({ from: account })
+      .then(betTxHash => {
+        console.log('bet', betTxHash); // eslint-disable-line
+        this.setStake(slotId, undefined);
+      });
   }
 
   renderRow(title, key, newKey, renderer) {
@@ -259,7 +255,6 @@ export default class Slots extends React.Component {
           <tr>
             <th style={formCellStyle} />
             {slots.map((slot, i) => {
-              const { BigNumber } = getWeb3();
               const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
                 1.05
               );
@@ -362,7 +357,7 @@ export default class Slots extends React.Component {
 }
 
 Slots.propTypes = {
-  decimals: PropTypes.object.isRequired,
+  decimals: PropTypes.number.isRequired,
   account: PropTypes.string,
   symbol: PropTypes.string.isRequired,
   tokenAddress: PropTypes.string.isRequired,

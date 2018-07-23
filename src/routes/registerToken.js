@@ -11,7 +11,6 @@ import { List, Form, Input, Button } from 'antd';
 
 import { isValidAddress } from 'ethereumjs-util';
 import getWeb3 from '../utils/getWeb3';
-import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi } from '../utils/abis';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
@@ -39,15 +38,17 @@ export default class RegisterToken extends React.Component {
     const { account, bridgeAddress } = this.props;
     const { tokenAddr } = this.state;
 
-    const web3 = getWeb3(true);
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
-
-    promisifyWeb3Call(bridge.registerToken.sendTransaction, tokenAddr, '', {
-      from: account,
-    }).then(registerTxHash => {
-      console.log('registerToken', registerTxHash); // eslint-disable-line
-      this.setState({ tokenAddr: '' });
-    });
+    const iWeb3 = getWeb3(true);
+    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
+    bridge.methods
+      .registerToken(tokenAddr, '')
+      .send({
+        from: account,
+      })
+      .then(registerTxHash => {
+        console.log('registerToken', registerTxHash); // eslint-disable-line
+        this.setState({ tokenAddr: '' });
+      });
   }
 
   render() {

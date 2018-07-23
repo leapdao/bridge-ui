@@ -13,14 +13,12 @@ let injectedWeb3;
 
 export default (injected = false) => {
   if (!injected && !web3) {
-    web3 = new Web3();
     const network = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
-    web3.setProvider(new web3.providers.HttpProvider(network.provider));
+    web3 = new Web3(network.provider);
   }
 
   if (injected && !injectedWeb3) {
-    injectedWeb3 = new Web3();
-    injectedWeb3.setProvider(window.web3.currentProvider);
+    injectedWeb3 = new Web3(window.web3.currentProvider);
   }
 
   return injected ? injectedWeb3 : web3;

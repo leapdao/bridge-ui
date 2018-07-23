@@ -7,10 +7,10 @@
 
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
+import BigNumber from 'bignumber.js';
 import { Select, Form, Input, Button } from 'antd';
 
 import getWeb3 from '../utils/getWeb3';
-import promisifyWeb3Call from '../utils/promisifyWeb3Call';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
@@ -59,11 +59,11 @@ export default class Deposit extends React.Component {
       }
     };
     this.state.tokens.forEach((tokenData, color) => {
-      const token = getWeb3(true)
-        .eth.contract(tokenAbi)
-        .at(tokenData.address);
-      const transferEvents = token.Transfer({ toBlock: 'latest' });
-      transferEvents.watch(
+      const iWeb3 = getWeb3(true);
+      const token = new iWeb3.eth.Contract(tokenAbi, tokenData.address);
+      const transferEvents = token.events.Transfer({ toBlock: 'latest' });
+      transferEvents.on(
+        'data',
         handleEvent(() => {
           this.fetchTokenBalance(this.props.account, color);
         })
@@ -74,18 +74,22 @@ export default class Deposit extends React.Component {
   /* eslint-disable class-methods-use-this */
   fetchTokenBalance(account, color) {
     const tokenData = this.state.tokens[color];
-    const token = getWeb3(true)
-      .eth.contract(tokenAbi)
-      .at(tokenData.address);
-    return promisifyWeb3Call(token.balanceOf, account).then(balance => {
-      this.setState(state => ({
-        tokens: Object.assign([], state.tokens, {
-          [color]: Object.assign({}, tokenData, {
-            balance: Number(balance.div(10 ** tokenData.decimals)),
+    const iWeb3 = getWeb3(true);
+    const token = new iWeb3.eth.Contract(tokenAbi, tokenData.address);
+    return token.methods
+      .balanceOf(account)
+      .call()
+      .then(balance => {
+        this.setState(state => ({
+          tokens: Object.assign([], state.tokens, {
+            [color]: Object.assign({}, tokenData, {
+              balance: Number(
+                new BigNumber(balance).div(10 ** tokenData.decimals)
+              ),
+            }),
           }),
-        }),
-      }));
-    });
+        }));
+      });
   }
   /* eslint-enable */
 
@@ -100,32 +104,27 @@ export default class Deposit extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     const { account, bridgeAddress } = this.props;
-    const { BigNumber } = getWeb3();
     const value = new BigNumber(this.state.value).mul(
       10 ** this.selectedToken.decimals
     );
-    const web3 = getWeb3(true);
-    const bridge = web3.eth.contract(bridgeAbi).at(bridgeAddress);
+    const iWeb3 = getWeb3(true);
+    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
 
     // do approveAndCall to token
-    const token = web3.eth.contract(tokenAbi).at(this.selectedToken.address);
-    const data = bridge.deposit.getData(
-      account,
-      value,
-      this.selectedToken.color
-    );
-    promisifyWeb3Call(
-      token.approveAndCall.sendTransaction,
-      bridgeAddress,
-      value,
-      data,
-      {
+    const token = new iWeb3.eth.Contract(tokenAbi, this.selectedToken.address);
+    const data = bridge.methods
+      .deposit(account, value, this.selectedToken.color)
+      .encodeABI();
+
+    token.methods
+      .approveAndCall(bridgeAddress, value, data)
+      .send({
         from: account,
-      }
-    ).then(depositTxHash => {
-      console.log('deposit', depositTxHash); // eslint-disable-line
-      this.setState({ value: 0 });
-    });
+      })
+      .then(depositTxHash => {
+        console.log('deposit', depositTxHash); // eslint-disable-line
+        this.setState({ value: 0 });
+      });
   }
 
   render() {
