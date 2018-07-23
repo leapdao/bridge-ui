@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
@@ -79,6 +80,10 @@ const formCellStyle = Object.assign(
   cellStyle
 );
 
+@inject(stores => ({
+  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+}))
+@observer
 export default class Slots extends React.Component {
   constructor(props) {
     super(props);
@@ -141,9 +146,11 @@ export default class Slots extends React.Component {
   }
 
   handleBet(slotId) {
-    const { decimals, account, tokenAddress, bridgeAddress } = this.props;
+    const { account, bridgeAddress, psc } = this.props;
     const { signerAddr, tenderPubKey } = this.state;
-    const stake = new BigNumber(this.state.stakes[slotId]).mul(decimals);
+    const stake = new BigNumber(this.state.stakes[slotId]).mul(
+      10 ** psc.decimals
+    );
     const iWeb3 = getWeb3(true);
     const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
 
@@ -151,7 +158,7 @@ export default class Slots extends React.Component {
     const data = bridge.methods
       .bet(slotId, stake, signerAddr, `0x${tenderPubKey}`, account)
       .encodeABI();
-    const token = new iWeb3.eth.Contract(tokenAbi, tokenAddress);
+    const token = new iWeb3.eth.Contract(tokenAbi, psc.address);
     token.methods
       .approveAndCall(bridgeAddress, stake, data)
       .send({ from: account })
@@ -197,7 +204,7 @@ export default class Slots extends React.Component {
 
   renderSlots() {
     const { slots, signerAddr, stakes, tenderPubKey } = this.state;
-    const { decimals, symbol, balance, account, network } = this.props;
+    const { account, network, psc } = this.props;
 
     return (
       <table style={{ borderCollapse: 'collapse' }}>
@@ -249,7 +256,7 @@ export default class Slots extends React.Component {
             'Stake',
             'stake',
             'newStake',
-            val => `${val.div(decimals).toNumber()} ${symbol}`
+            val => `${val.div(10 ** psc.decimals).toNumber()} ${psc.symbol}`
           )}
           {this.renderRow('Act. epoch', 'activationEpoch')}
           <tr>
@@ -258,7 +265,7 @@ export default class Slots extends React.Component {
               const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
                 1.05
               );
-              const minValue = minStake.div(decimals).toNumber();
+              const minValue = minStake.div(10 ** psc.decimals).toNumber();
               const ownStake = addrCmp(slot.owner, account || '')
                 ? minValue
                 : 0;
@@ -271,12 +278,12 @@ export default class Slots extends React.Component {
                         <StakeForm
                           value={stakes[i]}
                           onChange={value => this.setStake(i, value)}
-                          symbol={symbol}
+                          symbol={psc.symbol}
                           disabled={!signerAddr}
                           onSubmit={() => this.handleBet(i)}
                           minValue={minValue}
                           ownStake={ownStake}
-                          maxValue={balance && Number(balance.div(decimals))}
+                          maxValue={psc.decimalsBalance}
                         />
                       )
                     }
@@ -292,7 +299,12 @@ export default class Slots extends React.Component {
 
   render() {
     const { signerAddr, tenderPubKey, lastCompleteEpoch } = this.state;
-    const { account, network } = this.props;
+    const { account, network, psc } = this.props;
+
+    if (!psc || !psc.ready) {
+      return null;
+    }
+
     const slotsTable = this.renderSlots();
 
     return (
@@ -357,11 +369,8 @@ export default class Slots extends React.Component {
 }
 
 Slots.propTypes = {
-  decimals: PropTypes.number.isRequired,
   account: PropTypes.string,
-  symbol: PropTypes.string.isRequired,
-  tokenAddress: PropTypes.string.isRequired,
   bridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
-  balance: PropTypes.object,
+  psc: PropTypes.object,
 };

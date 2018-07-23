@@ -6,6 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
+import { computed } from 'mobx';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import BigNumber from 'bignumber.js';
 import { Select, Form, Input, Button } from 'antd';
@@ -14,8 +16,11 @@ import getWeb3 from '../utils/getWeb3';
 import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
-import getBridgeTokens from '../utils/getBridgeTokens';
 
+@inject(stores => ({
+  tokens: stores.tokens.tokens,
+}))
+@observer
 export default class Deposit extends React.Component {
   constructor(props) {
     super(props);
@@ -30,22 +35,16 @@ export default class Deposit extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
-  componentDidMount() {
-    getBridgeTokens(this.props.bridgeAddress).then(tokens => {
-      this.setState({ tokens, selectedColor: 0 });
-      this.fetchTokenBalances(this.props.account);
-      this.watchTokenBalances();
-    });
-  }
-
   componentWillReceiveProps(nextProps) {
     if (this.props.account !== nextProps.account) {
       this.fetchTokenBalances(nextProps.account);
     }
   }
 
+  @computed
   get selectedToken() {
-    const { selectedColor, tokens } = this.state;
+    const { selectedColor } = this.state;
+    const { tokens } = this.props;
     return tokens[selectedColor];
   }
 
@@ -128,8 +127,12 @@ export default class Deposit extends React.Component {
   }
 
   render() {
-    const { account, network } = this.props;
-    const { value, tokens, selectedColor } = this.state;
+    const { account, network, tokens } = this.props;
+    const { value, selectedColor } = this.state;
+
+    if (!tokens || !this.selectedToken || !this.selectedToken.ready) {
+      return null;
+    }
 
     if (tokens.length === 0) {
       return (
@@ -195,7 +198,7 @@ export default class Deposit extends React.Component {
           <dt>Token contract address</dt>
           <dd>{this.selectedToken.address}</dd>
           <dt>Token balance</dt>
-          <dd>{this.selectedToken.balance}</dd>
+          <dd>{this.selectedToken.decimalsBalance}</dd>
         </dl>
       </Fragment>
     );
@@ -204,6 +207,7 @@ export default class Deposit extends React.Component {
 
 Deposit.propTypes = {
   account: PropTypes.string,
+  tokens: PropTypes.array,
   network: PropTypes.string.isRequired,
   bridgeAddress: PropTypes.string.isRequired,
 };
