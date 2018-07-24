@@ -36,7 +36,11 @@ export default class Deposit extends React.Component {
   get selectedToken() {
     const { selectedColor } = this.state;
     const { tokens } = this.props;
-    return tokens[selectedColor];
+    if (tokens[selectedColor] && tokens[selectedColor].ready) {
+      return tokens[selectedColor];
+    }
+
+    return undefined;
   }
 
   handleSubmit(e) {
@@ -59,7 +63,7 @@ export default class Deposit extends React.Component {
       .send({
         from: account,
       })
-      .then(depositTxHash => {
+      .on('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
         this.setState({ value: 0 });
       });
@@ -69,7 +73,7 @@ export default class Deposit extends React.Component {
     const { account, network, tokens } = this.props;
     const { value, selectedColor } = this.state;
 
-    if (!tokens || !this.selectedToken || !this.selectedToken.ready) {
+    if (!tokens || !this.selectedToken) {
       return null;
     }
 

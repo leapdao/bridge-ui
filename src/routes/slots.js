@@ -162,7 +162,7 @@ export default class Slots extends React.Component {
     token.methods
       .approveAndCall(bridgeAddress, stake, data)
       .send({ from: account })
-      .then(betTxHash => {
+      .on('transactionHash', betTxHash => {
         console.log('bet', betTxHash); // eslint-disable-line
         this.setStake(slotId, undefined);
       });

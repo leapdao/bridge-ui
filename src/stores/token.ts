@@ -56,8 +56,8 @@ export default class Token {
       } as any);
       transferEvents.watch((err, event) => {
         if (
-          event.args.to === this.account.address ||
-          event.args.from === this.account.address
+          event.args.to.toLowerCase() === this.account.address.toLowerCase() ||
+          event.args.from.toLowerCase() === this.account.address.toLowerCase()
         ) {
           this.loadBalance();
         }

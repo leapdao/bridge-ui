@@ -51,7 +51,7 @@ export default class RegisterToken extends React.Component {
       .send({
         from: account,
       })
-      .then(registerTxHash => {
+      .on('transactionHash', registerTxHash => {
         console.log('registerToken', registerTxHash); // eslint-disable-line
         this.setState({ tokenAddr: '' });
       });
