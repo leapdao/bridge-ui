@@ -25,20 +25,11 @@ export default class Deposit extends React.Component {
   constructor(props) {
     super(props);
 
-    const psc = { color: 0, symbol: 'PSC' };
-
     this.state = {
       value: 0,
-      tokens: [psc],
       selectedColor: 0,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.props.account !== nextProps.account) {
-      this.fetchTokenBalances(nextProps.account);
-    }
   }
 
   @computed
@@ -46,58 +37,6 @@ export default class Deposit extends React.Component {
     const { selectedColor } = this.state;
     const { tokens } = this.props;
     return tokens[selectedColor];
-  }
-
-  watchTokenBalances() {
-    const handleEvent = cb => (err, e) => {
-      if (
-        e.args.to === this.props.account ||
-        e.args.from === this.props.account
-      ) {
-        cb();
-      }
-    };
-    this.state.tokens.forEach((tokenData, color) => {
-      const iWeb3 = getWeb3(true);
-      const token = new iWeb3.eth.Contract(tokenAbi, tokenData.address);
-      const transferEvents = token.events.Transfer({ toBlock: 'latest' });
-      transferEvents.on(
-        'data',
-        handleEvent(() => {
-          this.fetchTokenBalance(this.props.account, color);
-        })
-      );
-    });
-  }
-
-  /* eslint-disable class-methods-use-this */
-  fetchTokenBalance(account, color) {
-    const tokenData = this.state.tokens[color];
-    const iWeb3 = getWeb3(true);
-    const token = new iWeb3.eth.Contract(tokenAbi, tokenData.address);
-    return token.methods
-      .balanceOf(account)
-      .call()
-      .then(balance => {
-        this.setState(state => ({
-          tokens: Object.assign([], state.tokens, {
-            [color]: Object.assign({}, tokenData, {
-              balance: Number(
-                new BigNumber(balance).div(10 ** tokenData.decimals)
-              ),
-            }),
-          }),
-        }));
-      });
-  }
-  /* eslint-enable */
-
-  fetchTokenBalances(account) {
-    return Promise.all(
-      this.state.tokens.map((_, color) =>
-        this.fetchTokenBalance(account, color)
-      )
-    );
   }
 
   handleSubmit(e) {
