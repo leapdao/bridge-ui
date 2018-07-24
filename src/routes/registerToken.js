@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { List, Form, Input, Button } from 'antd';
 
@@ -14,23 +15,28 @@ import getWeb3 from '../utils/getWeb3';
 import { bridge as bridgeAbi } from '../utils/abis';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
-import getBridgeTokens from '../utils/getBridgeTokens';
 
+const Item = observer(({ item }) => (
+  <List.Item key={item.address}>
+    <List.Item.Meta
+      title={`${item.name} (${item.symbol})`}
+      description={item.address}
+    />
+  </List.Item>
+));
+
+@inject(stores => ({
+  tokens: stores.tokens.tokens,
+}))
+@observer
 export default class RegisterToken extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
       tokenAddr: '',
-      tokens: [],
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
-  componentDidMount() {
-    getBridgeTokens(this.props.bridgeAddress).then(tokens => {
-      this.setState({ tokens });
-    });
   }
 
   handleSubmit(e) {
@@ -45,15 +51,15 @@ export default class RegisterToken extends React.Component {
       .send({
         from: account,
       })
-      .then(registerTxHash => {
+      .on('transactionHash', registerTxHash => {
         console.log('registerToken', registerTxHash); // eslint-disable-line
         this.setState({ tokenAddr: '' });
       });
   }
 
   render() {
-    const { account, network } = this.props;
-    const { tokenAddr, tokens } = this.state;
+    const { account, network, tokens } = this.props;
+    const { tokenAddr } = this.state;
 
     return (
       <Fragment>
@@ -91,15 +97,8 @@ export default class RegisterToken extends React.Component {
         <List
           itemLayout="vertical"
           size="small"
-          dataSource={tokens}
-          renderItem={item => (
-            <List.Item key={item.address}>
-              <List.Item.Meta
-                title={`${item.name} (${item.symbol})`}
-                description={item.address}
-              />
-            </List.Item>
-          )}
+          dataSource={tokens && tokens[0] && tokens[0].ready && tokens}
+          renderItem={item => <Item item={item} />}
         />
       </Fragment>
     );
@@ -108,6 +107,7 @@ export default class RegisterToken extends React.Component {
 
 RegisterToken.propTypes = {
   account: PropTypes.string,
+  tokens: PropTypes.array,
   network: PropTypes.string.isRequired,
   bridgeAddress: PropTypes.string.isRequired,
 };

@@ -6,10 +6,11 @@
  */
 
 import React, { Fragment } from 'react';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { NETWORKS } from '../utils';
 
-const Info = ({ network, tokenAddress, bridgeAddress }) => {
+const Info = ({ network, bridgeAddress, psc }) => {
   return (
     <Fragment>
       <h1>Chain info</h1>
@@ -18,17 +19,23 @@ const Info = ({ network, tokenAddress, bridgeAddress }) => {
         <dd>{NETWORKS[network].name || network}</dd>
         <dt>Bridge contract address</dt>
         <dd>{bridgeAddress}</dd>
-        <dt>Token contract address</dt>
-        <dd>{tokenAddress}</dd>
+        {psc && (
+          <Fragment>
+            <dt>Token contract address</dt>
+            <dd>{psc.address}</dd>
+          </Fragment>
+        )}
       </dl>
     </Fragment>
   );
 };
 
-export default Info;
+export default inject(stores => ({
+  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+}))(observer(Info));
 
 Info.propTypes = {
   network: PropTypes.string.isRequired,
-  tokenAddress: PropTypes.string.isRequired,
+  psc: PropTypes.object,
   bridgeAddress: PropTypes.string.isRequired,
 };

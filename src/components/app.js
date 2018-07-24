@@ -7,11 +7,11 @@
 import 'antd/dist/antd.css';
 
 import React, { Fragment } from 'react';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
-import BigNumber from 'bignumber.js';
 import { Dropdown, Icon, Layout, Menu } from 'antd';
 
 import Slots from '../routes/slots';
@@ -20,77 +20,27 @@ import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
 import Info from '../routes/info';
 import getWeb3 from '../utils/getWeb3';
-import { token as tokenAbi, bridge as bridgeAbi } from '../utils/abis';
-import Web3SubmitWrapper from '../components/web3SubmitWrapper';
+import { bridge as bridgeAbi } from '../utils/abis';
 
 import parsecLabsLogo from '../parseclabs.svg';
 
 import '../style.css';
 
+@inject(stores => ({
+  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+}))
+@observer
 class App extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      balance: null,
-    };
-  }
-
   componentDidMount() {
     if (window.web3) {
-      const { tokenAddress, bridgeAddress } = this.props;
+      const { bridgeAddress } = this.props;
       const iWeb3 = getWeb3(true);
-      this.token = new iWeb3.eth.Contract(tokenAbi, tokenAddress);
       this.bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
-
-      const bridgeEvents = this.bridge.events.allEvents({ toBlock: 'latest' });
-      bridgeEvents.on('data', () => {
-        if (this.props.account) {
-          this.loadData(this.props.account);
-        }
-      });
-
-      const transferEvents = this.token.events.Transfer({ toBlock: 'latest' });
-      transferEvents.on('data', (err, e) => {
-        if (e.args.to === this.props.account) {
-          this.loadData(this.props.account);
-        }
-      });
-    }
-
-    if (this.props.account) {
-      this.loadData(this.props.account);
-    }
-  }
-
-  componentWillReceiveProps(nextProps) {
-    if (this.props.account !== nextProps.account) {
-      this.loadData(nextProps.account);
-    }
-  }
-
-  loadData(account) {
-    if (this.token && this.props.canSubmitTx) {
-      this.token.methods
-        .balanceOf(account)
-        .call()
-        .then(balance => {
-          this.setState({
-            balance: new BigNumber(balance),
-          });
-        });
     }
   }
 
   render() {
-    const { balance } = this.state;
-    const {
-      decimals,
-      symbol,
-      account,
-      network,
-      bridgeAddress,
-      defaultBridgeAddress,
-    } = this.props;
+    const { bridgeAddress, defaultBridgeAddress, psc } = this.props;
     const urlSuffix =
       bridgeAddress !== defaultBridgeAddress ? `#${bridgeAddress}` : '';
 
@@ -141,19 +91,12 @@ class App extends React.Component {
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
-              <Web3SubmitWrapper account={account} network={network}>
-                {canSubmitTx =>
-                  canSubmitTx &&
-                  balance && (
-                    <Fragment>
-                      Balance:{' '}
-                      <strong>
-                        {Number(balance.div(decimals))} {symbol}
-                      </strong>
-                    </Fragment>
-                  )
-                }
-              </Web3SubmitWrapper>
+              {psc &&
+                psc.balanceString && (
+                  <Fragment>
+                    Balance: <strong>{psc.balanceString}</strong>
+                  </Fragment>
+                )}
             </span>
             <MediaQuery maxWidth={1048}>
               <Dropdown
@@ -186,15 +129,17 @@ class App extends React.Component {
               path="/"
               exact
               render={props => (
-                <Slots {...props} {...this.props} balance={balance} />
+                <Slots
+                  {...props}
+                  {...this.props}
+                  balance={psc && psc.balance}
+                />
               )}
             />
             <Route
               path="/deposit"
               exact
-              render={props => (
-                <Deposit {...props} {...this.props} balance={balance} />
-              )}
+              render={props => <Deposit {...props} {...this.props} />}
             />
             <Route
               path="/registerToken"
@@ -220,14 +165,12 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  decimals: PropTypes.number.isRequired,
   account: PropTypes.string,
-  symbol: PropTypes.string.isRequired,
-  tokenAddress: PropTypes.string.isRequired,
   bridgeAddress: PropTypes.string.isRequired,
   defaultBridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
   canSubmitTx: PropTypes.bool.isRequired,
+  psc: PropTypes.object,
   location: PropTypes.object.isRequired,
 };
 

@@ -6,64 +6,18 @@
  */
 
 import React, { Fragment } from 'react';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
 import BigNumber from 'bignumber.js';
 
-import getWeb3 from '../utils/getWeb3';
-import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
-
-const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
-
-const readSlots = (web3, bridge) => {
-  return bridge.methods
-    .epochLength()
-    .call()
-    .then(epochLength => {
-      const proms = [];
-      for (let slotId = 0; slotId < epochLength; slotId += 1) {
-        proms.push(bridge.methods.getSlot(slotId).call());
-      }
-
-      return Promise.all(proms);
-    })
-    .then(slots => {
-      return slots.map(
-        ({
-          0: eventCounter,
-          1: owner,
-          2: stake,
-          3: signer,
-          4: tendermint,
-          5: activationEpoch,
-          6: newOwner,
-          7: newStake,
-          8: newSigner,
-          9: newTendermint,
-        }) => {
-          return {
-            eventCounter,
-            owner,
-            stake: new BigNumber(stake),
-            signer,
-            tendermint,
-            activationEpoch: Number(activationEpoch),
-            newOwner,
-            newStake: new BigNumber(newStake),
-            newSigner,
-            newTendermint,
-          };
-        }
-      );
-    });
-};
 
 const cellStyle = {
   textAlign: 'left',
@@ -79,6 +33,11 @@ const formCellStyle = Object.assign(
   cellStyle
 );
 
+@inject(stores => ({
+  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+  bridge: stores.bridge,
+}))
+@observer
 export default class Slots extends React.Component {
   constructor(props) {
     super(props);
@@ -86,7 +45,6 @@ export default class Slots extends React.Component {
     const signerAddr = window.localStorage.getItem('signerAddr');
     const tenderPubKey = window.localStorage.getItem('tenderPubKey');
     this.state = {
-      slots: [],
       stakes: {},
       signerAddr,
       tenderPubKey,
@@ -96,19 +54,6 @@ export default class Slots extends React.Component {
       this,
       'tenderPubKey'
     );
-  }
-
-  componentDidMount() {
-    this.refreshSlots();
-    if (window.web3) {
-      // need to use websocket provider for watching events without MetaMask
-      const web3 = getWeb3(true);
-      const bridge = new web3.eth.Contract(bridgeAbi, this.props.bridgeAddress);
-      const allEvents = bridge.events.allEvents({ toBlock: 'latest' });
-      allEvents.on('data', () => {
-        this.refreshSlots();
-      });
-    }
   }
 
   setStake(i, stake) {
@@ -121,17 +66,6 @@ export default class Slots extends React.Component {
     });
   }
 
-  refreshSlots() {
-    const web3 = getWeb3();
-    const bridge = new web3.eth.Contract(bridgeAbi, this.props.bridgeAddress);
-    Promise.all([
-      readSlots(web3, bridge),
-      bridge.methods.lastCompleteEpoch().call(),
-    ]).then(([slots, lastCompleteEpoch]) => {
-      this.setState({ slots, lastCompleteEpoch });
-    });
-  }
-
   handleChange(key, e) {
     const value = e.target.value.trim();
     window.localStorage.setItem(key, value);
@@ -141,36 +75,29 @@ export default class Slots extends React.Component {
   }
 
   handleBet(slotId) {
-    const { decimals, account, tokenAddress, bridgeAddress } = this.props;
+    const { psc, bridge } = this.props;
     const { signerAddr, tenderPubKey } = this.state;
-    const stake = new BigNumber(this.state.stakes[slotId]).mul(decimals);
-    const iWeb3 = getWeb3(true);
-    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
+    const stake = new BigNumber(this.state.stakes[slotId]).mul(
+      10 ** psc.decimals
+    );
 
-    // do approveAndCall to token
-    const data = bridge.methods
-      .bet(slotId, stake, signerAddr, `0x${tenderPubKey}`, account)
-      .encodeABI();
-    const token = new iWeb3.eth.Contract(tokenAbi, tokenAddress);
-    token.methods
-      .approveAndCall(bridgeAddress, stake, data)
-      .send({ from: account })
-      .then(betTxHash => {
+    bridge
+      .bet(psc, slotId, stake, signerAddr, tenderPubKey)
+      .on('transactionHash', betTxHash => {
         console.log('bet', betTxHash); // eslint-disable-line
         this.setStake(slotId, undefined);
       });
   }
 
   renderRow(title, key, newKey, renderer) {
-    const { slots } = this.state;
+    const { bridge } = this.props;
     return (
       <tr key={key}>
         <th style={cellStyle}>
           <div style={{ width: 80 }}>{title}</div>
         </th>
-        {slots.map((slot, i) => {
-          const isFree = slot.owner === EMPTY_ADDRESS;
-          const willChange = slot.newSigner !== EMPTY_ADDRESS;
+        {bridge.slots.map((slot, i) => {
+          const willChange = slot.willChange && newKey;
           const currentValuesStyle = {
             display: 'block',
             textDecoration: willChange ? 'line-through' : 'none',
@@ -179,7 +106,7 @@ export default class Slots extends React.Component {
 
           return (
             <td key={i} style={cellStyle}>
-              {!isFree && (
+              {!slot.isFree && (
                 <Fragment>
                   <span style={currentValuesStyle}>
                     {renderer ? renderer(slot[key]) : slot[key]}
@@ -196,15 +123,15 @@ export default class Slots extends React.Component {
   }
 
   renderSlots() {
-    const { slots, signerAddr, stakes, tenderPubKey } = this.state;
-    const { decimals, symbol, balance, account, network } = this.props;
+    const { signerAddr, stakes, tenderPubKey } = this.state;
+    const { account, network, psc, bridge } = this.props;
 
     return (
       <table style={{ borderCollapse: 'collapse' }}>
         <thead>
           <tr>
             <th style={cellStyle} />
-            {slots.map((slot, i) => (
+            {bridge.slots.map((slot, i) => (
               <th style={cellStyle} key={i}>
                 Slot {i} {account && addrCmp(slot.owner, account) && '(owner)'}
               </th>
@@ -249,16 +176,16 @@ export default class Slots extends React.Component {
             'Stake',
             'stake',
             'newStake',
-            val => `${val.div(decimals).toNumber()} ${symbol}`
+            val => `${val.div(10 ** psc.decimals).toNumber()} ${psc.symbol}`
           )}
           {this.renderRow('Act. epoch', 'activationEpoch')}
           <tr>
             <th style={formCellStyle} />
-            {slots.map((slot, i) => {
+            {bridge.slots.map((slot, i) => {
               const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
                 1.05
               );
-              const minValue = minStake.div(decimals).toNumber();
+              const minValue = minStake.div(10 ** psc.decimals).toNumber();
               const ownStake = addrCmp(slot.owner, account || '')
                 ? minValue
                 : 0;
@@ -271,12 +198,12 @@ export default class Slots extends React.Component {
                         <StakeForm
                           value={stakes[i]}
                           onChange={value => this.setStake(i, value)}
-                          symbol={symbol}
+                          symbol={psc.symbol}
                           disabled={!signerAddr}
                           onSubmit={() => this.handleBet(i)}
                           minValue={minValue}
                           ownStake={ownStake}
-                          maxValue={balance && Number(balance.div(decimals))}
+                          maxValue={psc.decimalsBalance}
                         />
                       )
                     }
@@ -291,8 +218,13 @@ export default class Slots extends React.Component {
   }
 
   render() {
-    const { signerAddr, tenderPubKey, lastCompleteEpoch } = this.state;
-    const { account, network } = this.props;
+    const { signerAddr, tenderPubKey } = this.state;
+    const { account, network, psc, bridge } = this.props;
+
+    if (!psc || !psc.ready) {
+      return null;
+    }
+
     const slotsTable = this.renderSlots();
 
     return (
@@ -317,10 +249,10 @@ export default class Slots extends React.Component {
           </Form.Item>
         </Form>
         <Divider />
-        {lastCompleteEpoch && (
+        {bridge.lastCompleteEpoch !== undefined && (
           <Fragment>
             <p>
-              <strong>Last complete epoch:</strong> {Number(lastCompleteEpoch)}
+              <strong>Last complete epoch:</strong> {bridge.lastCompleteEpoch}
             </p>
             <Divider />
           </Fragment>
@@ -357,11 +289,8 @@ export default class Slots extends React.Component {
 }
 
 Slots.propTypes = {
-  decimals: PropTypes.number.isRequired,
   account: PropTypes.string,
-  symbol: PropTypes.string.isRequired,
-  tokenAddress: PropTypes.string.isRequired,
-  bridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
-  balance: PropTypes.object,
+  psc: PropTypes.object,
+  bridge: PropTypes.object,
 };
