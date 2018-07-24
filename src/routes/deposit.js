@@ -12,13 +12,12 @@ import PropTypes from 'prop-types';
 import BigNumber from 'bignumber.js';
 import { Select, Form, Input, Button } from 'antd';
 
-import getWeb3 from '../utils/getWeb3';
-import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 @inject(stores => ({
   tokens: stores.tokens.tokens,
+  bridge: stores.bridge,
 }))
 @observer
 export default class Deposit extends React.Component {
@@ -45,24 +44,13 @@ export default class Deposit extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    const { account, bridgeAddress } = this.props;
+    const { bridge } = this.props;
     const value = new BigNumber(this.state.value).mul(
       10 ** this.selectedToken.decimals
     );
-    const iWeb3 = getWeb3(true);
-    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
 
-    // do approveAndCall to token
-    const token = new iWeb3.eth.Contract(tokenAbi, this.selectedToken.address);
-    const data = bridge.methods
-      .deposit(account, value, this.selectedToken.color)
-      .encodeABI();
-
-    token.methods
-      .approveAndCall(bridgeAddress, value, data)
-      .send({
-        from: account,
-      })
+    bridge
+      .deposit(this.selectedToken, value)
       .on('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
         this.setState({ value: 0 });
@@ -151,6 +139,6 @@ export default class Deposit extends React.Component {
 Deposit.propTypes = {
   account: PropTypes.string,
   tokens: PropTypes.array,
+  bridge: PropTypes.object,
   network: PropTypes.string.isRequired,
-  bridgeAddress: PropTypes.string.isRequired,
 };

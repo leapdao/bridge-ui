@@ -8,6 +8,7 @@ import { DEFAULT_NETWORK } from '../utils';
 import Message from './message';
 
 import Tokens from '../stores/tokens.ts';
+import Bridge from '../stores/bridge.ts';
 import Account from '../stores/account.ts';
 
 if (!process.env.BRIDGE_ADDR) {
@@ -58,9 +59,11 @@ export default class Web3Wrapper extends React.Component {
     Promise.all(promises).then(([accounts, mmNetwork]) => {
       const account = new Account(accounts[0]);
       const tokens = new Tokens(account, getBridgeAddress());
+      const bridge = new Bridge(account, getBridgeAddress());
       this.stores = {
         account,
         tokens,
+        bridge,
       };
       this.setState({
         account: accounts && accounts[0],

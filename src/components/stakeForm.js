@@ -1,8 +1,7 @@
 import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Input, Button } from 'antd';
-
-import getWeb3 from '../utils/getWeb3';
+import BigNumber from 'bignumber.js';
 
 const fieldValue = v => String(v >= 0 ? v : '');
 
@@ -42,7 +41,6 @@ class StakeForm extends React.PureComponent {
   handleUpdate() {
     const { minValue, onChange } = this.props;
     const { value } = this.state;
-    const { BigNumber } = getWeb3();
     const minStake = new BigNumber(minValue);
     const zero = value === 0 || value === '0';
     onChange(zero ? 0 : Math.max(Number(minStake), Number(value)));

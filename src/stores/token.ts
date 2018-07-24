@@ -8,12 +8,11 @@
 import { observable, action, autorun, computed, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
-import Web3 from 'web3';
 import { Contract } from 'web3/types';
-import getWeb3 from '../utils/getWeb3';
 import { token as tokenAbi } from '../utils/abis';
 
 import Account from './account';
+import ContractStore from './contractStore';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([
@@ -23,13 +22,11 @@ const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   ]);
 };
 
-export default class Token {
+export default class Token extends ContractStore {
   @observable public tokens: IObservableArray<Token>;
 
   private account: Account;
-  private contract: Contract;
 
-  public address: string;
   public color: number;
   @observable public name: string;
   @observable public symbol: string;
@@ -37,12 +34,10 @@ export default class Token {
   @observable public balance?: number;
 
   constructor(account: Account, address: string, color: number) {
-    this.account = account;
-    this.address = address;
-    this.color = color;
+    super(tokenAbi, address);
 
-    const web3 = getWeb3() as Web3;
-    this.contract = new web3.eth.Contract(tokenAbi, this.address);
+    this.account = account;
+    this.color = color;
 
     autorun(this.loadBalance);
     tokenInfo(this.contract).then(this.setInfo);
@@ -85,6 +80,20 @@ export default class Token {
   @computed
   public get ready() {
     return !!this.symbol;
+  }
+
+  public approveAndCall(to: string, value: BigNumber, data: string) {
+    if (!this.iContract) {
+      throw new Error('No metamask');
+    }
+
+    const tx = this.iContract.methods
+      .approveAndCall(to, value, data)
+      .send({ from: this.account.address });
+
+    tx.on('confirmation', this.loadBalance);
+
+    return tx;
   }
 
   @autobind

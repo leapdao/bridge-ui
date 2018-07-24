@@ -13,7 +13,7 @@ import { Form, Input, Divider } from 'antd';
 import BigNumber from 'bignumber.js';
 
 import getWeb3 from '../utils/getWeb3';
-import { bridge as bridgeAbi, token as tokenAbi } from '../utils/abis';
+import { bridge as bridgeAbi } from '../utils/abis';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
@@ -82,6 +82,7 @@ const formCellStyle = Object.assign(
 
 @inject(stores => ({
   psc: stores.tokens.tokens && stores.tokens.tokens[0],
+  bridge: stores.bridge,
 }))
 @observer
 export default class Slots extends React.Component {
@@ -146,22 +147,14 @@ export default class Slots extends React.Component {
   }
 
   handleBet(slotId) {
-    const { account, bridgeAddress, psc } = this.props;
+    const { psc, bridge } = this.props;
     const { signerAddr, tenderPubKey } = this.state;
     const stake = new BigNumber(this.state.stakes[slotId]).mul(
       10 ** psc.decimals
     );
-    const iWeb3 = getWeb3(true);
-    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
 
-    // do approveAndCall to token
-    const data = bridge.methods
-      .bet(slotId, stake, signerAddr, `0x${tenderPubKey}`, account)
-      .encodeABI();
-    const token = new iWeb3.eth.Contract(tokenAbi, psc.address);
-    token.methods
-      .approveAndCall(bridgeAddress, stake, data)
-      .send({ from: account })
+    bridge
+      .bet(psc, slotId, stake, signerAddr, tenderPubKey)
       .on('transactionHash', betTxHash => {
         console.log('bet', betTxHash); // eslint-disable-line
         this.setStake(slotId, undefined);
@@ -373,4 +366,5 @@ Slots.propTypes = {
   bridgeAddress: PropTypes.string.isRequired,
   network: PropTypes.string.isRequired,
   psc: PropTypes.object,
+  bridge: PropTypes.object,
 };
