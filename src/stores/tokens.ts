@@ -46,7 +46,7 @@ export default class Tokens {
             bridge.methods
               .tokens(pos)
               .call()
-              .then(([address]) => new Token(this.account, address, pos))
+              .then(({ 0: address }) => new Token(this.account, address, pos))
           )
         )
       )
