@@ -179,39 +179,42 @@ export default class Slots extends React.Component {
             val => `${val.div(10 ** psc.decimals).toNumber()} ${psc.symbol}`
           )}
           {this.renderRow('Act. epoch', 'activationEpoch')}
-          <tr>
-            <th style={formCellStyle} />
-            {bridge.slots.map((slot, i) => {
-              const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
-                1.05
-              );
-              const minValue = minStake.div(10 ** psc.decimals).toNumber();
-              const ownStake = addrCmp(slot.owner, account || '')
-                ? minValue
-                : 0;
+          {psc &&
+            psc.ready && (
+              <tr>
+                <th style={formCellStyle} />
+                {bridge.slots.map((slot, i) => {
+                  const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
+                    1.05
+                  );
+                  const minValue = minStake.div(10 ** psc.decimals).toNumber();
+                  const ownStake = addrCmp(slot.owner, account || '')
+                    ? minValue
+                    : 0;
 
-              return (
-                <td key={i} style={formCellStyle}>
-                  <Web3SubmitWrapper account={account} network={network}>
-                    {canSubmitTx =>
-                      canSubmitTx && (
-                        <StakeForm
-                          value={stakes[i]}
-                          onChange={value => this.setStake(i, value)}
-                          symbol={psc.symbol}
-                          disabled={!signerAddr}
-                          onSubmit={() => this.handleBet(i)}
-                          minValue={minValue}
-                          ownStake={ownStake}
-                          maxValue={psc.decimalsBalance}
-                        />
-                      )
-                    }
-                  </Web3SubmitWrapper>
-                </td>
-              );
-            })}
-          </tr>
+                  return (
+                    <td key={i} style={formCellStyle}>
+                      <Web3SubmitWrapper account={account} network={network}>
+                        {canSubmitTx =>
+                          canSubmitTx && (
+                            <StakeForm
+                              value={stakes[i]}
+                              onChange={value => this.setStake(i, value)}
+                              symbol={psc.symbol}
+                              disabled={!signerAddr}
+                              onSubmit={() => this.handleBet(i)}
+                              minValue={minValue}
+                              ownStake={ownStake}
+                              maxValue={psc.decimalsBalance}
+                            />
+                          )
+                        }
+                      </Web3SubmitWrapper>
+                    </td>
+                  );
+                })}
+              </tr>
+            )}
         </tbody>
       </table>
     );
@@ -219,11 +222,7 @@ export default class Slots extends React.Component {
 
   render() {
     const { signerAddr, tenderPubKey } = this.state;
-    const { account, network, psc, bridge } = this.props;
-
-    if (!psc || !psc.ready) {
-      return null;
-    }
+    const { account, network, bridge } = this.props;
 
     const slotsTable = this.renderSlots();
 
