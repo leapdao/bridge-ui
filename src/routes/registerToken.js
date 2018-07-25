@@ -47,7 +47,7 @@ export default class RegisterToken extends React.Component {
     const iWeb3 = getWeb3(true);
     const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
     bridge.methods
-      .registerToken(tokenAddr, '')
+      .registerToken(tokenAddr)
       .send({
         from: account,
       })
