@@ -61,7 +61,7 @@ export default class Deposit extends React.Component {
     const { account, network, tokens } = this.props;
     const { value, selectedColor } = this.state;
 
-    if (!tokens || !this.selectedToken) {
+    if (!tokens) {
       return null;
     }
 
@@ -71,6 +71,10 @@ export default class Deposit extends React.Component {
           You need to register some token first
         </div>
       );
+    }
+
+    if (!this.selectedToken) {
+      return null;
     }
 
     const tokenSelect = (
