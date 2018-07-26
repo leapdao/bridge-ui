@@ -33,6 +33,13 @@ const formCellStyle = Object.assign(
   cellStyle
 );
 
+const thCellStyle = Object.assign(
+  {
+    whiteSpace: 'nowrap',
+  },
+  cellStyle
+);
+
 @inject(stores => ({
   psc: stores.tokens.tokens && stores.tokens.tokens[0],
   bridge: stores.bridge,
@@ -130,9 +137,9 @@ export default class Slots extends React.Component {
       <table style={{ borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th style={cellStyle} />
+            <th style={thCellStyle} />
             {bridge.slots.map((slot, i) => (
-              <th style={cellStyle} key={i}>
+              <th style={thCellStyle} key={i}>
                 Slot {i} {account && addrCmp(slot.owner, account) && '(owner)'}
               </th>
             ))}
