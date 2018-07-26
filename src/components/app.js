@@ -27,7 +27,7 @@ import parsecLabsLogo from '../parseclabs.svg';
 import '../style.css';
 
 @inject(stores => ({
-  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+  psc: stores.tokens.list && stores.tokens.list[0],
 }))
 @observer
 class App extends React.Component {

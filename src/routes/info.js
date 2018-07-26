@@ -31,7 +31,7 @@ const Info = ({ network, bridgeAddress, psc }) => {
 };
 
 export default inject(stores => ({
-  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+  psc: stores.tokens.list && stores.tokens.list[0],
 }))(observer(Info));
 
 Info.propTypes = {

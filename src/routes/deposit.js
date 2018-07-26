@@ -16,7 +16,7 @@ import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 @inject(stores => ({
-  tokens: stores.tokens.tokens,
+  tokens: stores.tokens.list,
   bridge: stores.bridge,
 }))
 @observer

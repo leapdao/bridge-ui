@@ -11,8 +11,6 @@ import PropTypes from 'prop-types';
 import { List, Form, Input, Button } from 'antd';
 
 import { isValidAddress } from 'ethereumjs-util';
-import getWeb3 from '../utils/getWeb3';
-import { bridge as bridgeAbi } from '../utils/abis';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
@@ -26,7 +24,8 @@ const Item = observer(({ item }) => (
 ));
 
 @inject(stores => ({
-  tokens: stores.tokens.tokens,
+  tokens: stores.tokens,
+  bridge: stores.bridge,
 }))
 @observer
 export default class RegisterToken extends React.Component {
@@ -41,19 +40,17 @@ export default class RegisterToken extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    const { account, bridgeAddress } = this.props;
+    const { bridge, tokens } = this.props;
     const { tokenAddr } = this.state;
 
-    const iWeb3 = getWeb3(true);
-    const bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
-    bridge.methods
+    bridge
       .registerToken(tokenAddr)
-      .send({
-        from: account,
-      })
       .on('transactionHash', registerTxHash => {
         console.log('registerToken', registerTxHash); // eslint-disable-line
         this.setState({ tokenAddr: '' });
+      })
+      .on('receipt', () => {
+        tokens.loadTokens();
       });
   }
 
@@ -97,7 +94,9 @@ export default class RegisterToken extends React.Component {
         <List
           itemLayout="vertical"
           size="small"
-          dataSource={tokens && tokens[0] && tokens[0].ready && tokens}
+          dataSource={
+            tokens.list && tokens.list[0] && tokens.list[0].ready && tokens.list
+          }
           renderItem={item => <Item item={item} />}
         />
       </Fragment>
@@ -107,7 +106,7 @@ export default class RegisterToken extends React.Component {
 
 RegisterToken.propTypes = {
   account: PropTypes.string,
-  tokens: PropTypes.array,
+  tokens: PropTypes.object,
   network: PropTypes.string.isRequired,
-  bridgeAddress: PropTypes.string.isRequired,
+  bridge: PropTypes.object.isRequired,
 };

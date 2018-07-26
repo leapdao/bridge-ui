@@ -16,7 +16,7 @@ import Account from './account';
 import Token from './token';
 
 export default class Tokens {
-  @observable public tokens: IObservableArray<Token>;
+  @observable public list: IObservableArray<Token>;
 
   private account: Account;
   private bridgeAddr: string;
@@ -30,8 +30,13 @@ export default class Tokens {
 
   @autobind
   @action
-  private updateTokens(tokens: Array<Token>) {
-    this.tokens = observable.array(tokens);
+  private addTokens(tokens: Array<Token>) {
+    if (!this.list) {
+      this.list = observable.array([]);
+    }
+    tokens.forEach(token => {
+      this.list.push(token);
+    });
   }
 
   public loadTokens() {
@@ -42,7 +47,10 @@ export default class Tokens {
       .call()
       .then((tokenCount: number) =>
         Promise.all(
-          (range(0, tokenCount - 1) as number[]).map(pos =>
+          (range(
+            this.list ? this.list.length : 0,
+            tokenCount - 1
+          ) as number[]).map(pos =>
             bridge.methods
               .tokens(pos)
               .call()
@@ -50,6 +58,6 @@ export default class Tokens {
           )
         )
       )
-      .then(this.updateTokens);
+      .then(this.addTokens);
   }
 }

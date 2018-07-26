@@ -41,7 +41,7 @@ const thCellStyle = Object.assign(
 );
 
 @inject(stores => ({
-  psc: stores.tokens.tokens && stores.tokens.tokens[0],
+  psc: stores.tokens.list && stores.tokens.list[0],
   bridge: stores.bridge,
 }))
 @observer
