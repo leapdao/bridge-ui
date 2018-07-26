@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button, Divider, Alert } from 'antd';
 
@@ -16,6 +17,10 @@ const api = requestApi(URL);
 
 const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
 
+@inject(stores => ({
+  account: stores.account,
+}))
+@observer
 export default class Faucet extends React.Component {
   constructor(props) {
     super(props);
@@ -76,11 +81,13 @@ export default class Faucet extends React.Component {
               Request tokens
             </Button>
           </Form.Item>
-          {account && (
+          {account.address && (
             <Fragment>
               <Divider />
               <Button
-                href={`https://twitter.com/intent/tweet?text=${`Requesting faucet funds into ${account} on the @Parsec_Labs test network.`}`}
+                href={`https://twitter.com/intent/tweet?text=${`Requesting faucet funds into ${
+                  account.address
+                } on the @Parsec_Labs test network.`}`}
                 target="_blank"
                 className="twitter-share-button"
               >
@@ -95,5 +102,5 @@ export default class Faucet extends React.Component {
 }
 
 Faucet.propTypes = {
-  account: PropTypes.string,
+  account: PropTypes.object,
 };

@@ -12,7 +12,7 @@ import { observable, computed } from 'mobx';
 export default class Account {
   @observable private _address: string;
 
-  constructor(address: string) {
+  constructor(address?: string) {
     this._address = address;
   }
 

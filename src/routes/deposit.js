@@ -13,11 +13,11 @@ import BigNumber from 'bignumber.js';
 import { Select, Form, Input, Button } from 'antd';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 @inject(stores => ({
   tokens: stores.tokens.list,
   bridge: stores.bridge,
+  network: stores.network,
 }))
 @observer
 export default class Deposit extends React.Component {
@@ -58,7 +58,7 @@ export default class Deposit extends React.Component {
   }
 
   render() {
-    const { account, network, tokens } = this.props;
+    const { network, tokens } = this.props;
     const { value, selectedColor } = this.state;
 
     if (!tokens) {
@@ -95,7 +95,7 @@ export default class Deposit extends React.Component {
       <Fragment>
         <h1>Make a deposit</h1>
 
-        <Web3SubmitWarning account={account} network={network} />
+        <Web3SubmitWarning />
 
         <Form onSubmit={this.handleSubmit} layout="inline">
           <Form.Item>
@@ -111,19 +111,17 @@ export default class Deposit extends React.Component {
           </Form.Item>
 
           <Form.Item>
-            <Web3SubmitWrapper account={account} network={network}>
-              {canSendTx => (
-                <Button
-                  htmlType="submit"
-                  type="primary"
-                  disabled={
-                    !canSendTx || !value || value > this.selectedToken.balance
-                  }
-                >
-                  Deposit
-                </Button>
-              )}
-            </Web3SubmitWrapper>
+            <Button
+              htmlType="submit"
+              type="primary"
+              disabled={
+                !network.canSubmit ||
+                !value ||
+                value > this.selectedToken.balance
+              }
+            >
+              Deposit
+            </Button>
           </Form.Item>
         </Form>
 
@@ -141,8 +139,7 @@ export default class Deposit extends React.Component {
 }
 
 Deposit.propTypes = {
-  account: PropTypes.string,
   tokens: PropTypes.array,
   bridge: PropTypes.object,
-  network: PropTypes.string.isRequired,
+  network: PropTypes.object,
 };

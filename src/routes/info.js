@@ -10,15 +10,15 @@ import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { NETWORKS } from '../utils';
 
-const Info = ({ network, bridgeAddress, psc }) => {
+const Info = ({ network, bridge, psc }) => {
   return (
     <Fragment>
       <h1>Chain info</h1>
       <dl className="info">
         <dt>Network</dt>
-        <dd>{NETWORKS[network].name || network}</dd>
+        <dd>{NETWORKS[network.network].name || network.network}</dd>
         <dt>Bridge contract address</dt>
-        <dd>{bridgeAddress}</dd>
+        <dd>{bridge.address}</dd>
         {psc && (
           <Fragment>
             <dt>Token contract address</dt>
@@ -32,10 +32,12 @@ const Info = ({ network, bridgeAddress, psc }) => {
 
 export default inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
+  network: stores.network,
+  bridge: stores.bridge,
 }))(observer(Info));
 
 Info.propTypes = {
-  network: PropTypes.string.isRequired,
+  network: PropTypes.object,
   psc: PropTypes.object,
-  bridgeAddress: PropTypes.string.isRequired,
+  bridge: PropTypes.object,
 };

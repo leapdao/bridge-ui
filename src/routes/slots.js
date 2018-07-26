@@ -12,7 +12,6 @@ import ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
 import BigNumber from 'bignumber.js';
 
-import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
 
@@ -43,6 +42,8 @@ const thCellStyle = Object.assign(
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
   bridge: stores.bridge,
+  account: stores.account,
+  network: stores.network,
 }))
 @observer
 export default class Slots extends React.Component {
@@ -140,7 +141,10 @@ export default class Slots extends React.Component {
             <th style={thCellStyle} />
             {bridge.slots.map((slot, i) => (
               <th style={thCellStyle} key={i}>
-                Slot {i} {account && addrCmp(slot.owner, account) && '(owner)'}
+                Slot {i}{' '}
+                {account.address &&
+                  addrCmp(slot.owner, account.address) &&
+                  '(owner)'}
               </th>
             ))}
           </tr>
@@ -183,7 +187,8 @@ export default class Slots extends React.Component {
             'Stake',
             'stake',
             'newStake',
-            val => `${val.div(10 ** psc.decimals).toNumber()} ${psc.symbol}`
+            val =>
+              psc && `${val.div(10 ** psc.decimals).toNumber()} ${psc.symbol}`
           )}
           {this.renderRow('Act. epoch', 'activationEpoch')}
           {psc &&
@@ -195,28 +200,25 @@ export default class Slots extends React.Component {
                     1.05
                   );
                   const minValue = minStake.div(10 ** psc.decimals).toNumber();
-                  const ownStake = addrCmp(slot.owner, account || '')
+                  const ownStake = addrCmp(slot.owner, account.address || '')
                     ? minValue
                     : 0;
 
                   return (
                     <td key={i} style={formCellStyle}>
-                      <Web3SubmitWrapper account={account} network={network}>
-                        {canSubmitTx =>
-                          canSubmitTx && (
-                            <StakeForm
-                              value={stakes[i]}
-                              onChange={value => this.setStake(i, value)}
-                              symbol={psc.symbol}
-                              disabled={!signerAddr}
-                              onSubmit={() => this.handleBet(i)}
-                              minValue={minValue}
-                              ownStake={ownStake}
-                              maxValue={psc.decimalsBalance}
-                            />
-                          )
-                        }
-                      </Web3SubmitWrapper>
+                      {network &&
+                        network.canSubmit && (
+                          <StakeForm
+                            value={stakes[i]}
+                            onChange={value => this.setStake(i, value)}
+                            symbol={psc.symbol}
+                            disabled={!signerAddr}
+                            onSubmit={() => this.handleBet(i)}
+                            minValue={minValue}
+                            ownStake={ownStake}
+                            maxValue={psc.decimalsBalance}
+                          />
+                        )}
                     </td>
                   );
                 })}
@@ -229,7 +231,7 @@ export default class Slots extends React.Component {
 
   render() {
     const { signerAddr, tenderPubKey } = this.state;
-    const { account, network, bridge } = this.props;
+    const { bridge } = this.props;
 
     const slotsTable = this.renderSlots();
 
@@ -288,15 +290,15 @@ export default class Slots extends React.Component {
           </div>
         </div>
 
-        <Web3SubmitWarning account={account} network={network} />
+        <Web3SubmitWarning />
       </Fragment>
     );
   }
 }
 
 Slots.propTypes = {
-  account: PropTypes.string,
-  network: PropTypes.string.isRequired,
+  account: PropTypes.object,
+  network: PropTypes.object,
   psc: PropTypes.object,
   bridge: PropTypes.object,
 };

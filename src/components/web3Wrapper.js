@@ -1,4 +1,4 @@
-import React, { cloneElement } from 'react';
+import React from 'react';
 import { Provider } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Spin } from 'antd';
@@ -10,6 +10,7 @@ import Message from './message';
 import Tokens from '../stores/tokens.ts';
 import Bridge from '../stores/bridge.ts';
 import Account from '../stores/account.ts';
+import Network from '../stores/network.ts';
 
 if (!process.env.BRIDGE_ADDR) {
   console.error(
@@ -31,7 +32,20 @@ export default class Web3Wrapper extends React.Component {
     super(props);
     this.state = {
       ready: false,
-      network: process.env.NETWORK_ID || DEFAULT_NETWORK,
+    };
+    const account = new Account();
+    const tokens = new Tokens(account, getBridgeAddress());
+    const bridge = new Bridge(account, getBridgeAddress());
+    const network = new Network(
+      account,
+      process.env.NETWORK_ID || DEFAULT_NETWORK
+    );
+
+    this.stores = {
+      account,
+      tokens,
+      bridge,
+      network,
     };
   }
 
@@ -40,12 +54,8 @@ export default class Web3Wrapper extends React.Component {
   }
 
   loadData() {
-    const promises = [];
-
     if (window.web3) {
       const iWeb3 = getWeb3(true);
-      promises.push(iWeb3.eth.getAccounts());
-      promises.push(iWeb3.eth.net.getId());
 
       setInterval(() => {
         iWeb3.eth.getAccounts().then(accounts => {
@@ -55,26 +65,20 @@ export default class Web3Wrapper extends React.Component {
           }
         });
       }, 1000);
-    }
-    Promise.all(promises).then(([accounts, mmNetwork]) => {
-      const account = new Account(accounts[0]);
-      const tokens = new Tokens(account, getBridgeAddress());
-      const bridge = new Bridge(account, getBridgeAddress());
-      this.stores = {
-        account,
-        tokens,
-        bridge,
-      };
-      this.setState({
-        account: accounts && accounts[0],
-        ready: true,
-        mmNetwork: String(mmNetwork),
+
+      iWeb3.eth.getAccounts().then(accounts => {
+        this.stores.account.address = accounts[0]; // eslint-disable-line
+
+        this.setState({
+          account: accounts && accounts[0],
+          ready: true,
+        });
       });
-    });
+    }
   }
 
   render() {
-    const { ready, account, network, mmNetwork } = this.state;
+    const { ready } = this.state;
 
     if (!ready) {
       return (
@@ -84,17 +88,7 @@ export default class Web3Wrapper extends React.Component {
       );
     }
 
-    return (
-      <Provider {...this.stores}>
-        {cloneElement(this.props.children, {
-          account,
-          network,
-          canSubmitTx: !!window.web3 && !!account && network === mmNetwork,
-          bridgeAddress: getBridgeAddress(),
-          defaultBridgeAddress: process.env.BRIDGE_ADDR,
-        })}
-      </Provider>
-    );
+    return <Provider {...this.stores}>{this.props.children}</Provider>;
   }
 }
 

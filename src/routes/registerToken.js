@@ -12,7 +12,6 @@ import { List, Form, Input, Button } from 'antd';
 
 import { isValidAddress } from 'ethereumjs-util';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-import Web3SubmitWrapper from '../components/web3SubmitWrapper';
 
 const Item = observer(({ item }) => (
   <List.Item key={item.address}>
@@ -26,6 +25,7 @@ const Item = observer(({ item }) => (
 @inject(stores => ({
   tokens: stores.tokens,
   bridge: stores.bridge,
+  network: stores.network,
 }))
 @observer
 export default class RegisterToken extends React.Component {
@@ -55,14 +55,14 @@ export default class RegisterToken extends React.Component {
   }
 
   render() {
-    const { account, network, tokens } = this.props;
+    const { network, tokens } = this.props;
     const { tokenAddr } = this.state;
 
     return (
       <Fragment>
         <h1>Register a new ERC827 token</h1>
 
-        <Web3SubmitWarning account={account} network={network} />
+        <Web3SubmitWarning />
 
         <Form onSubmit={this.handleSubmit} layout="inline">
           <Form.Item>
@@ -74,19 +74,15 @@ export default class RegisterToken extends React.Component {
           </Form.Item>
 
           <Form.Item>
-            <Web3SubmitWrapper account={account} network={network}>
-              {canSendTx => (
-                <Button
-                  htmlType="submit"
-                  type="primary"
-                  disabled={
-                    !canSendTx || !tokenAddr || !isValidAddress(tokenAddr)
-                  }
-                >
-                  Register token
-                </Button>
-              )}
-            </Web3SubmitWrapper>
+            <Button
+              htmlType="submit"
+              type="primary"
+              disabled={
+                !network.canSubmit || !tokenAddr || !isValidAddress(tokenAddr)
+              }
+            >
+              Register token
+            </Button>
           </Form.Item>
         </Form>
 
@@ -105,8 +101,7 @@ export default class RegisterToken extends React.Component {
 }
 
 RegisterToken.propTypes = {
-  account: PropTypes.string,
   tokens: PropTypes.object,
-  network: PropTypes.string.isRequired,
-  bridge: PropTypes.object.isRequired,
+  network: PropTypes.object,
+  bridge: PropTypes.object,
 };

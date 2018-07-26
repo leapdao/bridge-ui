@@ -19,8 +19,6 @@ import Deposit from '../routes/deposit';
 import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
 import Info from '../routes/info';
-import getWeb3 from '../utils/getWeb3';
-import { bridge as bridgeAbi } from '../utils/abis';
 
 import parsecLabsLogo from '../parseclabs.svg';
 
@@ -28,21 +26,13 @@ import '../style.css';
 
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
+  bridge: stores.bridge,
 }))
 @observer
 class App extends React.Component {
-  componentDidMount() {
-    if (window.web3) {
-      const { bridgeAddress } = this.props;
-      const iWeb3 = getWeb3(true);
-      this.bridge = new iWeb3.eth.Contract(bridgeAbi, bridgeAddress);
-    }
-  }
-
   render() {
-    const { bridgeAddress, defaultBridgeAddress, psc } = this.props;
-    const urlSuffix =
-      bridgeAddress !== defaultBridgeAddress ? `#${bridgeAddress}` : '';
+    const { bridge, psc } = this.props;
+    const urlSuffix = `#${bridge.address}`;
 
     const menu = horizontal => (
       <Menu
@@ -165,12 +155,8 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  account: PropTypes.string,
-  bridgeAddress: PropTypes.string.isRequired,
-  defaultBridgeAddress: PropTypes.string.isRequired,
-  network: PropTypes.string.isRequired,
-  canSubmitTx: PropTypes.bool.isRequired,
   psc: PropTypes.object,
+  bridge: PropTypes.object,
   location: PropTypes.object.isRequired,
 };
 

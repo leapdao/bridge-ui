@@ -1,25 +1,17 @@
 import React from 'react';
+import { inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Alert } from 'antd';
 import { NETWORKS } from '../utils';
-import getWeb3 from '../utils/getWeb3';
 
+@inject(stores => ({
+  network: stores.network,
+  account: stores.account,
+}))
 class Web3SubmitWarning extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
-    if (window.web3) {
-      getWeb3(true)
-        .eth.net.getId()
-        .then(mmNetwork => {
-          this.setState({ mmNetwork: String(mmNetwork) });
-        });
-    }
-  }
-
   render() {
-    const { account, network } = this.props;
-    const { mmNetwork } = this.state;
+    const { network, account } = this.props;
+
     if (!window.web3) {
       return (
         <Alert
@@ -30,7 +22,7 @@ class Web3SubmitWarning extends React.Component {
       );
     }
 
-    if (mmNetwork && network !== mmNetwork) {
+    if (network.mmNetwork && network.network !== network.mmNetwork) {
       return (
         <Alert
           type="warning"
@@ -42,7 +34,7 @@ class Web3SubmitWarning extends React.Component {
       );
     }
 
-    if (!account) {
+    if (!account.address) {
       return (
         <Alert
           style={{ marginBottom: 10 }}
@@ -57,8 +49,8 @@ class Web3SubmitWarning extends React.Component {
 }
 
 Web3SubmitWarning.propTypes = {
-  account: PropTypes.string,
-  network: PropTypes.string.isRequired,
+  network: PropTypes.object,
+  account: PropTypes.object,
 };
 
 export default Web3SubmitWarning;
