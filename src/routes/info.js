@@ -9,8 +9,10 @@ import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { NETWORKS } from '../utils';
+import Explorer from '../components/explorer';
 
-const Info = ({ network, bridge, psc }) => {
+const Info = props => {
+  const { network, bridge, psc } = props;
   return (
     <Fragment>
       <h1>Chain info</h1>
@@ -26,6 +28,8 @@ const Info = ({ network, bridge, psc }) => {
           </Fragment>
         )}
       </dl>
+
+      <Explorer {...props} style={{ marginTop: 20 }} />
     </Fragment>
   );
 };

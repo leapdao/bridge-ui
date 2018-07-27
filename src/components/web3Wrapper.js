@@ -11,6 +11,7 @@ import Tokens from '../stores/tokens.ts';
 import Bridge from '../stores/bridge.ts';
 import Account from '../stores/account.ts';
 import Network from '../stores/network.ts';
+import Blocks from '../stores/blocks';
 
 if (!process.env.BRIDGE_ADDR) {
   console.error(
@@ -46,6 +47,7 @@ export default class Web3Wrapper extends React.Component {
       tokens,
       bridge,
       network,
+      blocks: new Blocks(),
     };
   }
 

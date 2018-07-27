@@ -8,15 +8,21 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'mobx-react';
 
 import App from './components/app';
 import Web3Wrapper from './components/web3Wrapper';
+import Store from './store';
+
+const store = new Store();
 
 ReactDOM.render(
   <BrowserRouter>
-    <Web3Wrapper>
-      <App />
-    </Web3Wrapper>
+    <Provider {...store}>
+      <Web3Wrapper>
+        <App store={store} />
+      </Web3Wrapper>
+    </Provider>
   </BrowserRouter>,
   document.getElementById('app')
 );
