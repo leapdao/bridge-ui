@@ -8,20 +8,37 @@
 /* eslint-disable no-underscore-dangle */
 
 import { observable, computed } from 'mobx';
+import Web3 from 'web3';
+import getWeb3 from '../utils/getWeb3';
 
 export default class Account {
-  @observable private _address: string;
+  @observable private _address: string | null;
+  @observable public ready = false;
 
-  constructor(address?: string) {
-    this._address = address;
+  constructor() {
+    const web3 = getWeb3(true) as Web3;
+    if ((window as any).web3) {
+      setInterval(() => {
+        web3.eth.getAccounts().then(accounts => {
+          this.address = accounts[0];
+        });
+      }, 1000);
+
+      web3.eth.getAccounts().then(accounts => {
+        this.address = accounts[0];
+        this.ready = true;
+      });
+    } else {
+      this.ready = true;
+    }
   }
 
-  set address(address) {
+  public set address(address: string | null) {
     this._address = address;
   }
 
   @computed
-  get address() {
+  public get address() {
     return this._address;
   }
 }

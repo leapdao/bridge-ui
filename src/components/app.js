@@ -12,7 +12,7 @@ import PropTypes from 'prop-types';
 import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
-import { Dropdown, Icon, Layout, Menu } from 'antd';
+import { Dropdown, Icon, Layout, Menu, Spin } from 'antd';
 
 import Slots from '../routes/slots';
 import Deposit from '../routes/deposit';
@@ -22,17 +22,28 @@ import Info from '../routes/info';
 
 import parsecLabsLogo from '../parseclabs.svg';
 
+import Message from './message';
+
 import '../style.css';
 
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
   bridge: stores.bridge,
+  account: stores.account,
 }))
 @observer
 class App extends React.Component {
   render() {
-    const { bridge, psc } = this.props;
+    const { bridge, psc, account } = this.props;
     const urlSuffix = `#${bridge.address}`;
+
+    if (!account.ready) {
+      return (
+        <Message hideBg>
+          <Spin size="large" />
+        </Message>
+      );
+    }
 
     const menu = horizontal => (
       <Menu
@@ -155,8 +166,9 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  psc: PropTypes.object,
-  bridge: PropTypes.object,
+  psc: PropTypes.object.isRequired,
+  bridge: PropTypes.object.isRequired,
+  account: PropTypes.object.isRequired,
   location: PropTypes.object.isRequired,
 };
 

@@ -8,15 +8,42 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter } from 'react-router-dom';
+import { Provider } from 'mobx-react';
+
+import { DEFAULT_NETWORK } from './utils';
+
+import Tokens from './stores/tokens.ts';
+import Bridge from './stores/bridge.ts';
+import Account from './stores/account.ts';
+import Network from './stores/network.ts';
 
 import App from './components/app';
-import Web3Wrapper from './components/web3Wrapper';
+
+if (!process.env.BRIDGE_ADDR) {
+  console.error(
+    'Missing Bridge contract address. Please rebuild with BRIDGE_ADDR env variable set'
+  );
+}
+
+const getBridgeAddress = () => {
+  const hash = window.location.hash.replace('#', '');
+  if (hash.startsWith('0x') && hash.length === 42) {
+    return hash;
+  }
+
+  return process.env.BRIDGE_ADDR;
+};
+
+const account = new Account();
+const tokens = new Tokens(account, getBridgeAddress());
+const bridge = new Bridge(account, getBridgeAddress());
+const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
 
 ReactDOM.render(
   <BrowserRouter>
-    <Web3Wrapper>
+    <Provider {...{ account, tokens, bridge, network }}>
       <App />
-    </Web3Wrapper>
+    </Provider>
   </BrowserRouter>,
   document.getElementById('app')
 );
