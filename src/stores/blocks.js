@@ -9,7 +9,7 @@ const getWeb3 = () => {
     web3Instance = new Web3();
     web3Instance.setProvider(
       new web3Instance.providers.HttpProvider(
-        'http://ec2-34-254-176-118.eu-west-1.compute.amazonaws.com:8545'
+        'http://ec2-34-254-247-1.eu-west-1.compute.amazonaws.com:8545'
       )
     );
   }
