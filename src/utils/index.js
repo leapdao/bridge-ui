@@ -7,5 +7,4 @@ export const NETWORKS = {
 
 export const DEFAULT_NETWORK = '4';
 
-export const range = (s, e) =>
-  Array.from(new Array(e - s + 1), (_, i) => i + s);
+export { range } from './range.ts';
