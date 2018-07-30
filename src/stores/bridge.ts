@@ -130,4 +130,12 @@ export default class Bridge extends ContractStore {
 
     return tx;
   }
+
+  public registerToken(tokenAddr: string) {
+    const tx = this.iContract.methods.registerToken(tokenAddr).send({
+      from: this.account.address,
+    });
+
+    return tx;
+  }
 }
