@@ -90,32 +90,34 @@ class BlocksStore {
 
   // TODO: adjust default fromBlock to get only the recent blocks
   @action
-  load = async (fromBlock = 0) => {
+  load = (fromBlock = 0) => {
     const web3 = getWeb3();
-    const blockNumber = await web3.eth.getBlockNumber();
+    web3.eth
+      .getBlockNumber()
+      .then(blockNumber => {
+        this.fromBlock = blockNumber;
+        return getBlocksRange(fromBlock, blockNumber);
+      })
+      .then(blocks => {
+        if (blocks.length) {
+          blocks
+            .filter(b => b)
+            .sort((a, b) => a.timestamp - b.timestamp)
+            .map(this.add.bind(this));
+        }
 
-    try {
-      const blocks = await getBlocksRange(fromBlock, blockNumber);
+        this.save();
 
-      if (blocks.length) {
-        blocks
-          .filter(b => b)
-          .sort((a, b) => a.timestamp - b.timestamp)
-          .map(this.add.bind(this));
-      }
-      this.fromBlock = blockNumber;
-
-      this.save();
-
-      setTimeout(() => {
-        this.load(this.fromBlock);
-      }, 5000);
-    } catch (error) {
-      console.error(error);
-      setTimeout(() => {
-        this.load(fromBlock);
-      }, 5000);
-    }
+        setTimeout(() => {
+          this.load(this.fromBlock);
+        }, 5000);
+      })
+      .catch(error => {
+        console.error(error);
+        setTimeout(() => {
+          this.load(fromBlock);
+        }, 5000);
+      });
   };
 
   save = () => {
