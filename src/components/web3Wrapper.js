@@ -74,6 +74,10 @@ export default class Web3Wrapper extends React.Component {
           ready: true,
         });
       });
+    } else {
+      this.setState({
+        ready: true,
+      });
     }
   }
 
