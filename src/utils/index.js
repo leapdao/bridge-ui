@@ -3,7 +3,7 @@ export const NETWORKS = {
   3: { name: 'Ropsten', provider: 'https://ropsten.infura.io' },
   4: { name: 'Rinkeby', provider: 'https://rinkeby.infura.io' },
   42: { name: 'Kovan', provider: 'https://kovan.infura.io' },
-  6: { name: 'Truffle', provider: 'http://localhost:9545' },
+  4447: { name: 'Truffle', provider: 'http://localhost:9545' },
 };
 
 export const DEFAULT_NETWORK = '4';
