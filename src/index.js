@@ -35,8 +35,8 @@ const getBridgeAddress = () => {
 };
 
 const account = new Account();
-const tokens = new Tokens(account, getBridgeAddress());
 const bridge = new Bridge(account, getBridgeAddress());
+const tokens = new Tokens(account, bridge);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
 
 ReactDOM.render(

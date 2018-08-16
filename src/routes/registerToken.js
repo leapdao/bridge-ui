@@ -40,18 +40,13 @@ export default class RegisterToken extends React.Component {
 
   handleSubmit(e) {
     e.preventDefault();
-    const { bridge, tokens } = this.props;
+    const { bridge } = this.props;
     const { tokenAddr } = this.state;
 
-    bridge
-      .registerToken(tokenAddr)
-      .on('transactionHash', registerTxHash => {
-        console.log('registerToken', registerTxHash); // eslint-disable-line
-        this.setState({ tokenAddr: '' });
-      })
-      .on('receipt', () => {
-        tokens.loadTokens();
-      });
+    bridge.registerToken(tokenAddr).on('transactionHash', registerTxHash => {
+      console.log('registerToken', registerTxHash); // eslint-disable-line
+      this.setState({ tokenAddr: '' });
+    });
   }
 
   render() {

@@ -284,6 +284,18 @@ export default [
     inputs: [
       {
         indexed: false,
+        name: 'epochLength',
+        type: 'uint256',
+      },
+    ],
+    name: 'EpochLength',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
         name: 'blockNumber',
         type: 'uint256',
       },
@@ -407,6 +419,11 @@ export default [
       },
       {
         indexed: false,
+        name: 'newSigner',
+        type: 'address',
+      },
+      {
+        indexed: false,
         name: 'eventCounter',
         type: 'uint256',
       },
@@ -471,6 +488,23 @@ export default [
       },
     ],
     name: 'ValidatorUpdate',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'tokenAddr',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        name: 'color',
+        type: 'uint16',
+      },
+    ],
+    name: 'NewToken',
     type: 'event',
   },
   {

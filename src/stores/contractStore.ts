@@ -4,8 +4,8 @@ import getWeb3 from '../utils/getWeb3';
 
 export default class ContractStore {
   public address: string;
-  protected contract: Contract;
-  protected iContract?: Contract;
+  public contract: Contract;
+  public iContract?: Contract;
 
   constructor(abi: any[], address: string) {
     this.address = address;

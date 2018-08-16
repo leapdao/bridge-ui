@@ -7,25 +7,36 @@
 
 import { observable, action, autorun, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
-import Web3 from 'web3';
-import getWeb3 from '../utils/getWeb3';
+
 import { bridge as bridgeAbi } from '../utils/abis';
 import { range } from '../utils';
-
 import Account from './account';
 import Token from './token';
+import Bridge from './bridge';
 
 export default class Tokens {
   @observable public list: IObservableArray<Token>;
 
   private account: Account;
-  private bridgeAddr: string;
+  private bridge: Bridge;
 
-  constructor(account: Account, bridgeAddr: string) {
+  constructor(account: Account, bridge: Bridge) {
     this.account = account;
-    this.bridgeAddr = bridgeAddr;
+    this.bridge = bridge;
 
     this.loadTokens();
+
+    if ((window as any).web3) {
+      // ToDo: events are not working with web3 1.0 for some reason. Need to fix
+      const iWeb3 = (window as any).web3;
+      const iContract = iWeb3.eth.contract(bridgeAbi).at(this.bridge.address);
+      const newTokenEvents = iContract.NewToken({
+        toBlock: 'latest',
+      } as any);
+      newTokenEvents.watch((err, e) => {
+        this.loadTokens();
+      });
+    }
   }
 
   @autobind
@@ -40,9 +51,7 @@ export default class Tokens {
   }
 
   public loadTokens() {
-    const web3 = getWeb3() as Web3;
-    const bridge = new web3.eth.Contract(bridgeAbi, this.bridgeAddr);
-    return bridge.methods
+    return this.bridge.contract.methods
       .tokenCount()
       .call()
       .then((tokenCount: number) =>
@@ -51,7 +60,7 @@ export default class Tokens {
             this.list ? this.list.length : 0,
             tokenCount - 1
           ) as number[]).map(pos =>
-            bridge.methods
+            this.bridge.contract.methods
               .tokens(pos)
               .call()
               .then(({ 0: address }) => new Token(this.account, address, pos))
