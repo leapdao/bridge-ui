@@ -9,7 +9,7 @@ import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import { observable } from 'mobx';
 import PropTypes from 'prop-types';
-import autobind from 'autobind-decorator';
+import { Link } from 'react-router-dom';
 
 import { Form, Input, Button } from 'antd';
 import Active from '../components/explorer/active';
@@ -19,14 +19,12 @@ import Active from '../components/explorer/active';
 }))
 @observer
 export default class Explorer extends React.Component {
-  @observable value;
-
-  @autobind
-  handleSubmit(e) {
-    e.preventDefault();
+  componentWillReceiveProps(nextProps) {
     const { explorer } = this.props;
-    explorer.search(this.value);
+    explorer.search(nextProps.match.params.search);
   }
+
+  @observable value;
 
   render() {
     const { explorer } = this.props;
@@ -34,7 +32,7 @@ export default class Explorer extends React.Component {
     return (
       <Fragment>
         <h1>Block Explorer</h1>
-        <Form onSubmit={this.handleSubmit} layout="inline">
+        <Form layout="inline">
           <Form.Item>
             <Input
               addonBefore="Search"
@@ -46,12 +44,8 @@ export default class Explorer extends React.Component {
             />
           </Form.Item>
           <Form.Item>
-            <Button
-              htmlType="submit"
-              type="primary"
-              loading={explorer.searching}
-            >
-              Go!
+            <Button type="primary" loading={explorer.searching}>
+              <Link to={`/explorer/${this.value}`}>Go!</Link>
             </Button>
           </Form.Item>
         </Form>
@@ -63,4 +57,5 @@ export default class Explorer extends React.Component {
 
 Explorer.propTypes = {
   explorer: PropTypes.object,
+  match: PropTypes.object,
 };

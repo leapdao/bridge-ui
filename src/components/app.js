@@ -51,7 +51,6 @@ class App extends React.Component {
         </Message>
       );
     }
-
     return (
       <AppLayout>
         <Route path={`${match.path}/`} exact component={Slots} />
@@ -64,6 +63,10 @@ class App extends React.Component {
         <Route path={`${match.path}/faucet`} exact component={Faucet} />
         <Route path={`${match.path}/info`} exact component={Info} />
         <Route path={`${match.path}/explorer`} exact component={Explorer} />
+        <Route
+              path={`${match.path}/explorer/:search`}
+              render={props => <Explorer {...this.props} {...props} />}
+        />
       </AppLayout>
     );
   }

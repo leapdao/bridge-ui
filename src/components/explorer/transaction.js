@@ -8,7 +8,6 @@ import Searchable from './searchable';
 
 const Transaction = ({ explorer }) => {
   const tx = explorer.current;
-  console.log(tx.inputs);
   return (
     <Card title="Transaction">
       <h3> Hash: </h3>
@@ -29,7 +28,19 @@ const Transaction = ({ explorer }) => {
         dataSource={tx.inputs}
         renderItem={input => (
           <List.Item>
-            <Searchable text={input.hash} />
+            <Searchable text={input.hash} /> : {input.index}
+          </List.Item>
+        )}
+      />
+      <h3> Outputs: </h3>
+      <List
+        itemLayout="vertical"
+        dataSource={tx.outputs}
+        renderItem={output => (
+          <List.Item>
+            Address: <Searchable text={output.address} />
+            Color: {output.color}
+            Value: {output.value}
           </List.Item>
         )}
       />

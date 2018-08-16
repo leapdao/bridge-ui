@@ -1,17 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { inject } from 'mobx-react';
+import { Link } from 'react-router-dom';
 
-const Searchable = ({ explorer, text }) => {
+const Searchable = ({ text }) => {
   /* eslint-disable */
-  return <a onClick={() => explorer.search(text)}>{text}</a>;
+  return <Link to={`/explorer/${text}`}>{text}</Link>;
   /* eslint-enable */
 };
 
 Searchable.propTypes = {
-  explorer: PropTypes.any,
   text: PropTypes.any,
 };
 
-export default inject('explorer')(Searchable);
+export default Searchable;
