@@ -18,6 +18,7 @@ import Deposit from '../routes/deposit';
 import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
 import Info from '../routes/info';
+import Explorer from '../routes/explorer';
 
 import AppLayout from './appLayout';
 import Message from './message';
@@ -27,6 +28,7 @@ import '../style.css';
 @inject(stores => ({
   account: stores.account,
   bridge: stores.bridge,
+  explorer: stores.explorer,
 }))
 @observer
 class App extends React.Component {
@@ -61,6 +63,7 @@ class App extends React.Component {
         />
         <Route path={`${match.path}/faucet`} exact component={Faucet} />
         <Route path={`${match.path}/info`} exact component={Info} />
+        <Route path={`${match.path}/explorer`} exact component={Explorer} />
       </AppLayout>
     );
   }
