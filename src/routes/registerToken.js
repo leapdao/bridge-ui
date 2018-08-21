@@ -85,9 +85,7 @@ export default class RegisterToken extends React.Component {
         <List
           itemLayout="vertical"
           size="small"
-          dataSource={
-            tokens.list && tokens.list[0] && tokens.list[0].ready && tokens.list
-          }
+          dataSource={tokens.ready ? tokens.list : undefined}
           renderItem={item => <Item item={item} />}
         />
       </Fragment>

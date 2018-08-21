@@ -1,5 +1,5 @@
 import React from 'react';
-import { inject } from 'mobx-react';
+import { inject, observer } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Alert } from 'antd';
 import { NETWORKS } from '../utils';
@@ -8,6 +8,7 @@ import { NETWORKS } from '../utils';
   network: stores.network,
   account: stores.account,
 }))
+@observer
 class Web3SubmitWarning extends React.Component {
   render() {
     const { network, account } = this.props;

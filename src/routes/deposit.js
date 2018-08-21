@@ -15,7 +15,7 @@ import { Select, Form, Input, Button } from 'antd';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 
 @inject(stores => ({
-  tokens: stores.tokens.list,
+  tokens: stores.tokens,
   bridge: stores.bridge,
   network: stores.network,
 }))
@@ -35,8 +35,8 @@ export default class Deposit extends React.Component {
   get selectedToken() {
     const { selectedColor } = this.state;
     const { tokens } = this.props;
-    if (tokens[selectedColor] && tokens[selectedColor].ready) {
-      return tokens[selectedColor];
+    if (tokens.list[selectedColor] && tokens.list[selectedColor].ready) {
+      return tokens.list[selectedColor];
     }
 
     return undefined;
@@ -61,11 +61,11 @@ export default class Deposit extends React.Component {
     const { network, tokens } = this.props;
     const { value, selectedColor } = this.state;
 
-    if (!tokens) {
+    if (!tokens.ready) {
       return null;
     }
 
-    if (tokens.length === 0) {
+    if (tokens.list.length === 0) {
       return (
         <div style={{ textAlign: 'center', margin: 50, fontSize: 18 }}>
           You need to register some token first
@@ -83,7 +83,7 @@ export default class Deposit extends React.Component {
         style={{ width: 80 }}
         onChange={color => this.setState({ selectedColor: color })}
       >
-        {tokens.map(token => (
+        {tokens.list.map(token => (
           <Select.Option key={token} value={token.color}>
             {token.symbol}
           </Select.Option>
@@ -139,7 +139,7 @@ export default class Deposit extends React.Component {
 }
 
 Deposit.propTypes = {
-  tokens: PropTypes.array,
+  tokens: PropTypes.object,
   bridge: PropTypes.object,
   network: PropTypes.object,
 };

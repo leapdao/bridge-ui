@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, autorun, IObservableArray } from 'mobx';
+import { observable, action, computed, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
 import { bridge as bridgeAbi } from '../utils/abis';
@@ -48,6 +48,14 @@ export default class Tokens {
     tokens.forEach(token => {
       this.list.push(token);
     });
+  }
+
+  @computed
+  public get ready() {
+    if (!this.list) {
+      return false;
+    }
+    return !this.list.some(token => !token.ready);
   }
 
   public loadTokens() {
