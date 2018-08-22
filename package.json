@@ -85,6 +85,7 @@
     "preact": "^8.3.1",
     "preact-compat": "^3.18.3",
     "prop-types": "^15.6.1",
+    "query-string": "^6.1.0",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
     "react-responsive": "^4.1.0",
