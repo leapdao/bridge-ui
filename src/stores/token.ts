@@ -14,7 +14,6 @@ import { txSuccess } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
-import { reject } from 'any-promise';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([

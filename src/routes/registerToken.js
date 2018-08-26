@@ -55,7 +55,7 @@ export default class RegisterToken extends React.Component {
 
     return (
       <Fragment>
-        <h1>Register a new ERC827 token</h1>
+        <h1>Register a new ERC20/ERC721 token</h1>
 
         <Web3SubmitWarning />
 
