@@ -10,9 +10,11 @@ import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import { Contract, EventLog } from 'web3/types';
 import { token as tokenAbi } from '../utils/abis';
+import { txSuccess } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
+import { reject } from 'any-promise';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([
@@ -79,13 +81,18 @@ export default class Token extends ContractStore {
       throw new Error('No metamask');
     }
 
-    const tx = this.iContract.methods
-      .approveAndCall(to, value, data)
-      .send({ from: this.account.address });
+   return this.maybeApprove(to, value)
+      .then(() => {
+        const tx = this.iWeb3.eth.sendTransaction({
+          from: this.account.address,
+          to,
+          data,
+        });
 
-    tx.on('confirmation', this.loadBalance);
-
-    return tx;
+        const txSucceed = txSuccess(tx);
+        txSucceed.then(this.loadBalance);
+        return txSucceed;
+      });
   }
 
   @autobind
@@ -108,5 +115,24 @@ export default class Token extends ContractStore {
       .balanceOf(this.account.address)
       .call()
       .then(this.updateBalance);
+  }
+
+  /*
+  * Checks transfer allowance for a given spender. If allowance is not enough to transfer a given value,
+  * initiates an approval transaction for 2^256 units
+  * @param spender Account to approve transfer for
+  * @param value Minimal amount of allowance a spender should have
+  * @returns Promise resolved when allowance is enough for the transfer
+  */
+  private maybeApprove(spender: string, value: BigNumber) {
+    return this.iContract.methods.allowance(this.account.address, spender).call().then(allowance => {
+      if (Number(allowance) >= value.toNumber()) return;
+
+      const tx = this.iContract.methods
+        .approve(spender, new BigNumber(2 ** 255))
+        .send({ from: this.account.address });
+
+      return txSuccess(tx);
+    });
   }
 }

@@ -91,8 +91,8 @@ export default class Slots extends React.Component {
 
     bridge
       .bet(psc, slotId, stake, signerAddr, tenderPubKey)
-      .on('transactionHash', betTxHash => {
-        console.log('bet', betTxHash); // eslint-disable-line
+      .then(({ transactionHash }) => {
+        console.log('bet', transactionHash); // eslint-disable-line
         this.setStake(slotId, undefined);
       });
   }

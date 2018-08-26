@@ -16,7 +16,7 @@ import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
 
-import { range } from '../utils';
+import { range, txSuccess } from '../utils';
 
 const readSlots = (bridge: Contract) => {
   return bridge.methods
@@ -96,11 +96,11 @@ export default class Bridge extends ContractStore {
       .deposit(this.account.address, amount, token.color)
       .encodeABI();
 
-    const tx = token.approveAndCall(this.address, amount, data);
-
-    tx.on('confirmation', this.loadContractData);
-
-    return tx;
+    return token.approveAndCall(this.address, amount, data)
+      .then(tx => {
+        this.loadContractData();
+        return tx;
+      });
   }
 
   public bet(
@@ -114,11 +114,11 @@ export default class Bridge extends ContractStore {
       .bet(slotId, stake, signerAddr, `0x${tendermint}`, this.account.address)
       .encodeABI();
 
-    const tx = token.approveAndCall(this.address, stake, data);
-
-    tx.on('confirmation', this.loadContractData);
-
-    return tx;
+    return token.approveAndCall(this.address, stake, data)
+    .then(tx => {
+      this.loadContractData();
+      return tx;
+    });
   }
 
   public registerToken(tokenAddr: string) {
