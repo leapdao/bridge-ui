@@ -14,6 +14,7 @@ import { txSuccess } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
+import { InflightTxPromise } from '../utils/types';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([
@@ -45,8 +46,10 @@ export default class Token extends ContractStore {
 
     this.contract.events.Transfer({}, (_, event: EventLog) => {
       if (
-        event.returnValues.to.toLowerCase() === this.account.address.toLowerCase() ||
-        event.returnValues.from.toLowerCase() === this.account.address.toLowerCase()
+        event.returnValues.to.toLowerCase() ===
+          this.account.address.toLowerCase() ||
+        event.returnValues.from.toLowerCase() ===
+          this.account.address.toLowerCase()
       ) {
         this.loadBalance();
       }
@@ -75,23 +78,24 @@ export default class Token extends ContractStore {
     return !!this.symbol;
   }
 
-  public approveAndCall(to: string, value: BigNumber, data: string) {
+  public approveAndCall(
+    to: string,
+    value: BigNumber,
+    data: string
+  ): Promise<InflightTxPromise> {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
 
-   return this.maybeApprove(to, value)
-      .then(() => {
-        const tx = this.iWeb3.eth.sendTransaction({
-          from: this.account.address,
-          to,
-          data,
-        });
-
-        const txSucceed = txSuccess(tx);
-        txSucceed.then(this.loadBalance);
-        return txSucceed;
+    return this.maybeApprove(to, value).then(() => {
+      const tx = this.iWeb3.eth.sendTransaction({
+        from: this.account.address,
+        to,
+        data,
       });
+      txSuccess(tx).then(this.loadBalance.bind(this)); // TODO: remove once Transfer event subscription is
+      return { tx }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
+    });
   }
 
   @autobind
@@ -124,14 +128,17 @@ export default class Token extends ContractStore {
   * @returns Promise resolved when allowance is enough for the transfer
   */
   private maybeApprove(spender: string, value: BigNumber) {
-    return this.iContract.methods.allowance(this.account.address, spender).call().then(allowance => {
-      if (Number(allowance) >= value.toNumber()) return;
+    return this.iContract.methods
+      .allowance(this.account.address, spender)
+      .call()
+      .then(allowance => {
+        if (Number(allowance) >= value.toNumber()) return;
 
-      const tx = this.iContract.methods
-        .approve(spender, new BigNumber(2 ** 255))
-        .send({ from: this.account.address });
+        const tx = this.iContract.methods
+          .approve(spender, new BigNumber(2 ** 255))
+          .send({ from: this.account.address });
 
-      return txSuccess(tx);
-    });
+        return txSuccess(tx);
+      });
   }
 }

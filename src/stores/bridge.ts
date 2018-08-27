@@ -17,6 +17,7 @@ import Account from './account';
 import ContractStore from './contractStore';
 
 import { range, txSuccess } from '../utils';
+import { InflightTxPromise } from '../utils/types';
 
 const readSlots = (bridge: Contract) => {
   return bridge.methods
@@ -87,7 +88,7 @@ export default class Bridge extends ContractStore {
     ]).then(this.updateData);
   }
 
-  public deposit(token: Token, amount: any) {
+  public deposit(token: Token, amount: any) : Promise<InflightTxPromise> {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
@@ -96,11 +97,9 @@ export default class Bridge extends ContractStore {
       .deposit(this.account.address, amount, token.color)
       .encodeABI();
 
-    return token.approveAndCall(this.address, amount, data)
-      .then(tx => {
-        this.loadContractData();
-        return tx;
-      });
+    const inflightTx = token.approveAndCall(this.address, amount, data);
+    inflightTx.then(this.loadContractData.bind(this)); // TODO: remove once Transfer event subscription is
+    return inflightTx;
   }
 
   public bet(
@@ -109,16 +108,14 @@ export default class Bridge extends ContractStore {
     stake: any,
     signerAddr: string,
     tendermint: string
-  ) {
+  ) : Promise<InflightTxPromise> {
     const data = this.contract.methods
       .bet(slotId, stake, signerAddr, `0x${tendermint}`, this.account.address)
       .encodeABI();
 
-    return token.approveAndCall(this.address, stake, data)
-    .then(tx => {
-      this.loadContractData();
-      return tx;
-    });
+    const inflightTx = token.approveAndCall(this.address, stake, data);
+    inflightTx.then(this.loadContractData.bind(this)); // TODO: remove once Transfer event subscription is
+    return inflightTx;
   }
 
   public registerToken(tokenAddr: string) {
