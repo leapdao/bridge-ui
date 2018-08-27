@@ -16,7 +16,7 @@ import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
 
-import { range, txSuccess } from '../utils';
+import { range } from '../utils';
 import { InflightTxPromise } from '../utils/types';
 
 const readSlots = (bridge: Contract) => {
@@ -97,9 +97,7 @@ export default class Bridge extends ContractStore {
       .deposit(this.account.address, amount, token.color)
       .encodeABI();
 
-    const inflightTx = token.approveAndCall(this.address, amount, data);
-    inflightTx.then(this.loadContractData.bind(this)); // TODO: remove once Transfer event subscription is
-    return inflightTx;
+    return token.approveAndCall(this.address, amount, data);
   }
 
   public bet(
@@ -113,9 +111,7 @@ export default class Bridge extends ContractStore {
       .bet(slotId, stake, signerAddr, `0x${tendermint}`, this.account.address)
       .encodeABI();
 
-    const inflightTx = token.approveAndCall(this.address, stake, data);
-    inflightTx.then(this.loadContractData.bind(this)); // TODO: remove once Transfer event subscription is
-    return inflightTx;
+    return token.approveAndCall(this.address, stake, data);
   }
 
   public registerToken(tokenAddr: string) {

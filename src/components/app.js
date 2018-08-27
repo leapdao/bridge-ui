@@ -166,9 +166,13 @@ class App extends React.Component {
 }
 
 App.propTypes = {
-  psc: PropTypes.object.isRequired,
-  bridge: PropTypes.object.isRequired,
-  account: PropTypes.object.isRequired,
+  // settings stores as optional to get rid of 'undefined' warnings
+  // > Make sure to mark userStore as an optional property.
+  // > It should not (necessarily) be passed in by parent components at all!
+  // https://github.com/mobxjs/mobx-react#with-typescript
+  psc: PropTypes.object,
+  bridge: PropTypes.object,
+  account: PropTypes.object,
   location: PropTypes.object.isRequired,
 };
 

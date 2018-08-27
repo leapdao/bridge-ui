@@ -24,6 +24,11 @@ const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   ]);
 };
 
+const isOurTransfer = (event: EventLog, ourAccount: Account) : boolean => {
+  return event.returnValues.to.toLowerCase() === ourAccount.address.toLowerCase() ||
+         event.returnValues.from.toLowerCase() === ourAccount.address.toLowerCase();
+};
+
 export default class Token extends ContractStore {
   @observable public tokens: IObservableArray<Token>;
 
@@ -45,12 +50,7 @@ export default class Token extends ContractStore {
     tokenInfo(this.contract).then(this.setInfo);
 
     this.contract.events.Transfer({}, (_, event: EventLog) => {
-      if (
-        event.returnValues.to.toLowerCase() ===
-          this.account.address.toLowerCase() ||
-        event.returnValues.from.toLowerCase() ===
-          this.account.address.toLowerCase()
-      ) {
+      if (isOurTransfer(event, this.account)) {
         this.loadBalance();
       }
     });
@@ -93,7 +93,6 @@ export default class Token extends ContractStore {
         to,
         data,
       });
-      txSuccess(tx).then(this.loadBalance.bind(this)); // TODO: remove once Transfer event subscription is
       return { tx }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
     });
   }

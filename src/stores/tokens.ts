@@ -8,7 +8,6 @@
 import { observable, action, computed, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
-import { bridge as bridgeAbi } from '../utils/abis';
 import { range } from '../utils';
 import Account from './account';
 import Token from './token';
