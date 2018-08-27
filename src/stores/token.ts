@@ -122,7 +122,8 @@ export default class Token extends ContractStore {
 
   /*
   * Checks transfer allowance for a given spender. If allowance is not enough to transfer a given value,
-  * initiates an approval transaction for 2^256 units
+  * initiates an approval transaction for 2^256 units. Approving maximum possible amount to make `approve` tx 
+  * one time only — subsequent calls won't requre approve anymore.
   * @param spender Account to approve transfer for
   * @param value Minimal amount of allowance a spender should have
   * @returns Promise resolved when allowance is enough for the transfer
