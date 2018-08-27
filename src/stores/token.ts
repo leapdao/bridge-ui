@@ -14,7 +14,8 @@ import { txSuccess } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
-import { InflightTxPromise } from '../utils/types';
+import Transactions from '../components/txNotification/transactions';
+import { InflightTxPromise } from '../components/txNotification/types';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([
@@ -33,6 +34,7 @@ export default class Token extends ContractStore {
   @observable public tokens: IObservableArray<Token>;
 
   private account: Account;
+  private txs: Transactions;
 
   public color: number;
   @observable public name: string;
@@ -40,11 +42,12 @@ export default class Token extends ContractStore {
   @observable public decimals: number;
   @observable public balance?: number;
 
-  constructor(account: Account, address: string, color: number) {
+  constructor(account: Account, txs: Transactions, address: string, color: number) {
     super(tokenAbi, address);
 
     this.account = account;
     this.color = color;
+    this.txs = txs;
 
     autorun(this.loadBalance);
     tokenInfo(this.contract).then(this.setInfo);
@@ -134,9 +137,17 @@ export default class Token extends ContractStore {
       .then(allowance => {
         if (Number(allowance) >= value.toNumber()) return;
 
+
         const tx = this.iContract.methods
           .approve(spender, new BigNumber(2 ** 255))
           .send({ from: this.account.address });
+
+        this.txs.update("approve", { 
+          tx,
+          message: 'Approve bridge to transfer PSC',
+          description: 'Before you process with your tx, you need to sign a ' +
+                        'transaction to allow the bridge contract to transfer your PSC.',
+        });
 
         return txSuccess(tx);
       });

@@ -12,16 +12,19 @@ import { range } from '../utils';
 import Account from './account';
 import Token from './token';
 import Bridge from './bridge';
+import Transactions from '../components/txNotification/transactions';
 
 export default class Tokens {
   @observable public list: IObservableArray<Token>;
 
   private account: Account;
   private bridge: Bridge;
+  private txs: Transactions;
 
-  constructor(account: Account, bridge: Bridge) {
+  constructor(account: Account, bridge: Bridge, txs: Transactions) {
     this.account = account;
     this.bridge = bridge;
+    this.txs = txs;
 
     reaction(() => this.bridge.contract, this.init);
   }
@@ -64,7 +67,7 @@ export default class Tokens {
             this.bridge.contract.methods
               .tokens(pos)
               .call()
-              .then(({ 0: address }) => new Token(this.account, address, pos))
+              .then(({ 0: address }) => new Token(this.account, this.txs, address, pos))
           )
         )
       )

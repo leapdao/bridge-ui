@@ -15,9 +15,10 @@ import Token from './token';
 import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
+import Transactions from '../components/txNotification/transactions';
 
-import { range } from '../utils';
-import { InflightTxPromise } from '../utils/types';
+import { range, txSuccess } from '../utils';
+import { InflightTxPromise } from '../components/txNotification/types';
 
 const readSlots = (bridge: Contract) => {
   return bridge.methods
@@ -62,13 +63,15 @@ const readSlots = (bridge: Contract) => {
 
 export default class Bridge extends ContractStore {
   private account: Account;
+  private txs: Transactions;
 
   @observable public slots: IObservableArray<Slot> = observable.array([]);
   @observable public lastCompleteEpoch: number;
 
-  constructor(account: Account, address?: string) {
+  constructor(account: Account, txs: Transactions, address?: string) {
     super(bridgeAbi, address);
     this.account = account;
+    this.txs = txs;
 
     reaction(() => this.contract, this.init);
   }
@@ -102,7 +105,17 @@ export default class Bridge extends ContractStore {
       .deposit(this.account.address, amount, token.color)
       .encodeABI();
 
-    return token.approveAndCall(this.address, amount, data);
+    const inflightTxPromise = token.approveAndCall(this.address, amount, data);
+    
+    inflightTxPromise
+      .then(inflightTx => {
+        this.txs.update("deposit", {
+          tx : inflightTx.tx,
+          message: 'Deposit tokens to bridge',
+        });
+      });
+ 
+    return inflightTxPromise;
   }
 
   public bet(
@@ -116,12 +129,28 @@ export default class Bridge extends ContractStore {
       .bet(slotId, stake, signerAddr, `0x${tendermint}`, this.account.address)
       .encodeABI();
 
-    return token.approveAndCall(this.address, stake, data);
+    const inflightTxPromise = token.approveAndCall(this.address, stake, data);
+
+    inflightTxPromise
+      .then(inflightTx => {
+        this.txs.update("bet", { 
+          tx : inflightTx.tx,
+          message: 'Place a bet to the bridge contract',
+        });
+      });
+
+    return inflightTxPromise;
   }
 
   public registerToken(tokenAddr: string) {
     const tx = this.iContract.methods.registerToken(tokenAddr).send({
       from: this.account.address,
+    });
+
+    this.txs.update("registerToken", {
+      tx,
+      message: 'Register a new token on the bridge',
+      description: 'bridge.registerToken(tokenAddr)'
     });
 
     return tx;
