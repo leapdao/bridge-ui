@@ -49,12 +49,12 @@ export default class Deposit extends React.Component {
       10 ** this.selectedToken.decimals
     );
 
-    bridge
-      .deposit(this.selectedToken, value)
-      .on('transactionHash', depositTxHash => {
+    bridge.deposit(this.selectedToken, value).then(({ tx }) => {
+      tx.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
         this.setState({ value: 0 });
       });
+    });
   }
 
   render() {

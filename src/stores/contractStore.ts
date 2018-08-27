@@ -6,6 +6,7 @@ export default class ContractStore {
   public address: string;
   public contract: Contract;
   public iContract?: Contract;
+  public iWeb3?: Web3;
 
   constructor(abi: any[], address: string) {
     this.address = address;
@@ -14,8 +15,8 @@ export default class ContractStore {
     this.contract = new web3.eth.Contract(abi, address);
 
     if ((window as any).web3) {
-      const iWeb3 = getWeb3(true) as Web3;
-      this.iContract = new iWeb3.eth.Contract(abi, address);
+      this.iWeb3 = getWeb3(true) as Web3;
+      this.iContract = new this.iWeb3.eth.Contract(abi, address);
     }
   }
 }

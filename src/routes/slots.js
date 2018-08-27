@@ -89,12 +89,12 @@ export default class Slots extends React.Component {
       10 ** psc.decimals
     );
 
-    bridge
-      .bet(psc, slotId, stake, signerAddr, tenderPubKey)
-      .on('transactionHash', betTxHash => {
+    bridge.bet(psc, slotId, stake, signerAddr, tenderPubKey).then(({ tx }) => {
+      tx.once('transactionHash', betTxHash => {
         console.log('bet', betTxHash); // eslint-disable-line
         this.setStake(slotId, undefined);
       });
+    });
   }
 
   renderRow(title, key, newKey, renderer) {
