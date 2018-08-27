@@ -8,7 +8,7 @@
 import { observable, action, autorun, computed, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
-import { Contract } from 'web3/types';
+import { Contract, EventLog } from 'web3/types';
 import { token as tokenAbi } from '../utils/abis';
 
 import Account from './account';
@@ -42,22 +42,14 @@ export default class Token extends ContractStore {
     autorun(this.loadBalance);
     tokenInfo(this.contract).then(this.setInfo);
 
-    if ((window as any).web3) {
-      // ToDo: events are not working with web3 1.0 for some reason. Need to fix
-      const iWeb3 = (window as any).web3;
-      const iContract = iWeb3.eth.contract(tokenAbi).at(this.address);
-      const transferEvents = iContract.Transfer({
-        toBlock: 'latest',
-      } as any);
-      transferEvents.watch((err, event) => {
-        if (
-          event.args.to.toLowerCase() === this.account.address.toLowerCase() ||
-          event.args.from.toLowerCase() === this.account.address.toLowerCase()
-        ) {
-          this.loadBalance();
-        }
-      });
-    }
+    this.contract.events.Transfer({}, (_, event: EventLog) => {
+      if (
+        event.returnValues.to.toLowerCase() === this.account.address.toLowerCase() ||
+        event.returnValues.from.toLowerCase() === this.account.address.toLowerCase()
+      ) {
+        this.loadBalance();
+      }
+    });
   }
 
   @computed
