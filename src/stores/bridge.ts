@@ -70,17 +70,7 @@ export default class Bridge extends ContractStore {
     this.account = account;
     this.loadContractData();
 
-    if ((window as any).web3) {
-      // ToDo: events are not working with web3 1.0 for some reason. Need to fix
-      const iWeb3 = (window as any).web3;
-      const iContract = iWeb3.eth.contract(bridgeAbi).at(this.address);
-      const allEvents = iContract.allEvents({
-        toBlock: 'latest',
-      } as any);
-      allEvents.watch(() => {
-        this.loadContractData();
-      });
-    }
+    this.contract.events.allEvents({}, this.loadContractData.bind(this));
   }
 
   @autobind

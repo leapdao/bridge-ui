@@ -26,17 +26,7 @@ export default class Tokens {
 
     this.loadTokens();
 
-    if ((window as any).web3) {
-      // ToDo: events are not working with web3 1.0 for some reason. Need to fix
-      const iWeb3 = (window as any).web3;
-      const iContract = iWeb3.eth.contract(bridgeAbi).at(this.bridge.address);
-      const newTokenEvents = iContract.NewToken({
-        toBlock: 'latest',
-      } as any);
-      newTokenEvents.watch((err, e) => {
-        this.loadTokens();
-      });
-    }
+    this.bridge.contract.events.NewToken({}, this.loadTokens.bind(this));
   }
 
   @autobind
