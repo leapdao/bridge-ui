@@ -9,15 +9,15 @@ import 'antd/dist/antd.css';
 import React from 'react';
 import PropTypes from 'prop-types';
 import { observer, inject } from 'mobx-react';
-import { notification } from 'antd';
+import { notification, Spin, Icon } from 'antd';
 import { TxStatus } from './types';
 
 const statusDetails = {
-  [TxStatus.CREATED]: { text: 'Waiting for signature..', icon: 'warning' },
-  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: 'info' },
-  [TxStatus.SUCCEED]: { text: 'Success', icon: 'success' },
-  [TxStatus.FAILED]: { text: 'Transaction failed', icon: 'error' },
-  [TxStatus.CANCELLED]: { text: 'Cancelled', icon: 'error' },
+  [TxStatus.CREATED]: { text: 'Waiting for signature..', icon: <Icon type='key' /> },
+  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: <Spin /> },
+  [TxStatus.SUCCEED]: { text: 'Success', icon: <Icon type="check-circle" style={{color: 'green'}} /> },
+  [TxStatus.FAILED]: { text: 'Transaction failed', icon: <Icon type="close-circle" style={{color: 'red'}} /> },
+  [TxStatus.CANCELLED]: { text: 'Cancelled', icon: <Icon type="close-circle-o" style={{color: 'red'}} /> },
 };
 
 const TxNotification = ({ transactions }) => {
@@ -39,11 +39,12 @@ const TxNotification = ({ transactions }) => {
     const msg = {
       key: txChange.name,
       message: txChange.newValue.message || '',
+      icon: statusDetails[status].icon,
       duration: 0,
       description: description,
     };
 
-    notification[statusDetails[status].icon](msg);
+    notification.open(msg);
   });
   return null;
 };
