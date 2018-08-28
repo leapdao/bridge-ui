@@ -5,6 +5,7 @@ const path = require('path');
 const autoprefixer = require('autoprefixer');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const HtmlPlugin = require('html-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -190,5 +191,8 @@ module.exports = {
       filename: 'main.css',
     }),
     new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR']),
+    new HtmlPlugin({
+      template: 'src/index.html',
+    }),
   ],
 };

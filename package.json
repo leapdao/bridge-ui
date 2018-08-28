@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "start": "parcel src/index.html --open",
-    "build": "rm -rf dist/ && parcel build src/index.html",
+    "build": "rm -rf dist/ && webpack-cli --config webpack.config.prod.js",
     "precommit": "lint-staged",
     "deploy:dev": "aws s3 sync ./dist s3://stake-dev.parseclabs.org/ --acl public-read",
     "deploy:testnet": "aws s3 sync ./dist s3://stake-testnet.parseclabs.org/ --acl public-read",
@@ -53,6 +53,7 @@
     "eslint-plugin-react": "^7.9.1",
     "extract-text-webpack-plugin": "^4.0.0-beta.0",
     "file-loader": "^2.0.0",
+    "html-webpack-plugin": "^3.2.0",
     "husky": "^0.14.3",
     "jest": "^23.0.1",
     "less": "3.0.0",
