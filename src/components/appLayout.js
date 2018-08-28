@@ -4,7 +4,6 @@
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
  */
-import 'antd/dist/antd.css';
 
 import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
