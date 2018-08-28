@@ -14,7 +14,8 @@ import { txSuccess } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
-import { InflightTxPromise } from '../utils/types';
+import Transactions from '../components/txNotification/transactions';
+import { InflightTxReceipt } from '../utils/types';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([
@@ -40,8 +41,8 @@ export default class Token extends ContractStore {
   @observable public decimals: number;
   @observable public balance?: number;
 
-  constructor(account: Account, address: string, color: number) {
-    super(tokenAbi, address);
+  constructor(account: Account, transactions: Transactions, address: string, color: number) {
+    super(tokenAbi, address, transactions);
 
     this.account = account;
     this.color = color;
@@ -82,18 +83,18 @@ export default class Token extends ContractStore {
     to: string,
     value: BigNumber,
     data: string
-  ): Promise<InflightTxPromise> {
+  ): Promise<InflightTxReceipt> {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
 
     return this.maybeApprove(to, value).then(() => {
-      const tx = this.iWeb3.eth.sendTransaction({
+      const futureReceipt = this.iWeb3.eth.sendTransaction({
         from: this.account.address,
         to,
         data,
       });
-      return { tx }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
+      return { futureReceipt }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
     });
   }
 
@@ -137,6 +138,12 @@ export default class Token extends ContractStore {
         const tx = this.iContract.methods
           .approve(spender, new BigNumber(2 ** 255))
           .send({ from: this.account.address });
+
+        this.watchTx(tx, 'approve', {
+          message: 'Approve bridge to transfer PSC',
+          description: 'Before you process with your tx, you need to sign a ' +
+                        'transaction to allow the bridge contract to transfer your PSC.',
+        });
 
         return txSuccess(tx);
       });

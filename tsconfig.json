@@ -3,6 +3,7 @@
     "experimentalDecorators": true,
     "allowJs": true,
     "target": "es6",
-    "module": "commonjs"
+    "module": "commonjs",
+    "jsx": "react"
   }
 }

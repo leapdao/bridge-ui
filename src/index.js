@@ -17,6 +17,8 @@ import Tokens from './stores/tokens.ts';
 import Bridge from './stores/bridge.ts';
 import Account from './stores/account.ts';
 import Network from './stores/network.ts';
+import Transactions from './components/txNotification/transactions.ts';
+import TxNotification from './components/txNotification/index.tsx';
 
 import App from './components/app';
 
@@ -26,15 +28,17 @@ if (!process.env.BRIDGE_ADDR) {
   );
 }
 
+const transactions = new Transactions();
 const account = new Account();
-const bridge = new Bridge(account);
-const tokens = new Tokens(account, bridge);
+const bridge = new Bridge(account, transactions);
+const tokens = new Tokens(account, bridge, transactions);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
 
 ReactDOM.render(
   <BrowserRouter>
-    <Provider {...{ account, tokens, bridge, network }}>
+    <Provider {...{ account, tokens, bridge, network, transactions }}>
       <Fragment>
+        <TxNotification />
         <Route
           path="/"
           exact
