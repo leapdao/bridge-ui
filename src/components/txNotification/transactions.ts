@@ -28,6 +28,7 @@ export default class Transactions {
       newTx.futureReceipt.once('error', (e: Error) => {
         if (e.message.indexOf('User denied transaction signature')) {
           this.setStatus(newTx, TxStatus.CANCELLED);
+          this.delayedRemove(newTx.key);
         } else {
           this.setStatus(newTx, TxStatus.FAILED);
         }
@@ -38,6 +39,7 @@ export default class Transactions {
       newTx.futureReceipt.then(({ status }) => {
         const statusCode = status ? TxStatus.SUCCEED : TxStatus.FAILED;
         this.setStatus(newTx, statusCode);
+        this.delayedRemove(newTx.key);
       })
     }
     this.map.set(newTx.key, Object.assign(oldTx, newTx));
@@ -47,6 +49,14 @@ export default class Transactions {
     runInAction(() => {
       this.map.set(tx.key, Object.assign(tx, { status }));      
     });
+  }
+
+  private delayedRemove(key: string) {
+    setTimeout(() => {
+      runInAction(() => {
+        this.map.delete(key);      
+      });
+    }, 2000); 
   }
 
 }

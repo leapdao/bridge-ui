@@ -39,7 +39,7 @@ const TxNotification = ({ transactions }) => {
     const msg = {
       key: txChange.name,
       message: txChange.newValue.message || '',
-      duration: status === TxStatus.CREATED || status === TxStatus.INFLIGHT ? 0 : 2,
+      duration: 0,
       description: description,
     };
 
