@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, IObservableArray } from 'mobx';
+import { observable, action, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import { Contract } from 'web3/types';
@@ -66,11 +66,16 @@ export default class Bridge extends ContractStore {
   @observable public slots: IObservableArray<Slot> = observable.array([]);
   @observable public lastCompleteEpoch: number;
 
-  constructor(account: Account, address: string) {
+  constructor(account: Account, address?: string) {
     super(bridgeAbi, address);
     this.account = account;
-    this.loadContractData();
 
+    reaction(() => this.contract, this.init);
+  }
+
+  @autobind
+  private init() {
+    this.loadContractData();
     this.contract.events.allEvents({}, this.loadContractData.bind(this));
   }
 
@@ -88,7 +93,7 @@ export default class Bridge extends ContractStore {
     ]).then(this.updateData);
   }
 
-  public deposit(token: Token, amount: any) : Promise<InflightTxPromise> {
+  public deposit(token: Token, amount: any): Promise<InflightTxPromise> {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
@@ -106,7 +111,7 @@ export default class Bridge extends ContractStore {
     stake: any,
     signerAddr: string,
     tendermint: string
-  ) : Promise<InflightTxPromise> {
+  ): Promise<InflightTxPromise> {
     const data = this.contract.methods
       .bet(slotId, stake, signerAddr, `0x${tendermint}`, this.account.address)
       .encodeABI();

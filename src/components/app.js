@@ -6,13 +6,11 @@
  */
 import 'antd/dist/antd.css';
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { Route, withRouter } from 'react-router';
-import { Link } from 'react-router-dom';
-import MediaQuery from 'react-responsive';
-import { Dropdown, Icon, Layout, Menu, Spin } from 'antd';
+import { Route } from 'react-router';
+import { Spin } from 'antd';
 
 import Slots from '../routes/slots';
 import Deposit from '../routes/deposit';
@@ -20,22 +18,28 @@ import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
 import Info from '../routes/info';
 
-import parsecLabsLogo from '../parseclabs.svg';
-
+import AppLayout from './appLayout';
 import Message from './message';
 
 import '../style.css';
 
 @inject(stores => ({
-  psc: stores.tokens.list && stores.tokens.list[0],
-  bridge: stores.bridge,
   account: stores.account,
+  bridge: stores.bridge,
 }))
 @observer
 class App extends React.Component {
+  constructor(props) {
+    super(props);
+    props.bridge.address = props.match.params.bridgeAddr;
+  }
+
+  componentWillReceiveProps(nextProps) {
+    nextProps.bridge.address = nextProps.match.params.bridgeAddr;
+  }
+
   render() {
-    const { bridge, psc, account } = this.props;
-    const urlSuffix = `#${bridge.address}`;
+    const { account, match } = this.props;
 
     if (!account.ready) {
       return (
@@ -45,122 +49,18 @@ class App extends React.Component {
       );
     }
 
-    const menu = horizontal => (
-      <Menu
-        selectedKeys={[this.props.location.pathname]}
-        mode={horizontal ? 'horizontal' : 'vertical'}
-        style={{ lineHeight: '64px', width: '100%' }}
-      >
-        <Menu.Item key="/">
-          <Link to={`/${urlSuffix}`}>Slots auction</Link>
-        </Menu.Item>
-        <Menu.Item key="/deposit">
-          <Link to={`/deposit${urlSuffix}`}>Make deposit</Link>
-        </Menu.Item>
-        <Menu.Item key="/registerToken">
-          <Link to={`/registerToken${urlSuffix}`}>Register token</Link>
-        </Menu.Item>
-        <Menu.Item key="/faucet">
-          <Link to={`/faucet${urlSuffix}`}>Get tokens</Link>
-        </Menu.Item>
-        <Menu.Item key="/info">
-          <Link to={`/info${urlSuffix}`}>Chain info</Link>
-        </Menu.Item>
-      </Menu>
-    );
-
     return (
-      <Layout style={{ minHeight: '100vh' }}>
-        <Layout.Header
-          style={{
-            backgroundColor: '#FFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-          }}
-        >
-          <Link to={`/${urlSuffix}`}>
-            <img
-              src={parsecLabsLogo}
-              width="196"
-              height="50"
-              className="logo"
-              alt=""
-            />
-          </Link>
-
-          <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <span className="balance">
-              {psc &&
-                psc.balanceString && (
-                  <Fragment>
-                    Balance: <strong>{psc.balanceString}</strong>
-                  </Fragment>
-                )}
-            </span>
-            <MediaQuery maxWidth={1048}>
-              <Dropdown
-                overlay={menu(false)}
-                placement="bottomRight"
-                style={{ flexGrow: 1 }}
-              >
-                <a
-                  className="ant-dropdown-link"
-                  href="#"
-                  style={{
-                    paddingTop: 8,
-                  }}
-                >
-                  <Icon type="bars" style={{ fontSize: 24 }} />
-                </a>
-              </Dropdown>
-            </MediaQuery>
-          </div>
-        </Layout.Header>
-        <Layout.Content
-          style={{
-            padding: '20px 50px',
-            display: 'flex',
-            flexDirection: 'column',
-          }}
-        >
-          <div style={{ backgroundColor: '#FFF', padding: 20 }}>
-            <Route
-              path="/"
-              exact
-              render={props => (
-                <Slots
-                  {...props}
-                  {...this.props}
-                  balance={psc && psc.balance}
-                />
-              )}
-            />
-            <Route
-              path="/deposit"
-              exact
-              render={props => <Deposit {...props} {...this.props} />}
-            />
-            <Route
-              path="/registerToken"
-              exact
-              render={props => <RegisterToken {...props} {...this.props} />}
-            />
-            <Route
-              path="/faucet"
-              exact
-              render={props => <Faucet {...props} {...this.props} />}
-            />
-            <Route
-              path="/info"
-              exact
-              render={props => <Info {...props} {...this.props} />}
-            />
-          </div>
-        </Layout.Content>
-        <Layout.Footer>© PARSEC Labs {new Date().getFullYear()}</Layout.Footer>
-      </Layout>
+      <AppLayout>
+        <Route path={`${match.path}/`} exact component={Slots} />
+        <Route path={`${match.path}/deposit`} exact component={Deposit} />
+        <Route
+          path={`${match.path}/registerToken`}
+          exact
+          component={RegisterToken}
+        />
+        <Route path={`${match.path}/faucet`} exact component={Faucet} />
+        <Route path={`${match.path}/info`} exact component={Info} />
+      </AppLayout>
     );
   }
 }
@@ -170,10 +70,9 @@ App.propTypes = {
   // > Make sure to mark userStore as an optional property.
   // > It should not (necessarily) be passed in by parent components at all!
   // https://github.com/mobxjs/mobx-react#with-typescript
-  psc: PropTypes.object,
-  bridge: PropTypes.object,
   account: PropTypes.object,
-  location: PropTypes.object.isRequired,
+  bridge: PropTypes.object,
+  match: PropTypes.object,
 };
 
-export default withRouter(App);
+export default App;
