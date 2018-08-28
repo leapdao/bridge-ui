@@ -10,7 +10,7 @@ import Web3 from 'web3';
 import { observable, action, computed } from 'mobx';
 import autobind from 'autobind-decorator';
 import getParsecWeb3 from '../utils/getParsecWeb3';
-
+import { Tx } from 'parsec-lib';
 
 export default class Explorer {
   private web3: Web3;
@@ -107,12 +107,14 @@ export default class Explorer {
       this.cache[block.number.toString()] = block;
       this.cache[block.hash] = block;
       block.transactions.map(tx => {
+        tx = {...tx, ...Tx.fromRaw(tx.raw)};
         localStorage.setItem("PSC:" + tx.hash, JSON.stringify(tx));
         this.cache[tx.hash] = tx;
       })
       return block;
     }
     if (tx) {
+      tx = {...tx, ...Tx.fromRaw(tx.raw)};
       localStorage.setItem("PSC:" + hashOrNumber, JSON.stringify(tx));
       this.cache[hashOrNumber] = tx;
       return tx;

@@ -84,6 +84,7 @@
     "mobx-react": "^5.2.3",
     "preact": "^8.3.1",
     "preact-compat": "^3.18.3",
+    "parsec-lib": "0.15.0",
     "prop-types": "^15.6.1",
     "query-string": "^6.1.0",
     "react": "^16.4.0",
