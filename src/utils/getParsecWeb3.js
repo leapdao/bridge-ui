@@ -6,13 +6,13 @@
  */
 
 import Web3 from 'web3';
-import { PNODES, DEFAULT_PNODE } from '.';
+import { PARSEC_NODES, DEFAULT_PARSEC_NODE } from '.';
 
 let web3;
 
 export default () => {
   if (!web3) {
-    const node = PNODES[process.env.PNODE || DEFAULT_PNODE];
+    const node = PARSEC_NODES[process.env.PARSEC_NODE || DEFAULT_PARSEC_NODE];
     web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(node));
   }

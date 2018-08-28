@@ -9,31 +9,32 @@ import Block from './block';
 import Address from './address';
 import Transaction from './transaction';
 
-const Active = inject('explorer')(
-  observer(({ explorer }) => {
-    const branch = {
-      BLOCK: <Block />,
-      TRANSACTION: <Transaction />,
-      ADDRESS: <Address />,
-    };
-    const error = 'No results found for your search.';
-    const init = 'Syncing state with node, this may take some time...';
+const Active = ({ explorer }) => {
+  const branch = {
+    BLOCK: <Block />,
+    TRANSACTION: <Transaction />,
+    ADDRESS: <Address />,
+  };
 
-    return (
-      <div>
-        {!explorer.success && <Alert type="error" message={error} />}
-        {!explorer.initialSync ? (
-          branch[explorer.currentType]
-        ) : (
-          <Alert type="info" message={init} />
-        )}
-      </div>
-    );
-  })
-);
+  return (
+    <div>
+      {!explorer.success && (
+        <Alert type="error" message="No results found for your search." />
+      )}
+      {!explorer.initialSync ? (
+        branch[explorer.currentType]
+      ) : (
+        <Alert
+          type="info"
+          message="Syncing state with node, this may take some time..."
+        />
+      )}
+    </div>
+  );
+};
 
 Active.propTypes = {
   explorer: PropTypes.any,
 };
 
-export default Active;
+export default inject('explorer')(observer(Active));
