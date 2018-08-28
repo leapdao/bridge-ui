@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, computed, IObservableArray } from 'mobx';
+import { observable, action, computed, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
 import { range } from '../utils';
@@ -23,8 +23,12 @@ export default class Tokens {
     this.account = account;
     this.bridge = bridge;
 
-    this.loadTokens();
+    reaction(() => this.bridge.contract, this.init);
+  }
 
+  @autobind
+  private init() {
+    this.loadTokens();
     this.bridge.contract.events.NewToken({}, this.loadTokens.bind(this));
   }
 
