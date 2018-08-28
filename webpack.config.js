@@ -1,5 +1,6 @@
 /* eslint-disable global-require */
 
+const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
@@ -16,12 +17,12 @@ module.exports = {
     extensions: ['.js', '.ts'],
     alias: {
       'bn.js': require.resolve('bn.js'),
-      react: 'preact-compat',
-      'react-dom': 'preact-compat',
-      // Not necessary unless you consume a module using `createClass`
-      'create-react-class': 'preact-compat/lib/create-react-class',
-      // Not necessary unless you consume a module requiring `react-dom-factories`
-      'react-dom-factories': 'preact-compat/lib/react-dom-factories',
+      // react: 'preact-compat',
+      // 'react-dom': 'preact-compat',
+      // // Not necessary unless you consume a module using `createClass`
+      // 'create-react-class': 'preact-compat/lib/create-react-class',
+      // // Not necessary unless you consume a module requiring `react-dom-factories`
+      // 'react-dom-factories': 'preact-compat/lib/react-dom-factories',
     },
   },
   module: {
@@ -188,5 +189,6 @@ module.exports = {
     new ExtractTextPlugin({
       filename: 'main.css',
     }),
+    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR']),
   ],
 };
