@@ -34,7 +34,6 @@ export default class Token extends ContractStore {
   @observable public tokens: IObservableArray<Token>;
 
   private account: Account;
-  private txs: Transactions;
 
   public color: number;
   @observable public name: string;
@@ -42,12 +41,11 @@ export default class Token extends ContractStore {
   @observable public decimals: number;
   @observable public balance?: number;
 
-  constructor(account: Account, txs: Transactions, address: string, color: number) {
-    super(tokenAbi, address);
+  constructor(account: Account, transactions: Transactions, address: string, color: number) {
+    super(tokenAbi, address, transactions);
 
     this.account = account;
     this.color = color;
-    this.txs = txs;
 
     autorun(this.loadBalance);
     tokenInfo(this.contract).then(this.setInfo);
