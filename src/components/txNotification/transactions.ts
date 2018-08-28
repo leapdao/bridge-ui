@@ -7,11 +7,11 @@
 
 import { action, observable, ObservableMap, runInAction } from 'mobx';
 import autobind from 'autobind-decorator';
-import { TxStatus, InflightTxPromise } from "./types";
+import { TxStatus, DetailedInflightTxReceipt } from "./types";
 
 
 export default class Transactions {
-  @observable public map: ObservableMap<string, InflightTxPromise>;
+  @observable public map: ObservableMap<string, DetailedInflightTxReceipt>;
 
   constructor() {
     this.map = observable.map({});
@@ -19,33 +19,31 @@ export default class Transactions {
 
   @autobind
   @action
-  public update(key, tx: InflightTxPromise) {
-    const prevTx = this.map.get(key) || { tx: null };
-    if (!prevTx.tx) {
-      tx.key = key;
-      tx.status = TxStatus.CREATED;  
+  public update(newTx: DetailedInflightTxReceipt) {
+    const oldTx = this.map.get(newTx.key) || { key: newTx.key, futureReceipt: null };
+    if (!oldTx.futureReceipt) {
+      newTx.status = TxStatus.CREATED;
     }
-    if (!prevTx.tx && tx.tx) {
-      tx.tx.once('error', (e: Error) => {
+    if (!oldTx.futureReceipt && newTx.futureReceipt) {
+      newTx.futureReceipt.once('error', (e: Error) => {
         if (e.message.indexOf('User denied transaction signature')) {
-          this.setStatus(prevTx, TxStatus.CANCELLED);    
+          this.setStatus(newTx, TxStatus.CANCELLED);
         } else {
-          this.setStatus(prevTx, TxStatus.FAILED);
+          this.setStatus(newTx, TxStatus.FAILED);
         }
       });
-
-      tx.tx.once('transactionHash', () => {
-        this.setStatus(prevTx, TxStatus.INFLIGHT);
+      newTx.futureReceipt.once('transactionHash', () => {
+        this.setStatus(newTx, TxStatus.INFLIGHT);
       });
-      tx.tx.then(({ status }) => {
+      newTx.futureReceipt.then(({ status }) => {
         const statusCode = status ? TxStatus.SUCCEED : TxStatus.FAILED;
-        this.setStatus(prevTx, statusCode);
+        this.setStatus(newTx, statusCode);
       })
     }
-    this.map.set(key, Object.assign(prevTx, tx));
+    this.map.set(newTx.key, Object.assign(oldTx, newTx));
   }
 
-  private setStatus(tx: InflightTxPromise, status: TxStatus) {
+  private setStatus(tx: DetailedInflightTxReceipt, status: TxStatus) {
     runInAction(() => {
       this.map.set(tx.key, Object.assign(tx, { status }));      
     });

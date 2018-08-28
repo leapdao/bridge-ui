@@ -15,7 +15,7 @@ import { txSuccess } from '../utils';
 import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
-import { InflightTxPromise } from '../components/txNotification/types';
+import { InflightTxReceipt } from '../utils/types';
 
 const tokenInfo = (token: Contract): Promise<[string, string, string]> => {
   return Promise.all([
@@ -85,18 +85,18 @@ export default class Token extends ContractStore {
     to: string,
     value: BigNumber,
     data: string
-  ): Promise<InflightTxPromise> {
+  ): Promise<InflightTxReceipt> {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
 
     return this.maybeApprove(to, value).then(() => {
-      const tx = this.iWeb3.eth.sendTransaction({
+      const futureReceipt = this.iWeb3.eth.sendTransaction({
         from: this.account.address,
         to,
         data,
       });
-      return { tx }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
+      return { futureReceipt }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
     });
   }
 
@@ -137,13 +137,11 @@ export default class Token extends ContractStore {
       .then(allowance => {
         if (Number(allowance) >= value.toNumber()) return;
 
-
         const tx = this.iContract.methods
           .approve(spender, new BigNumber(2 ** 255))
           .send({ from: this.account.address });
 
-        this.txs.update("approve", { 
-          tx,
+        this.watchTx(tx, 'approve', {
           message: 'Approve bridge to transfer PSC',
           description: 'Before you process with your tx, you need to sign a ' +
                         'transaction to allow the bridge contract to transfer your PSC.',

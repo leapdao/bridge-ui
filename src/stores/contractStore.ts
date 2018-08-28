@@ -1,16 +1,20 @@
 import { computed, observable } from 'mobx';
 import Web3 from 'web3';
-import { Contract } from 'web3/types';
+import { Contract, PromiEvent, TransactionReceipt } from 'web3/types';
+import Transactions from '../components/txNotification/transactions';
 import getWeb3 from '../utils/getWeb3';
+import { InflightTxReceipt } from '../utils/types';
 
 export default class ContractStore {
   @observable public address: string;
   public abi: any[];
   public iWeb3?: Web3;
+  public transactions: Transactions;
 
-  constructor(abi: any[], address: string) {
+  constructor(abi: any[], address: string, transactions: Transactions) {
     this.abi = abi;
     this.address = address;
+    this.transactions = transactions;
   }
 
   @computed
@@ -26,4 +30,26 @@ export default class ContractStore {
       return new this.iWeb3.eth.Contract(this.abi, this.address);
     }
   }
+
+  public watchTx(
+    txReceiptPromise: Promise<InflightTxReceipt> | PromiEvent<TransactionReceipt>,
+    key: string,
+    metadata: object
+  ) {
+    const promise = (
+      !!txReceiptPromise['once'] // check if we have PromiEvent<TransactionReceipt> ?
+      ? Promise.resolve({ futureReceipt: txReceiptPromise })
+      : txReceiptPromise
+    ) as Promise<InflightTxReceipt>;
+
+    promise
+      .then(inflightTxReceipt => {
+        this.transactions.update({
+          ...metadata,
+          key,
+          futureReceipt: inflightTxReceipt.futureReceipt,
+        });
+      });
+  }
+
 }

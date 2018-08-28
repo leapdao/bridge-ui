@@ -8,9 +8,9 @@ export enum TxStatus {
   CANCELLED
 } 
 
-export declare interface InflightTxPromise {
-  key?: string,
-  tx: PromiEvent<TransactionReceipt>,
+export declare interface DetailedInflightTxReceipt {
+  key: string,
+  futureReceipt: PromiEvent<TransactionReceipt>,
   message?: string,
   description?: string,
   status?: TxStatus

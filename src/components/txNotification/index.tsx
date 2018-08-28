@@ -7,22 +7,21 @@
 import 'antd/dist/antd.css';
 
 import React from 'react';
-import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
+import { observer, inject } from 'mobx-react';
 import { notification } from 'antd';
 import { TxStatus } from './types';
 
+const statusDetails = {
+  [TxStatus.CREATED]: { text: 'Waiting for signature..', icon: 'warning' },
+  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: 'info' },
+  [TxStatus.SUCCEED]: { text: 'Success', icon: 'success' },
+  [TxStatus.FAILED]: { text: 'Transaction failed', icon: 'error' },
+  [TxStatus.CANCELLED]: { text: 'Cancelled', icon: 'error' },
+};
 
-const statusDetails = {};
-statusDetails[TxStatus.CREATED] = { text: 'Waiting for signature..', icon: 'warning' };
-statusDetails[TxStatus.INFLIGHT] = { text: 'Mining..', icon: 'info' };
-statusDetails[TxStatus.SUCCEED] = { text: 'Success', icon: 'success' };
-statusDetails[TxStatus.FAILED] = { text: 'Transaction failed', icon: 'error' };
-statusDetails[TxStatus.CANCELLED] = { text: 'Cancelled', icon: 'error' };
-
-const TxNotification = ({ txs }) => {
-  txs.observe((txChange) => {
-
+const TxNotification = ({ transactions }) => {
+  transactions.map.observe((txChange) => {
     if (txChange.type === 'delete') {
       notification.close(txChange.name);
       return;
@@ -50,9 +49,7 @@ const TxNotification = ({ txs }) => {
 };
 
 TxNotification.propTypes = {
-  txs: PropTypes.object,
+  transactions: PropTypes.object,
 };
 
-export default inject(stores => ({
-  txs: stores.transactions.map,
-}))(observer(TxNotification));
+export default inject('transactions')(observer(TxNotification));
