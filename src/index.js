@@ -40,7 +40,16 @@ ReactDOM.render(
           exact
           render={() => <Redirect to={`/${process.env.BRIDGE_ADDR}`} />}
         />
-        <Route path="/:bridgeAddr" component={App} />
+        <Route
+          path="/:bridgeAddr"
+          render={props => {
+            const section = props.match.params.bridgeAddr;
+            if (/0x[0-9a-fA-f]{40}/.test(section)) {
+              return <App {...props} />;
+            }
+            return <Redirect to={`/${process.env.BRIDGE_ADDR}/${section}`} />;
+          }}
+        />
       </Fragment>
     </Provider>
   </BrowserRouter>,
