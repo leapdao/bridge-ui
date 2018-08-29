@@ -16,6 +16,7 @@ import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
+import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 
 import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
@@ -72,12 +73,14 @@ export default class Bridge extends ContractStore {
     this.account = account;
 
     reaction(() => this.contract, this.init);
+    reaction(() => this.events, () => {
+      this.events.on('allEvents', this.loadContractData.bind(this));
+    });
   }
 
   @autobind
   private init() {
     this.loadContractData();
-    this.contract.events.allEvents({}, this.loadContractData.bind(this));
   }
 
   @autobind

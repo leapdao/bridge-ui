@@ -1,20 +1,35 @@
-import { computed, observable } from 'mobx';
+import { computed, observable, reaction } from 'mobx';
 import Web3 from 'web3';
 import { Contract, PromiEvent, TransactionReceipt } from 'web3/types';
 import Transactions from '../components/txNotification/transactions';
 import getWeb3 from '../utils/getWeb3';
 import { InflightTxReceipt } from '../utils/types';
+import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 
 export default class ContractStore {
   @observable public address: string;
   public abi: any[];
   public iWeb3?: Web3;
   public transactions: Transactions;
+  private activeEventSub: ContractEventsSubscription;
 
   constructor(abi: any[], address: string, transactions: Transactions) {
     this.abi = abi;
     this.address = address;
     this.transactions = transactions;
+  }
+
+  @computed
+  public get events(): ContractEventsSubscription | undefined {
+    if (!this.contract.options.address) return;
+    console.log(`Setting up event listener for contract at ${this.contract.options.address}..`);
+    if (this.activeEventSub) {
+      console.log('Stopping the old subscription..');
+      this.activeEventSub.stop();
+    }
+    this.activeEventSub = new ContractEventsSubscription(this.contract, getWeb3());
+    this.activeEventSub.start();
+    return this.activeEventSub;
   }
 
   @computed

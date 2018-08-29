@@ -27,12 +27,14 @@ export default class Tokens {
     this.txs = txs;
 
     reaction(() => this.bridge.contract, this.init);
+    reaction(() => this.bridge.events, () => {
+      this.bridge.events.on('NewToken', this.loadTokens.bind(this));
+    });
   }
 
   @autobind
   private init() {
     this.loadTokens();
-    this.bridge.contract.events.NewToken({}, this.loadTokens.bind(this));
   }
 
   @autobind
@@ -47,7 +49,7 @@ export default class Tokens {
   }
 
   @computed
-  public get ready() {
+  public get ready() {    
     if (!this.list) {
       return false;
     }
