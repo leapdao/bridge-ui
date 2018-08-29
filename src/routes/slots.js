@@ -85,9 +85,7 @@ export default class Slots extends React.Component {
   handleBet(slotId) {
     const { psc, bridge } = this.props;
     const { signerAddr, tenderPubKey } = this.state;
-    const stake = new BigNumber(this.state.stakes[slotId]).mul(
-      10 ** psc.decimals
-    );
+    const stake = psc.toCents(this.state.stakes[slotId]);
 
     bridge
       .bet(psc, slotId, stake, signerAddr, tenderPubKey)
@@ -189,8 +187,7 @@ export default class Slots extends React.Component {
             'Stake',
             'stake',
             'newStake',
-            val =>
-              psc && `${val.div(10 ** psc.decimals).toNumber()} ${psc.symbol}`
+            val => psc && `${psc.toTokens(val)} ${psc.symbol}`
           )}
           {this.renderRow('Act. epoch', 'activationEpoch')}
           {psc &&
@@ -201,7 +198,7 @@ export default class Slots extends React.Component {
                   const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
                     1.05
                   );
-                  const minValue = minStake.div(10 ** psc.decimals).toNumber();
+                  const minValue = psc.toTokens(minStake);
                   const ownStake = addrCmp(slot.owner, account.address || '')
                     ? minValue
                     : 0;

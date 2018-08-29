@@ -8,5 +8,9 @@ export const NETWORKS = {
 
 export const DEFAULT_NETWORK = '4';
 
+export const NFT_COLOR_BASE = 32769; // 2^15 + 1
+
+export const isNFT = color => color >= NFT_COLOR_BASE;
+
 export { range } from './range.ts';
 export { txSuccess } from './txSuccess.ts';
