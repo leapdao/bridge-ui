@@ -71,6 +71,9 @@ export default class Tokens {
           )
         )
       )
-      .then(this.addTokens);
+      .then((tokens: Array<Token>) => {
+        if (this.list) this.list.clear();
+        return this.addTokens(tokens);
+      });
   }
 }
