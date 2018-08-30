@@ -142,9 +142,9 @@ export default class Token extends ContractStore {
           .send({ from: this.account.address });
 
         this.watchTx(tx, 'approve', {
-          message: 'Approve bridge to transfer PSC',
+          message: `Approve bridge to transfer ${this.symbol}`,
           description: 'Before you process with your tx, you need to sign a ' +
-                        'transaction to allow the bridge contract to transfer your PSC.',
+                        `transaction to allow the bridge contract to transfer your ${this.symbol}.`,
         });
 
         return txSuccess(tx);
