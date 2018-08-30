@@ -73,9 +73,12 @@ export default class Bridge extends ContractStore {
     this.account = account;
 
     reaction(() => this.contract, this.init);
-    reaction(() => this.events, () => {
-      this.events.on('allEvents', this.loadContractData.bind(this));
-    });
+    reaction(
+      () => this.events,
+      () => {
+        this.events.on('allEvents', this.loadContractData.bind(this));
+      }
+    );
   }
 
   @autobind
@@ -106,8 +109,12 @@ export default class Bridge extends ContractStore {
       .deposit(this.account.address, amount, token.color)
       .encodeABI();
 
-    const inflightTxReceiptPromise = token.approveAndCall(this.address, amount, data);
-    
+    const inflightTxReceiptPromise = token.approveAndCall(
+      this.address,
+      amount,
+      data
+    );
+
     this.watchTx(inflightTxReceiptPromise, 'deposit', {
       message: 'Deposit tokens to the bridge',
     });
@@ -123,10 +130,14 @@ export default class Bridge extends ContractStore {
     tendermint: string
   ): Promise<InflightTxReceipt> {
     const data = this.contract.methods
-      .bet(slotId, stake, signerAddr, `0x${tendermint}`, this.account.address)
+      .bet(slotId, stake, signerAddr, `0x${tendermint}`)
       .encodeABI();
 
-    const inflightTxReceiptPromise = token.approveAndCall(this.address, stake, data);
+    const inflightTxReceiptPromise = token.approveAndCall(
+      this.address,
+      stake,
+      data
+    );
 
     this.watchTx(inflightTxReceiptPromise, 'bet', {
       message: 'Place a bet to the bridge contract',

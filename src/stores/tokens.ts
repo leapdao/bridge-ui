@@ -8,7 +8,7 @@
 import { observable, action, computed, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
-import { range } from '../utils';
+import { range, NFT_COLOR_BASE } from '../utils';
 import Account from './account';
 import Token from './token';
 import Bridge from './bridge';
@@ -20,11 +20,16 @@ export default class Tokens {
   private account: Account;
   private bridge: Bridge;
   private txs: Transactions;
+  private erc20TokenCount: number;
+  private nftTokenCount: number;
 
   constructor(account: Account, bridge: Bridge, txs: Transactions) {
     this.account = account;
     this.bridge = bridge;
     this.txs = txs;
+
+    this.erc20TokenCount = 0;
+    this.nftTokenCount = 0;
 
     reaction(() => this.bridge.contract, this.init);
     reaction(() => this.bridge.events, () => {
@@ -56,23 +61,28 @@ export default class Tokens {
     return !this.list.some(token => !token.ready);
   }
 
+  private loadTokenColorRange(from: number, to: number): Promise<Token>[] {
+    return (range(from, to) as number[]).map(color => {
+      return this.bridge.contract.methods
+          .tokens(color)
+          .call()
+          .then(({ 0: address }) => new Token(this.account, this.txs, address, color));
+    });
+  }
+
   public loadTokens() {
-    return this.bridge.contract.methods
-      .tokenCount()
-      .call()
-      .then((tokenCount: number) =>
-        Promise.all(
-          (range(
-            this.list ? this.list.length : 0,
-            tokenCount - 1
-          ) as number[]).map(pos =>
-            this.bridge.contract.methods
-              .tokens(pos)
-              .call()
-              .then(({ 0: address }) => new Token(this.account, this.txs, address, pos))
-          )
-        )
-      )
-      .then(this.addTokens);
+    return Promise.all([
+      this.bridge.contract.methods.erc20TokenCount().call().then(r => Number(r)),
+      this.bridge.contract.methods.nftTokenCount().call().then(r => Number(r)),
+    ]).then(([erc20TokenCount, nftTokenCount]) => {
+      // load new tokens for ERC20 and ERC721 color ranges
+      const tokens = Promise.all([
+        ...this.loadTokenColorRange(this.erc20TokenCount, erc20TokenCount - 1),
+        ...this.loadTokenColorRange(NFT_COLOR_BASE + this.nftTokenCount, NFT_COLOR_BASE + nftTokenCount - 1),        
+      ]);
+      this.erc20TokenCount = erc20TokenCount;
+      this.nftTokenCount = nftTokenCount;
+      return tokens;
+    }).then(this.addTokens);
   }
 }

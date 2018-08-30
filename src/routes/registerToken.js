@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { List, Form, Input, Button } from 'antd';
+import { List, Form, Input, Button, Icon } from 'antd';
 
 import { isValidAddress } from 'ethereumjs-util';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
@@ -16,7 +16,18 @@ import Web3SubmitWarning from '../components/web3SubmitWarning';
 const Item = observer(({ item }) => (
   <List.Item key={item.address}>
     <List.Item.Meta
-      title={`${item.name} (${item.symbol})`}
+      title={
+        <Fragment>
+          {item.name} ({item.symbol})
+          {item.isNft && (
+            <Icon
+              type="trophy"
+              style={{ color: 'lightgray', marginLeft: '5px' }}
+              title="Non-fungible token"
+            />
+          )}
+        </Fragment>
+      }
       description={item.address}
     />
   </List.Item>

@@ -9,7 +9,6 @@ import React, { Fragment } from 'react';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import BigNumber from 'bignumber.js';
 import { Select, Form, Input, Button } from 'antd';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
@@ -26,17 +25,17 @@ export default class Deposit extends React.Component {
 
     this.state = {
       value: 0,
-      selectedColor: 0,
+      selectedIdx: 0,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
   }
 
   @computed
   get selectedToken() {
-    const { selectedColor } = this.state;
+    const { selectedIdx } = this.state;
     const { tokens } = this.props;
-    if (tokens.list[selectedColor] && tokens.list[selectedColor].ready) {
-      return tokens.list[selectedColor];
+    if (tokens.list[selectedIdx] && tokens.list[selectedIdx].ready) {
+      return tokens.list[selectedIdx];
     }
 
     return undefined;
@@ -45,10 +44,7 @@ export default class Deposit extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     const { bridge } = this.props;
-    const value = new BigNumber(this.state.value).mul(
-      10 ** this.selectedToken.decimals
-    );
-
+    const value = this.selectedToken.toCents(this.state.value);
     bridge.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
@@ -57,9 +53,19 @@ export default class Deposit extends React.Component {
     });
   }
 
+  canSubmitValue(value) {
+    const { network } = this.props;
+
+    return (
+      network.canSubmit ||
+      value ||
+      (this.selectedToken.isNft || value <= this.selectedToken.balance)
+    );
+  }
+
   render() {
-    const { network, tokens } = this.props;
-    const { value, selectedColor } = this.state;
+    const { tokens } = this.props;
+    const { value, selectedIdx } = this.state;
 
     if (!tokens.ready) {
       return null;
@@ -79,12 +85,17 @@ export default class Deposit extends React.Component {
 
     const tokenSelect = (
       <Select
-        defaultValue={selectedColor}
+        defaultValue={selectedIdx}
         style={{ width: 80 }}
-        onChange={color => this.setState({ selectedColor: color })}
+        onChange={idx =>
+          this.setState({
+            selectedIdx: idx,
+            value: tokens.list[idx].isNft ? '' : value,
+          })
+        }
       >
-        {tokens.list.map(token => (
-          <Select.Option key={token} value={token.color}>
+        {tokens.list.map((token, idx) => (
+          <Select.Option key={token} value={idx}>
             {token.symbol}
           </Select.Option>
         ))}
@@ -97,12 +108,23 @@ export default class Deposit extends React.Component {
 
         <Web3SubmitWarning />
 
+        {this.selectedToken.isNft && (
+          <p>
+            {this.selectedToken.name} is non-fungible token. Please enter
+            tokenId to deposit
+          </p>
+        )}
+
         <Form onSubmit={this.handleSubmit} layout="inline">
           <Form.Item>
             <Input
+              placeholder={
+                this.selectedToken.isNft ? 'token id' : 'amount to deposit'
+              }
               value={value}
               onChange={e => this.setState({ value: e.target.value })}
               onBlur={() =>
+                !this.selectedToken.isNft &&
                 this.setState(state => ({ value: Number(state.value) || 0 }))
               }
               addonAfter={tokenSelect}
@@ -114,11 +136,7 @@ export default class Deposit extends React.Component {
             <Button
               htmlType="submit"
               type="primary"
-              disabled={
-                !network.canSubmit ||
-                !value ||
-                value > this.selectedToken.balance
-              }
+              disabled={!this.canSubmitValue(value)}
             >
               Deposit
             </Button>
