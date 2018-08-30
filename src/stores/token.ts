@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, autorun, computed, IObservableArray } from 'mobx';
+import { observable, action, reaction, computed, autorun, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import { Contract, EventLog } from 'web3/types';
@@ -47,13 +47,15 @@ export default class Token extends ContractStore {
     this.account = account;
     this.color = color;
 
-    autorun(this.loadBalance);
-    tokenInfo(this.contract).then(this.setInfo);
+    autorun(() => {
+      this.loadBalance();
+      tokenInfo(this.contract).then(this.setInfo);
 
-    this.contract.events.Transfer({}, (_, event: EventLog) => {
-      if (isOurTransfer(event, this.account)) {
-        this.loadBalance();
-      }
+      this.events.on('Transfer', (event: EventLog) => {
+        if (isOurTransfer(event, this.account)) {
+          this.loadBalance();
+        }
+      });
     });
   }
 
