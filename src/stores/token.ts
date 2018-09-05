@@ -204,7 +204,7 @@ export default class Token extends ContractStore {
       this.watchTx(tx, 'approve', {
         message: `Approve bridge to transfer ${this.symbol}`,
         description:
-          'Before you process with your tx, you need to sign a ' +
+          'Before you proceed with your tx, you need to sign a ' +
           `transaction to allow the bridge contract to transfer your ${
             this.symbol
           }.`,
