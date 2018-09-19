@@ -42,7 +42,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { account, match } = this.props;
+    const { account, match, explorer } = this.props;
 
     if (!account.ready) {
       return (
@@ -65,8 +65,10 @@ class App extends React.Component {
         <Route path={`${match.path}/explorer`} exact component={Explorer} />
         <Route
           path={`${match.path}/explorer/:search`}
-          exact
-          component={Explorer}
+          render={props => {
+            explorer.search(props.match.params.search);
+            return <Explorer match={props.match} />;
+          }}
         />
       </AppLayout>
     );
@@ -81,6 +83,7 @@ App.propTypes = {
   account: PropTypes.object,
   bridge: PropTypes.object,
   match: PropTypes.object,
+  explorer: PropTypes.object,
 };
 
 export default App;

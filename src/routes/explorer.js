@@ -19,14 +19,11 @@ import Active from '../components/explorer/active';
 }))
 @observer
 export default class Explorer extends React.Component {
-  componentWillReceiveProps(nextProps) {
-    const { explorer } = this.props;
-    explorer.search(nextProps.match.params.search);
-  }
-
-  @observable value;
+  @observable
+  value;
 
   render() {
+    // console.log(this.props.match);
     const { explorer } = this.props;
 
     return (
@@ -57,5 +54,4 @@ export default class Explorer extends React.Component {
 
 Explorer.propTypes = {
   explorer: PropTypes.object,
-  match: PropTypes.object,
 };
