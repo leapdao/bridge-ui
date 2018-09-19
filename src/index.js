@@ -29,6 +29,8 @@ if (!process.env.BRIDGE_ADDR) {
   );
 }
 
+const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
+
 const transactions = new Transactions();
 const account = new Account();
 const bridge = new Bridge(account, transactions);
@@ -50,10 +52,14 @@ ReactDOM.render(
           path="/:bridgeAddr"
           render={props => {
             const section = props.match.params.bridgeAddr;
-            if (/0x[0-9a-fA-f]{40}/.test(section)) {
+            if (ADDR_REGEX.test(section)) {
               return <App {...props} />;
             }
-            return <Redirect to={`/${process.env.BRIDGE_ADDR}/${section}`} />;
+            return (
+              <Redirect
+                to={`/${process.env.BRIDGE_ADDR}${props.location.pathname}`}
+              />
+            );
           }}
         />
       </Fragment>

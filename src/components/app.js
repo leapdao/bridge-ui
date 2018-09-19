@@ -64,8 +64,9 @@ class App extends React.Component {
         <Route path={`${match.path}/info`} exact component={Info} />
         <Route path={`${match.path}/explorer`} exact component={Explorer} />
         <Route
-              path={`${match.path}/explorer/:search`}
-              render={props => <Explorer {...this.props} {...props} />}
+          path={`${match.path}/explorer/:search`}
+          exact
+          component={Explorer}
         />
       </AppLayout>
     );
