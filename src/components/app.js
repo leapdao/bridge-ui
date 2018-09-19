@@ -67,7 +67,7 @@ class App extends React.Component {
           path={`${match.path}/explorer/:search`}
           render={props => {
             explorer.search(props.match.params.search);
-            return <Explorer match={props.match} />;
+            return <Explorer />;
           }}
         />
       </AppLayout>

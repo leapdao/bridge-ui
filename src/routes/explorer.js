@@ -23,7 +23,6 @@ export default class Explorer extends React.Component {
   value;
 
   render() {
-    // console.log(this.props.match);
     const { explorer } = this.props;
 
     return (
