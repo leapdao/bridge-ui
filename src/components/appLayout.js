@@ -64,6 +64,9 @@ class AppLayout extends React.Component {
             <Menu.Item key="info">
               <Link to={`${match.url}/info`}>Chain info</Link>
             </Menu.Item>
+            <Menu.Item key="explorer">
+              <Link to={`${match.url}/explorer`}>Explorer</Link>
+            </Menu.Item>
           </Menu>
         )}
       />

@@ -6,11 +6,17 @@ export const NETWORKS = {
   4447: { name: 'Truffle', provider: 'http://localhost:9545' },
 };
 
+export const PARSEC_NODES = {
+  1: 'https://testnet-1.parseclabs.org',
+};
+
 export const DEFAULT_NETWORK = '4';
 
 export const NFT_COLOR_BASE = 32769; // 2^15 + 1
 
 export const isNFT = color => color >= NFT_COLOR_BASE;
+
+export const DEFAULT_PARSEC_NODE = '1';
 
 export { range } from './range.ts';
 export { txSuccess } from './txSuccess.ts';

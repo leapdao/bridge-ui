@@ -19,6 +19,7 @@ import Account from './stores/account.ts';
 import Network from './stores/network.ts';
 import Transactions from './components/txNotification/transactions.ts';
 import TxNotification from './components/txNotification/index.tsx';
+import Explorer from './stores/explorer.ts';
 
 import App from './components/app';
 
@@ -28,15 +29,18 @@ if (!process.env.BRIDGE_ADDR) {
   );
 }
 
+const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
+
 const transactions = new Transactions();
 const account = new Account();
 const bridge = new Bridge(account, transactions);
 const tokens = new Tokens(account, bridge, transactions);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
+const explorer = new Explorer();
 
 ReactDOM.render(
   <BrowserRouter>
-    <Provider {...{ account, tokens, bridge, network, transactions }}>
+    <Provider {...{ account, tokens, bridge, network, transactions, explorer }}>
       <Fragment>
         <TxNotification />
         <Route
@@ -48,10 +52,14 @@ ReactDOM.render(
           path="/:bridgeAddr"
           render={props => {
             const section = props.match.params.bridgeAddr;
-            if (/0x[0-9a-fA-f]{40}/.test(section)) {
+            if (ADDR_REGEX.test(section)) {
               return <App {...props} />;
             }
-            return <Redirect to={`/${process.env.BRIDGE_ADDR}/${section}`} />;
+            return (
+              <Redirect
+                to={`/${process.env.BRIDGE_ADDR}${props.location.pathname}`}
+              />
+            );
           }}
         />
       </Fragment>
