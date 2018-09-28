@@ -65,8 +65,10 @@ const readSlots = (bridge: Contract) => {
 export default class Bridge extends ContractStore {
   private account: Account;
 
-  @observable public slots: IObservableArray<Slot> = observable.array([]);
-  @observable public lastCompleteEpoch: number;
+  @observable
+  public slots: IObservableArray<Slot> = observable.array([]);
+  @observable
+  public lastCompleteEpoch: number;
 
   constructor(account: Account, transactions: Transactions, address?: string) {
     super(bridgeAbi, address, transactions);
@@ -153,6 +155,18 @@ export default class Bridge extends ContractStore {
 
     this.watchTx(tx, 'registerToken', {
       message: 'Register a new token on the bridge',
+    });
+
+    return tx;
+  }
+
+  public startExit(proof: string[], outIndex: number) {
+    const tx = this.iContract.methods.startExit(proof, outIndex).send({
+      from: this.account.address,
+    });
+
+    this.watchTx(tx, 'startExit', {
+      message: 'Exit',
     });
 
     return tx;

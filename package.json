@@ -82,7 +82,7 @@
     "ethereumjs-util": "^5.2.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
-    "parsec-lib": "0.16.5",
+    "parsec-lib": "0.16.7",
     "preact": "^8.3.1",
     "preact-compat": "^3.18.3",
     "prop-types": "^15.6.1",

@@ -10,14 +10,34 @@ import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Select, Form, Input, Button } from 'antd';
+import Web3 from 'web3';
+import { helpers, Period, Block, Tx } from 'parsec-lib';
+import ethUtil from 'ethereumjs-util';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
+import { range } from '../utils/range.ts';
 
-@inject(stores => ({
-  tokens: stores.tokens,
-  bridge: stores.bridge,
-  network: stores.network,
-}))
+const pWeb3 = helpers.extendWeb3(new Web3('https://testnet-1.parseclabs.org'));
+
+function makePeriodFromRange(startBlock, endBlock) {
+  return Promise.all(
+    range(startBlock, endBlock - 1).map(n => pWeb3.eth.getBlock(n, true))
+  ).then(blocks => {
+    return new Period(
+      null,
+      blocks.map(({ number, timestamp, transactions }) => {
+        const block = new Block(number, {
+          timestamp,
+          txs: transactions.map(tx => Tx.fromRaw(tx.raw)),
+        });
+
+        return block;
+      })
+    );
+  });
+}
+
+@inject('tokens', 'bridge', 'network', 'account')
 @observer
 export default class Deposit extends React.Component {
   constructor(props) {
@@ -26,8 +46,19 @@ export default class Deposit extends React.Component {
     this.state = {
       value: 0,
       selectedIdx: 0,
+      unspent: [],
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+
+    if (props.account && props.account.address) {
+      this.fetchUnspent(props.account.address);
+    }
+  }
+
+  componentWillReceiveProps({ account }) {
+    if (account && account.address) {
+      this.fetchUnspent(account.address);
+    }
   }
 
   @computed
@@ -41,6 +72,27 @@ export default class Deposit extends React.Component {
     return undefined;
   }
 
+  fetchUnspent(address) {
+    pWeb3
+      .getUnspent(address)
+      .then(unspent => {
+        return Promise.all(
+          unspent.map(u =>
+            pWeb3.eth.getTransaction(ethUtil.bufferToHex(u.outpoint.hash))
+          )
+        ).then(transactions => {
+          transactions.forEach((tx, i) => {
+            unspent[i].transaction = tx;
+          });
+
+          return unspent;
+        });
+      })
+      .then(unspent => {
+        this.setState({ unspent });
+      });
+  }
+
   handleSubmit(e) {
     e.preventDefault();
     const { bridge } = this.props;
@@ -50,6 +102,19 @@ export default class Deposit extends React.Component {
         console.log('deposit', depositTxHash); // eslint-disable-line
         this.setState({ value: 0 });
       });
+    });
+  }
+
+  handleExit(i) {
+    const { bridge } = this.props;
+    const u = this.state.unspent[i];
+    const { blockNumber, raw } = u.transaction;
+    const periodNumber = Math.floor(blockNumber / 32);
+    const startBlock = periodNumber * 32;
+    const endBlock = periodNumber * 32 + 32;
+
+    makePeriodFromRange(startBlock, endBlock).then(period => {
+      bridge.startExit(period.proof(Tx.fromRaw(raw)), u.outpoint.index);
     });
   }
 
@@ -65,7 +130,7 @@ export default class Deposit extends React.Component {
 
   render() {
     const { tokens } = this.props;
-    const { value, selectedIdx } = this.state;
+    const { value, selectedIdx, unspent } = this.state;
 
     if (!tokens.ready) {
       return null;
@@ -151,12 +216,29 @@ export default class Deposit extends React.Component {
           <dt>Token balance</dt>
           <dd>{this.selectedToken.decimalsBalance}</dd>
         </dl>
+
+        <hr />
+        <h1>Exit</h1>
+        <ul>
+          {unspent.map((u, i) => (
+            <li key={`${u.outpoint.index}-${u.transaction.hash}`}>
+              Value: {u.output.value}
+              <br />
+              Color: {u.output.color}
+              <br />
+              <Button size="small" onClick={() => this.handleExit(i)}>
+                Exit
+              </Button>
+            </li>
+          ))}
+        </ul>
       </Fragment>
     );
   }
 }
 
 Deposit.propTypes = {
+  account: PropTypes.object,
   tokens: PropTypes.object,
   bridge: PropTypes.object,
   network: PropTypes.object,
