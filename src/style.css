@@ -12,3 +12,25 @@
 .info dt {
   font-weight: bold;
 }
+
+.explorer-nav {
+  margin-bottom: 20px;
+}
+
+.explorer-nav button + button {
+  margin-left: 10px;
+}
+
+.explorer-section h3 {
+  margin-top: 15px;
+  margin-bottom: 0;
+}
+
+.explorer-section .ant-list-item {
+  padding-bottom: 5px;
+  padding-top: 5px;
+}
+
+.explorer-section .ant-list-item .ant-list-item-content {
+  margin-bottom: 5px;
+}
