@@ -43,15 +43,20 @@ const isOurTransfer = (event: EventLog, ourAccount: Account): boolean => {
 };
 
 export default class Token extends ContractStore {
-  @observable public tokens: IObservableArray<Token>;
+  @observable
+  public tokens: IObservableArray<Token>;
 
   private account: Account;
 
   public color: number;
-  @observable public name: string;
-  @observable public symbol: string;
-  @observable public decimals: number;
-  @observable public balance?: number;
+  @observable
+  public name: string;
+  @observable
+  public symbol: string;
+  @observable
+  public decimals: number;
+  @observable
+  public balance?: number;
 
   constructor(
     account: Account,
@@ -168,7 +173,7 @@ export default class Token extends ContractStore {
   private allowanceOrTokenId(valueOrTokenId: number) {
     if (this.isNft) return valueOrTokenId;
 
-    return new BigNumber(2 ** 255);
+    return `0x${new BigNumber(2).pow(255).toString(16)}`;
   }
 
   private hasEnoughAllowance(spender: string, value: number): Promise<Boolean> {

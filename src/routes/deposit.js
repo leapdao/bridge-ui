@@ -25,7 +25,7 @@ function makePeriodFromRange(startBlock, endBlock) {
   ).then(blocks => {
     return new Period(
       null,
-      blocks.map(({ number, timestamp, transactions }) => {
+      blocks.filter(a => !!a).map(({ number, timestamp, transactions }) => {
         const block = new Block(number, {
           timestamp,
           txs: transactions.map(tx => Tx.fromRaw(tx.raw)),
@@ -110,10 +110,12 @@ export default class Deposit extends React.Component {
     const u = this.state.unspent[i];
     const { blockNumber, raw } = u.transaction;
     const periodNumber = Math.floor(blockNumber / 32);
+    console.log('Block %d at period %d', blockNumber, periodNumber);
     const startBlock = periodNumber * 32;
     const endBlock = periodNumber * 32 + 32;
 
     makePeriodFromRange(startBlock, endBlock).then(period => {
+      console.log('Proof', period.proof(Tx.fromRaw(raw)));
       bridge.startExit(period.proof(Tx.fromRaw(raw)), u.outpoint.index);
     });
   }
@@ -225,6 +227,12 @@ export default class Deposit extends React.Component {
               Value: {u.output.value}
               <br />
               Color: {u.output.color}
+              <br />
+              Output hash: {ethUtil.bufferToHex(u.outpoint.hash)}
+              <br />
+              Output index: {u.outpoint.index}
+              <br />
+              Height: {u.transaction.blockNumber}
               <br />
               <Button size="small" onClick={() => this.handleExit(i)}>
                 Exit

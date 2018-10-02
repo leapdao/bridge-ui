@@ -15,7 +15,8 @@ import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
 
 export default class Tokens {
-  @observable public list: IObservableArray<Token>;
+  @observable
+  public list: IObservableArray<Token>;
 
   private account: Account;
   private bridge: Bridge;
@@ -32,9 +33,12 @@ export default class Tokens {
     this.nftTokenCount = 0;
 
     reaction(() => this.bridge.contract, this.init);
-    reaction(() => this.bridge.events, () => {
-      this.bridge.events.on('NewToken', this.loadTokens.bind(this));
-    });
+    reaction(
+      () => this.bridge.events,
+      () => {
+        this.bridge.events.on('NewToken', this.loadTokens.bind(this));
+      }
+    );
   }
 
   @autobind
@@ -54,7 +58,7 @@ export default class Tokens {
   }
 
   @computed
-  public get ready() {    
+  public get ready() {
     if (!this.list) {
       return false;
     }
@@ -64,25 +68,41 @@ export default class Tokens {
   private loadTokenColorRange(from: number, to: number): Promise<Token>[] {
     return (range(from, to) as number[]).map(color => {
       return this.bridge.contract.methods
-          .tokens(color)
-          .call()
-          .then(({ 0: address }) => new Token(this.account, this.txs, address, color));
+        .tokens(color)
+        .call()
+        .then(
+          ({ 0: address }) => new Token(this.account, this.txs, address, color)
+        );
     });
   }
 
   public loadTokens() {
     return Promise.all([
-      this.bridge.contract.methods.erc20TokenCount().call().then(r => Number(r)),
-      this.bridge.contract.methods.nftTokenCount().call().then(r => Number(r)),
-    ]).then(([erc20TokenCount, nftTokenCount]) => {
-      // load new tokens for ERC20 and ERC721 color ranges
-      const tokens = Promise.all([
-        ...this.loadTokenColorRange(this.erc20TokenCount, erc20TokenCount - 1),
-        ...this.loadTokenColorRange(NFT_COLOR_BASE + this.nftTokenCount, NFT_COLOR_BASE + nftTokenCount - 1),        
-      ]);
-      this.erc20TokenCount = erc20TokenCount;
-      this.nftTokenCount = nftTokenCount;
-      return tokens;
-    }).then(this.addTokens);
+      this.bridge.contract.methods
+        .erc20TokenCount()
+        .call()
+        .then(r => Number(r)),
+      this.bridge.contract.methods
+        .nftTokenCount()
+        .call()
+        .then(r => Number(r)),
+    ])
+      .then(([erc20TokenCount, nftTokenCount]) => {
+        // load new tokens for ERC20 and ERC721 color ranges
+        const tokens = Promise.all([
+          ...this.loadTokenColorRange(
+            this.erc20TokenCount,
+            erc20TokenCount - 1
+          ),
+          ...this.loadTokenColorRange(
+            NFT_COLOR_BASE + this.nftTokenCount,
+            NFT_COLOR_BASE + nftTokenCount - 1
+          ),
+        ]);
+        this.erc20TokenCount = erc20TokenCount;
+        this.nftTokenCount = nftTokenCount;
+        return tokens;
+      })
+      .then(this.addTokens);
   }
 }
