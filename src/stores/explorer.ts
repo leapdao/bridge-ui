@@ -10,6 +10,12 @@ import { observable, computed } from 'mobx';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx } from 'parsec-lib';
 
+export enum Types {
+  BLOCK,
+  TRANSACTION,
+  ADDRESS,
+}
+
 export default class Explorer {
   private web3: Web3;
   private cache;
@@ -34,108 +40,124 @@ export default class Explorer {
     this.init();
   }
 
-  public async search(hashOrNumber) {
+  public search(hashOrNumber) {
     this.searching = true;
-    let result;
-    if (this.web3.utils.isAddress(hashOrNumber)) {
-      result = await this.getAddress(hashOrNumber);
-    } else {
-      result = await this.getBlockOrTx(hashOrNumber);
+    (this.web3.utils.isAddress(hashOrNumber)
+      ? this.getAddress(hashOrNumber)
+      : this.getBlockOrTx(hashOrNumber)
+    ).then(result => {
+      this.success = !!result;
+      this.current = result || this.current;
+      this.searching = false;
+    });
+  }
+
+  private static getType(obj) {
+    if (obj) {
+      if (obj.uncles) {
+        return Types.BLOCK;
+      }
+      if (obj.value) {
+        return Types.TRANSACTION;
+      }
+      if (obj.balance) {
+        return Types.ADDRESS;
+      }
     }
-    this.success = !!result;
-    this.current = result || this.current;
-    this.searching = false;
+    return undefined;
   }
 
   @computed
   public get currentType() {
-    if (this.current) {
-      if (this.current.uncles) {
-        return 'BLOCK';
-      }
-      if (this.current.value) {
-        return 'TRANSACTION';
-      }
-      if (this.current.balance) {
-        return 'ADDRESS';
-      }
-    }
-    return undefined;
+    return Explorer.getType(this.current);
   }
 
-  private async init() {
-    this.latestBlock = await this.web3.eth.getBlockNumber();
-    const blocks = [];
-    for (var i = 2; i <= this.latestBlock; i++) {
-      blocks.push(i);
-    }
-    this.blockchain = await Promise.all(
-      blocks.map(nr => this.getBlockOrTx(nr))
-    );
-    if (!this.current) {
-      await this.search(this.latestBlock);
-    }
-    this.initialSync = false;
-  }
-
-  private async getAddress(address) {
-    const balance = await this.web3.eth.getBalance(address);
-    const txs = this.blockchain
-      .map(block => {
-        return block.transactions.map(tx => {
-          return tx.from == address || tx.to == address ? tx : undefined;
-        });
+  private init() {
+    this.web3.eth
+      .getBlockNumber()
+      .then(latestBlock => {
+        this.latestBlock = latestBlock;
+        const blocks = [];
+        for (var i = 2; i <= this.latestBlock; i++) {
+          blocks.push(i);
+        }
+        return Promise.all(blocks.map(nr => this.getBlockOrTx(nr)))
+          .then(bc => {
+            this.blockchain = bc;
+          })
+          .then(() => {
+            if (!this.current) {
+              return this.search(this.latestBlock);
+            }
+          });
       })
-      .reduce((pre, cur) => {
-        return pre.concat(cur);
-      })
-      .filter(ele => ele);
-    const result = {
-      address: address,
-      balance: balance,
-      txs: txs,
-    };
-    return result;
+      .then(() => {
+        this.initialSync = false;
+      });
   }
 
-  private async getBlockOrTx(hashOrNumber) {
+  private getAddress(address) {
+    return this.web3.eth.getBalance(address).then(balance => {
+      const txs = this.blockchain
+        .map(block => {
+          return block.transactions.map(tx => {
+            return tx.from == address || tx.to == address ? tx : undefined;
+          });
+        })
+        .reduce((pre, cur) => {
+          return pre.concat(cur);
+        })
+        .filter(ele => ele);
+      const result = {
+        address: address,
+        balance: balance,
+        txs: txs,
+      };
+      return result;
+    });
+  }
+
+  private getBlockOrTx(hashOrNumber) {
     if (this.cache[hashOrNumber]) {
-      return this.cache[hashOrNumber];
+      return Promise.resolve(this.cache[hashOrNumber]);
     }
     if (localStorage.getItem('PSC:' + hashOrNumber)) {
       const blockOrTx = JSON.parse(localStorage.getItem('PSC:' + hashOrNumber));
       this.cache[hashOrNumber] = blockOrTx;
-      return blockOrTx;
+      return Promise.resolve(blockOrTx);
     }
-    let block, tx;
-    try {
-      block = await this.web3.eth.getBlock(hashOrNumber, true);
-    } catch {}
-    try {
-      tx = await this.web3.eth.getTransaction(hashOrNumber);
-    } catch {}
 
-    if (block) {
-      localStorage.setItem(
-        'PSC:' + block.number.toString(),
-        JSON.stringify(block)
-      );
-      localStorage.setItem('PSC:' + block.hash, JSON.stringify(block));
-      this.cache[block.number.toString()] = block;
-      this.cache[block.hash] = block;
-      block.transactions.map(tx => {
-        tx = { ...tx, ...Tx.fromRaw(tx.raw) };
-        localStorage.setItem('PSC:' + tx.hash, JSON.stringify(tx));
-        this.cache[tx.hash] = tx;
+    return this.web3.eth
+      .getBlock(hashOrNumber, true)
+      .then(block => block || this.web3.eth.getTransaction(hashOrNumber))
+      .then(blockOrTx => {
+        const type = Explorer.getType(blockOrTx);
+
+        if (type === Types.BLOCK) {
+          localStorage.setItem(
+            'PSC:' + blockOrTx.number.toString(),
+            JSON.stringify(blockOrTx)
+          );
+          localStorage.setItem(
+            'PSC:' + blockOrTx.hash,
+            JSON.stringify(blockOrTx)
+          );
+          this.cache[blockOrTx.number.toString()] = blockOrTx;
+          this.cache[blockOrTx.hash] = blockOrTx;
+          blockOrTx.transactions.map(tx => {
+            tx = { ...tx, ...Tx.fromRaw(tx.raw) };
+            localStorage.setItem('PSC:' + tx.hash, JSON.stringify(tx));
+            this.cache[tx.hash] = tx;
+          });
+          return blockOrTx;
+        }
+        if (type === Types.TRANSACTION) {
+          const tx = { ...blockOrTx, ...Tx.fromRaw(blockOrTx.raw) };
+          localStorage.setItem('PSC:' + hashOrNumber, JSON.stringify(tx));
+          this.cache[hashOrNumber] = tx;
+          return tx;
+        }
+        return undefined;
       });
-      return block;
-    }
-    if (tx) {
-      tx = { ...tx, ...Tx.fromRaw(tx.raw) };
-      localStorage.setItem('PSC:' + hashOrNumber, JSON.stringify(tx));
-      this.cache[hashOrNumber] = tx;
-      return tx;
-    }
-    return undefined;
   }
 }
