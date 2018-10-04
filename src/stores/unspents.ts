@@ -16,8 +16,9 @@ import Bridge from './bridge';
 import Account from './account';
 import autobind from 'autobind-decorator';
 import { range } from '../utils/range';
+import getParsecWeb3 from '../utils/getParsecWeb3';
 
-const pWeb3 = helpers.extendWeb3(new Web3('http://localhost:8645'));
+const pWeb3 = getParsecWeb3();
 
 interface ParsecTransaction extends Transaction {
   raw: string;

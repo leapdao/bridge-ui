@@ -6,6 +6,7 @@
  */
 
 import Web3 from 'web3';
+import { helpers } from 'parsec-lib';
 import { PARSEC_NODES, DEFAULT_PARSEC_NODE } from '.';
 
 let web3;
@@ -15,6 +16,7 @@ export default () => {
     const node = PARSEC_NODES[process.env.PARSEC_NODE || DEFAULT_PARSEC_NODE];
     web3 = new Web3();
     web3.setProvider(new web3.providers.HttpProvider(node));
+    web3 = helpers.extendWeb3(web3);
   }
   return web3;
 };
