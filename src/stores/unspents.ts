@@ -100,7 +100,6 @@ export default class Unspents {
                   eth.getTransaction(ethUtil.bufferToHex(u.outpoint.hash))
                 )
               ).then(transactions => {
-                console.log(transactions);
                 transactions.forEach((tx, i) => {
                   (unspent[
                     i

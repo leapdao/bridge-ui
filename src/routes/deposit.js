@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { computed, toJS } from 'mobx';
+import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Select, Form, Input, Button, Table } from 'antd';
@@ -61,7 +61,7 @@ export default class Deposit extends React.Component {
   }
 
   render() {
-    const { tokens, unspents } = this.props;
+    const { tokens, unspents, bridge } = this.props;
     const { value, selectedIdx } = this.state;
 
     if (!tokens.ready) {
@@ -98,7 +98,6 @@ export default class Deposit extends React.Component {
         ))}
       </Select>
     );
-    console.log(unspents && toJS(unspents.list));
 
     return (
       <Fragment>
@@ -216,6 +215,9 @@ export default class Deposit extends React.Component {
             />
           </Fragment>
         )}
+
+        <h1>Finalize exits</h1>
+        <Button onClick={() => bridge.finalizeExits(0)}>Finalize exits</Button>
       </Fragment>
     );
   }

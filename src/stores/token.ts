@@ -74,16 +74,13 @@ export default class Token extends ContractStore {
     autorun(this.loadBalance);
     tokenInfo(this.contract, color).then(this.setInfo);
 
-    reaction(
-      () => this.events,
-      () => {
-        this.events.on('Transfer', (event: EventLog) => {
-          if (isOurTransfer(event, this.account)) {
-            this.loadBalance();
-          }
-        });
-      }
-    );
+    if (this.events) {
+      this.events.on('Transfer', (event: EventLog) => {
+        if (isOurTransfer(event, this.account)) {
+          this.loadBalance();
+        }
+      });
+    }
   }
 
   @computed

@@ -170,4 +170,16 @@ export default class Bridge extends ContractStore {
 
     return tx;
   }
+
+  public finalizeExits(color: number) {
+    const tx = this.iContract.methods.finalizeExits(color).send({
+      from: this.account.address,
+    });
+
+    this.watchTx(tx, 'finalizeExits', {
+      message: 'Finalize exits',
+    });
+
+    return tx;
+  }
 }
