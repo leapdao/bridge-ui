@@ -5,16 +5,13 @@ import { Table } from 'antd';
 import Searchable from './searchable';
 
 const TransactionList = ({ txs }) => {
-  const transactions = txs.map(tx => {
-    const x = {
-      id: tx.transactionIndex,
-      hash: tx.hash,
-      from: tx.from,
-      to: tx.to,
-      value: tx.value,
-    };
-    return x;
-  });
+  const transactions = txs.map(tx => ({
+    id: tx.transactionIndex,
+    hash: tx.hash,
+    from: tx.from,
+    to: tx.to,
+    value: tx.value,
+  }));
   const columns = [
     {
       title: 'ID',

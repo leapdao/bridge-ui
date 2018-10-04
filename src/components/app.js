@@ -17,8 +17,6 @@ import Slots from '../routes/slots';
 import Deposit from '../routes/deposit';
 import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
-import Info from '../routes/info';
-import Explorer from '../routes/explorer';
 
 import AppLayout from './appLayout';
 import Message from './message';
@@ -28,7 +26,6 @@ import '../style.css';
 @inject(stores => ({
   account: stores.account,
   bridge: stores.bridge,
-  explorer: stores.explorer,
 }))
 @observer
 class App extends React.Component {
@@ -42,7 +39,7 @@ class App extends React.Component {
   }
 
   render() {
-    const { account, match, explorer } = this.props;
+    const { account, match } = this.props;
 
     if (!account.ready) {
       return (
@@ -61,15 +58,6 @@ class App extends React.Component {
           component={RegisterToken}
         />
         <Route path={`${match.path}/faucet`} exact component={Faucet} />
-        <Route path={`${match.path}/info`} exact component={Info} />
-        <Route path={`${match.path}/explorer`} exact component={Explorer} />
-        <Route
-          path={`${match.path}/explorer/:search`}
-          render={props => {
-            explorer.search(props.match.params.search);
-            return <Explorer />;
-          }}
-        />
       </AppLayout>
     );
   }
@@ -83,7 +71,6 @@ App.propTypes = {
   account: PropTypes.object,
   bridge: PropTypes.object,
   match: PropTypes.object,
-  explorer: PropTypes.object,
 };
 
 export default App;

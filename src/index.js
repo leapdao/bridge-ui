@@ -17,11 +17,14 @@ import Tokens from './stores/tokens.ts';
 import Bridge from './stores/bridge.ts';
 import Account from './stores/account.ts';
 import Network from './stores/network.ts';
+import ExplorerStore from './stores/explorer.ts';
+import Unspents from './stores/unspents.ts';
+
 import Transactions from './components/txNotification/transactions.ts';
 import TxNotification from './components/txNotification/index.tsx';
-import Explorer from './stores/explorer.ts';
 
 import App from './components/app';
+import Explorer from './routes/explorer';
 
 if (!process.env.BRIDGE_ADDR) {
   console.error(
@@ -36,17 +39,36 @@ const account = new Account();
 const bridge = new Bridge(account, transactions);
 const tokens = new Tokens(account, bridge, transactions);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
-const explorer = new Explorer();
+const unspents = new Unspents(bridge, account);
+const explorer = new ExplorerStore();
 
 ReactDOM.render(
   <BrowserRouter>
-    <Provider {...{ account, tokens, bridge, network, transactions, explorer }}>
+    <Provider
+      {...{
+        account,
+        tokens,
+        bridge,
+        network,
+        transactions,
+        explorer,
+        unspents,
+      }}
+    >
       <Fragment>
         <TxNotification />
         <Route
           path="/"
           exact
           render={() => <Redirect to={`/${process.env.BRIDGE_ADDR}`} />}
+        />
+        <Route path="/explorer" exact component={Explorer} />
+        <Route
+          path="/explorer/:search"
+          render={props => {
+            explorer.search(props.match.params.search);
+            return <Explorer />;
+          }}
         />
         <Route
           path="/:bridgeAddr"
@@ -55,11 +77,15 @@ ReactDOM.render(
             if (ADDR_REGEX.test(section)) {
               return <App {...props} />;
             }
-            return (
-              <Redirect
-                to={`/${process.env.BRIDGE_ADDR}${props.location.pathname}`}
-              />
-            );
+            if (section !== 'explorer') {
+              return (
+                <Redirect
+                  to={`/${process.env.BRIDGE_ADDR}${props.location.pathname}`}
+                />
+              );
+            }
+
+            return null;
           }}
         />
       </Fragment>

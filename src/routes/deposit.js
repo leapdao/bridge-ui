@@ -6,18 +6,15 @@
  */
 
 import React, { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { Select, Form, Input, Button } from 'antd';
+import { Select, Form, Input, Button, Table } from 'antd';
+import ethUtil from 'ethereumjs-util';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-
-@inject(stores => ({
-  tokens: stores.tokens,
-  bridge: stores.bridge,
-  network: stores.network,
-}))
+@inject('tokens', 'bridge', 'network', 'unspents')
 @observer
 export default class Deposit extends React.Component {
   constructor(props) {
@@ -64,7 +61,7 @@ export default class Deposit extends React.Component {
   }
 
   render() {
-    const { tokens } = this.props;
+    const { tokens, unspents, bridge } = this.props;
     const { value, selectedIdx } = this.state;
 
     if (!tokens.ready) {
@@ -151,12 +148,83 @@ export default class Deposit extends React.Component {
           <dt>Token balance</dt>
           <dd>{this.selectedToken.decimalsBalance}</dd>
         </dl>
+
+        {unspents && (
+          <Fragment>
+            <h1 style={{ alignItems: 'center', display: 'flex' }}>
+              Unspents: {unspents.list.length}
+              {unspents.list.length > 1 && (
+                <Fragment>
+                  {' '}
+                  <Button
+                    size="small"
+                    onClick={unspents.consolidate}
+                    style={{ marginLeft: 10 }}
+                  >
+                    Consolidate
+                  </Button>
+                </Fragment>
+              )}
+            </h1>
+            <Table
+              style={{ marginTop: 15 }}
+              columns={[
+                { title: 'Value', dataIndex: 'value', key: 'value' },
+                { title: 'Input', dataIndex: 'input', key: 'input' },
+                { title: 'Height', dataIndex: 'height', key: 'height' },
+                { title: 'Exit', dataIndex: 'exit', key: 'exit' },
+              ]}
+              dataSource={unspents.list
+                .sort(
+                  (a, b) =>
+                    b.transaction.blockNumber - a.transaction.blockNumber
+                )
+                .map((u, i) => {
+                  const token = tokens.tokenForColor(u.output.color);
+                  const inputHash = ethUtil.bufferToHex(u.outpoint.hash);
+                  return {
+                    value: `${token.toTokens(u.output.value)} ${token.symbol}`,
+                    input: (
+                      <Fragment>
+                        <Link to={`/explorer/${inputHash}`}>{inputHash}</Link> (
+                        {u.outpoint.index})
+                      </Fragment>
+                    ),
+                    height: u.transaction.blockNumber,
+                    exit: (
+                      <Fragment>
+                        {unspents.periodBlocksRange[0] >
+                          u.transaction.blockNumber && (
+                          <Button
+                            size="small"
+                            onClick={() => unspents.exitUnspent(i)}
+                          >
+                            Exit
+                          </Button>
+                        )}
+                        {unspents.periodBlocksRange[0] <=
+                          u.transaction.blockNumber && (
+                          <span>
+                            Wait until height {unspents.periodBlocksRange[1]}
+                          </span>
+                        )}
+                      </Fragment>
+                    ),
+                  };
+                })}
+            />
+          </Fragment>
+        )}
+
+        <h1>Finalize exits</h1>
+        <Button onClick={() => bridge.finalizeExits(0)}>Finalize exits</Button>
       </Fragment>
     );
   }
 }
 
 Deposit.propTypes = {
+  unspents: PropTypes.object,
   tokens: PropTypes.object,
   bridge: PropTypes.object,
   network: PropTypes.object,

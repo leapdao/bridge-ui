@@ -12,10 +12,16 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import { Form, Input, Button } from 'antd';
-import Active from '../components/explorer/active';
 
-@inject(stores => ({
-  explorer: stores.explorer,
+import AppLayout from '../components/appLayout';
+import Active from '../components/explorer/active';
+import { NETWORKS } from '../utils';
+
+@inject(({ tokens, network, explorer, bridge }) => ({
+  psc: tokens.list && tokens.list[0],
+  network,
+  explorer,
+  bridge,
 }))
 @observer
 export default class Explorer extends React.Component {
@@ -23,10 +29,10 @@ export default class Explorer extends React.Component {
   value;
 
   render() {
-    const { explorer } = this.props;
+    const { explorer, bridge, network, psc } = this.props;
 
     return (
-      <Fragment>
+      <AppLayout>
         <h1>Block Explorer</h1>
         <Form layout="inline">
           <Form.Item>
@@ -46,11 +52,28 @@ export default class Explorer extends React.Component {
           </Form.Item>
         </Form>
         <Active />
-      </Fragment>
+
+        <h1>Chain info</h1>
+        <dl className="info">
+          <dt>Network</dt>
+          <dd>{NETWORKS[network.network].name || network.network}</dd>
+          <dt>Bridge contract address</dt>
+          <dd>{bridge.address}</dd>
+          {psc && (
+            <Fragment>
+              <dt>Token contract address</dt>
+              <dd>{psc.address}</dd>
+            </Fragment>
+          )}
+        </dl>
+      </AppLayout>
     );
   }
 }
 
 Explorer.propTypes = {
   explorer: PropTypes.object,
+  network: PropTypes.object,
+  psc: PropTypes.object,
+  bridge: PropTypes.object,
 };

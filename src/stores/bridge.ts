@@ -8,7 +8,7 @@
 import { observable, action, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
-import { Contract } from 'web3/types';
+import Contract from 'web3/eth/contract';
 import { bridge as bridgeAbi } from '../utils/abis';
 
 import Token from './token';
@@ -16,7 +16,6 @@ import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
-import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 
 import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
@@ -65,8 +64,10 @@ const readSlots = (bridge: Contract) => {
 export default class Bridge extends ContractStore {
   private account: Account;
 
-  @observable public slots: IObservableArray<Slot> = observable.array([]);
-  @observable public lastCompleteEpoch: number;
+  @observable
+  public slots: IObservableArray<Slot> = observable.array([]);
+  @observable
+  public lastCompleteEpoch: number;
 
   constructor(account: Account, transactions: Transactions, address?: string) {
     super(bridgeAbi, address, transactions);
@@ -153,6 +154,30 @@ export default class Bridge extends ContractStore {
 
     this.watchTx(tx, 'registerToken', {
       message: 'Register a new token on the bridge',
+    });
+
+    return tx;
+  }
+
+  public startExit(proof: string[], outIndex: number) {
+    const tx = this.iContract.methods.startExit(proof, outIndex).send({
+      from: this.account.address,
+    });
+
+    this.watchTx(tx, 'startExit', {
+      message: 'Exit',
+    });
+
+    return tx;
+  }
+
+  public finalizeExits(color: number) {
+    const tx = this.iContract.methods.finalizeExits(color).send({
+      from: this.account.address,
+    });
+
+    this.watchTx(tx, 'finalizeExits', {
+      message: 'Finalize exits',
     });
 
     return tx;

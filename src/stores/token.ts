@@ -15,7 +15,8 @@ import {
 } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
-import { Contract, EventLog } from 'web3/types';
+import Contract from 'web3/eth/contract';
+import { EventLog } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
 import { txSuccess, isNFT } from '../utils';
 
@@ -43,15 +44,21 @@ const isOurTransfer = (event: EventLog, ourAccount: Account): boolean => {
 };
 
 export default class Token extends ContractStore {
-  @observable public tokens: IObservableArray<Token>;
+  @observable
+  public tokens: IObservableArray<Token>;
 
   private account: Account;
 
   public color: number;
-  @observable public name: string;
-  @observable public symbol: string;
-  @observable public decimals: number;
-  @observable public balance?: number;
+
+  @observable
+  public name: string;
+  @observable
+  public symbol: string;
+  @observable
+  public decimals: number;
+  @observable
+  public balance?: number;
 
   constructor(
     account: Account,
@@ -67,16 +74,13 @@ export default class Token extends ContractStore {
     autorun(this.loadBalance);
     tokenInfo(this.contract, color).then(this.setInfo);
 
-    reaction(
-      () => this.events,
-      () => {
-        this.events.on('Transfer', (event: EventLog) => {
-          if (isOurTransfer(event, this.account)) {
-            this.loadBalance();
-          }
-        });
-      }
-    );
+    if (this.events) {
+      this.events.on('Transfer', (event: EventLog) => {
+        if (isOurTransfer(event, this.account)) {
+          this.loadBalance();
+        }
+      });
+    }
   }
 
   @computed
@@ -168,7 +172,7 @@ export default class Token extends ContractStore {
   private allowanceOrTokenId(valueOrTokenId: number) {
     if (this.isNft) return valueOrTokenId;
 
-    return new BigNumber(2 ** 255);
+    return `0x${new BigNumber(2).pow(255).toString(16)}`;
   }
 
   private hasEnoughAllowance(spender: string, value: number): Promise<Boolean> {

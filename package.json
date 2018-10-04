@@ -75,6 +75,7 @@
   },
   "dependencies": {
     "@types/node": "^10.9.3",
+    "@types/web3": "^1.0.6",
     "antd": "^3.6.2",
     "autobind-decorator": "^2.1.0",
     "bignumber.js": "4.0.2",
@@ -82,7 +83,7 @@
     "ethereumjs-util": "^5.2.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
-    "parsec-lib": "0.16.5",
+    "parsec-lib": "0.16.9",
     "preact": "^8.3.1",
     "preact-compat": "^3.18.3",
     "prop-types": "^15.6.1",

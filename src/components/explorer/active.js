@@ -5,15 +5,17 @@ import { Alert } from 'antd';
 
 import { observer, inject } from 'mobx-react';
 
+import { Types } from '../../stores/explorer.ts';
+
 import Block from './block';
 import Address from './address';
 import Transaction from './transaction';
 
 const Active = ({ explorer }) => {
   const branch = {
-    BLOCK: <Block />,
-    TRANSACTION: <Transaction />,
-    ADDRESS: <Address />,
+    [Types.BLOCK]: <Block />,
+    [Types.TRANSACTION]: <Transaction />,
+    [Types.ADDRESS]: <Address />,
   };
 
   return (

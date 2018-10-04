@@ -7,13 +7,15 @@
 
 /* eslint-disable no-underscore-dangle */
 
+import Web3 = require('web3'); // weird imports for strange typings
 import { observable, computed } from 'mobx';
-import Web3 from 'web3';
 import getWeb3 from '../utils/getWeb3';
 
 export default class Account {
-  @observable private _address: string | null;
-  @observable public ready = false;
+  @observable
+  private _address: string | null;
+  @observable
+  public ready = false;
 
   constructor() {
     const web3 = getWeb3(true) as Web3;
