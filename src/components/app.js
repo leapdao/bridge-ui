@@ -17,7 +17,6 @@ import Slots from '../routes/slots';
 import Deposit from '../routes/deposit';
 import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
-import Info from '../routes/info';
 import Explorer from '../routes/explorer';
 
 import AppLayout from './appLayout';
@@ -61,7 +60,6 @@ class App extends React.Component {
           component={RegisterToken}
         />
         <Route path={`${match.path}/faucet`} exact component={Faucet} />
-        <Route path={`${match.path}/info`} exact component={Info} />
         <Route path={`${match.path}/explorer`} exact component={Explorer} />
         <Route
           path={`${match.path}/explorer/:search`}

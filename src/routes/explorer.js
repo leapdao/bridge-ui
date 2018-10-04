@@ -12,16 +12,23 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
 import { Form, Input, Button } from 'antd';
-import Active from '../components/explorer/active';
 
-@inject('explorer')
+import Active from '../components/explorer/active';
+import { NETWORKS } from '../utils';
+
+@inject(({ tokens, network, explorer, bridge }) => ({
+  psc: tokens.list && tokens.list[0],
+  network,
+  explorer,
+  bridge,
+}))
 @observer
 export default class Explorer extends React.Component {
   @observable
   value;
 
   render() {
-    const { explorer } = this.props;
+    const { explorer, bridge, network, psc } = this.props;
 
     return (
       <Fragment>
@@ -44,6 +51,20 @@ export default class Explorer extends React.Component {
           </Form.Item>
         </Form>
         <Active />
+
+        <h1>Chain info</h1>
+        <dl className="info">
+          <dt>Network</dt>
+          <dd>{NETWORKS[network.network].name || network.network}</dd>
+          <dt>Bridge contract address</dt>
+          <dd>{bridge.address}</dd>
+          {psc && (
+            <Fragment>
+              <dt>Token contract address</dt>
+              <dd>{psc.address}</dd>
+            </Fragment>
+          )}
+        </dl>
       </Fragment>
     );
   }
@@ -51,4 +72,7 @@ export default class Explorer extends React.Component {
 
 Explorer.propTypes = {
   explorer: PropTypes.object,
+  network: PropTypes.object,
+  psc: PropTypes.object,
+  bridge: PropTypes.object,
 };

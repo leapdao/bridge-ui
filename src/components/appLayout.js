@@ -53,16 +53,13 @@ class AppLayout extends React.Component {
               <Link to={`${match.url}`}>Slots auction</Link>
             </Menu.Item>
             <Menu.Item key="deposit">
-              <Link to={`${match.url}/deposit`}>Make deposit</Link>
+              <Link to={`${match.url}/deposit`}>Deposit/exit</Link>
             </Menu.Item>
             <Menu.Item key="registerToken">
               <Link to={`${match.url}/registerToken`}>Register token</Link>
             </Menu.Item>
             <Menu.Item key="faucet">
               <Link to={`${match.url}/faucet`}>Get tokens</Link>
-            </Menu.Item>
-            <Menu.Item key="info">
-              <Link to={`${match.url}/info`}>Chain info</Link>
             </Menu.Item>
             <Menu.Item key="explorer">
               <Link to={`${match.url}/explorer`}>Explorer</Link>
