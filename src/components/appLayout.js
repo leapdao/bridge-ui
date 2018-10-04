@@ -41,31 +41,36 @@ class AppLayout extends React.Component {
         path={`${match.path}/:section?`}
         render={({
           match: {
-            params: { section },
+            params: { section = 'slots' },
+            path,
           },
-        }) => (
-          <Menu
-            selectedKeys={[section || 'slots']}
-            mode={horizontal ? 'horizontal' : 'vertical'}
-            style={{ lineHeight: '64px', width: '100%' }}
-          >
-            <Menu.Item key="slots">
-              <Link to={`${match.url}`}>Slots auction</Link>
-            </Menu.Item>
-            <Menu.Item key="deposit">
-              <Link to={`${match.url}/deposit`}>Deposit/exit</Link>
-            </Menu.Item>
-            <Menu.Item key="registerToken">
-              <Link to={`${match.url}/registerToken`}>Register token</Link>
-            </Menu.Item>
-            <Menu.Item key="faucet">
-              <Link to={`${match.url}/faucet`}>Get tokens</Link>
-            </Menu.Item>
-            <Menu.Item key="explorer">
-              <Link to={`${match.url}/explorer`}>Explorer</Link>
-            </Menu.Item>
-          </Menu>
-        )}
+        }) => {
+          const base = path.startsWith('/explorer') ? '' : match.url;
+          section = path.startsWith('/explorer') ? 'explorer' : section; // eslint-disable-line
+          return (
+            <Menu
+              selectedKeys={[section || 'slots']}
+              mode={horizontal ? 'horizontal' : 'vertical'}
+              style={{ lineHeight: '64px', width: '100%' }}
+            >
+              <Menu.Item key="slots">
+                <Link to={`${base}/`}>Slots auction</Link>
+              </Menu.Item>
+              <Menu.Item key="deposit">
+                <Link to={`${base}/deposit`}>Deposit/exit</Link>
+              </Menu.Item>
+              <Menu.Item key="registerToken">
+                <Link to={`${base}/registerToken`}>Register token</Link>
+              </Menu.Item>
+              <Menu.Item key="faucet">
+                <Link to={`${base}/faucet`}>Get tokens</Link>
+              </Menu.Item>
+              <Menu.Item key="explorer">
+                <Link to="/explorer">Explorer</Link>
+              </Menu.Item>
+            </Menu>
+          );
+        }}
       />
     );
 
@@ -79,7 +84,7 @@ class AppLayout extends React.Component {
             justifyContent: 'space-between',
           }}
         >
-          <Link to={`${match.url}`}>
+          <Link to="/">
             <img
               src={parsecLabsLogo}
               width="196"

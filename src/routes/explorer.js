@@ -13,6 +13,7 @@ import { Link } from 'react-router-dom';
 
 import { Form, Input, Button } from 'antd';
 
+import AppLayout from '../components/appLayout';
 import Active from '../components/explorer/active';
 import { NETWORKS } from '../utils';
 
@@ -31,7 +32,7 @@ export default class Explorer extends React.Component {
     const { explorer, bridge, network, psc } = this.props;
 
     return (
-      <Fragment>
+      <AppLayout>
         <h1>Block Explorer</h1>
         <Form layout="inline">
           <Form.Item>
@@ -65,7 +66,7 @@ export default class Explorer extends React.Component {
             </Fragment>
           )}
         </dl>
-      </Fragment>
+      </AppLayout>
     );
   }
 }
