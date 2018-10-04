@@ -1,10 +1,18 @@
+/**
+ * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
+ *
+ * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
+ * found in the LICENSE file in the root directory of this source tree.
+ */
+
+import Web3 = require('web3'); // weird imports for strange typings
 import { observable, computed } from 'mobx';
-import Web3 from 'web3';
 import Account from './account';
 import getWeb3 from '../utils/getWeb3';
 
 export default class Network {
-  @observable private _mmNetwork: string;
+  @observable
+  private _mmNetwork: string;
 
   constructor(
     public readonly account: Account,

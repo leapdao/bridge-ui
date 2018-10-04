@@ -17,9 +17,11 @@ import Tokens from './stores/tokens.ts';
 import Bridge from './stores/bridge.ts';
 import Account from './stores/account.ts';
 import Network from './stores/network.ts';
+import Explorer from './stores/explorer.ts';
+import Unspents from './stores/unspents.ts';
+
 import Transactions from './components/txNotification/transactions.ts';
 import TxNotification from './components/txNotification/index.tsx';
-import Explorer from './stores/explorer.ts';
 
 import App from './components/app';
 
@@ -36,11 +38,22 @@ const account = new Account();
 const bridge = new Bridge(account, transactions);
 const tokens = new Tokens(account, bridge, transactions);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
+const unspents = new Unspents(bridge, account);
 const explorer = new Explorer();
 
 ReactDOM.render(
   <BrowserRouter>
-    <Provider {...{ account, tokens, bridge, network, transactions, explorer }}>
+    <Provider
+      {...{
+        account,
+        tokens,
+        bridge,
+        network,
+        transactions,
+        explorer,
+        unspents,
+      }}
+    >
       <Fragment>
         <TxNotification />
         <Route

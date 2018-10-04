@@ -15,7 +15,8 @@ import {
 } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
-import { Contract, EventLog } from 'web3/types';
+import Contract from 'web3/eth/contract';
+import { EventLog } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
 import { txSuccess, isNFT } from '../utils';
 
@@ -49,6 +50,7 @@ export default class Token extends ContractStore {
   private account: Account;
 
   public color: number;
+
   @observable
   public name: string;
   @observable

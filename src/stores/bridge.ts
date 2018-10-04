@@ -8,7 +8,7 @@
 import { observable, action, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
-import { Contract } from 'web3/types';
+import Contract from 'web3/eth/contract';
 import { bridge as bridgeAbi } from '../utils/abis';
 
 import Token from './token';
@@ -16,7 +16,6 @@ import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
-import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 
 import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';

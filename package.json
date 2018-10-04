@@ -75,6 +75,7 @@
   },
   "dependencies": {
     "@types/node": "^10.9.3",
+    "@types/web3": "^1.0.6",
     "antd": "^3.6.2",
     "autobind-decorator": "^2.1.0",
     "bignumber.js": "4.0.2",

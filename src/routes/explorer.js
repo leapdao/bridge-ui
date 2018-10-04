@@ -14,9 +14,7 @@ import { Link } from 'react-router-dom';
 import { Form, Input, Button } from 'antd';
 import Active from '../components/explorer/active';
 
-@inject(stores => ({
-  explorer: stores.explorer,
-}))
+@inject('explorer')
 @observer
 export default class Explorer extends React.Component {
   @observable

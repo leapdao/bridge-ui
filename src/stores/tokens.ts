@@ -13,22 +13,20 @@ import Account from './account';
 import Token from './token';
 import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
+import { Output } from 'parsec-lib';
 
 export default class Tokens {
   @observable
   public list: IObservableArray<Token>;
 
-  private account: Account;
-  private bridge: Bridge;
-  private txs: Transactions;
   private erc20TokenCount: number;
   private nftTokenCount: number;
 
-  constructor(account: Account, bridge: Bridge, txs: Transactions) {
-    this.account = account;
-    this.bridge = bridge;
-    this.txs = txs;
-
+  constructor(
+    private account: Account,
+    private bridge: Bridge,
+    private txs: Transactions
+  ) {
     this.erc20TokenCount = 0;
     this.nftTokenCount = 0;
 
@@ -63,6 +61,14 @@ export default class Tokens {
       return false;
     }
     return !this.list.some(token => !token.ready);
+  }
+
+  public tokenForColor(color: number) {
+    const index = Output.isNFT(color)
+      ? this.erc20TokenCount + (color - NFT_COLOR_BASE)
+      : color;
+
+    return this.list[index];
   }
 
   private loadTokenColorRange(from: number, to: number): Promise<Token>[] {

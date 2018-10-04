@@ -7,7 +7,7 @@ export const NETWORKS = {
 };
 
 export const PARSEC_NODES = {
-  1: 'https://testnet-1.parseclabs.org',
+  1: 'http://localhost:8645',
 };
 
 export const DEFAULT_NETWORK = '4';
