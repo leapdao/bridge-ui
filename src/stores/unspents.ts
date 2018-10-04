@@ -5,9 +5,8 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 = require('web3'); // weird imports for strange typings
 import { observable, reaction, computed } from 'mobx';
-import { Unspent, helpers, Tx, Period, Block } from 'parsec-lib';
+import { Unspent, Tx, Period, Block, Input, Output, Type } from 'parsec-lib';
 import Eth from 'web3/eth/index';
 import { Transaction } from 'web3/eth/types';
 import ethUtil from 'ethereumjs-util';
@@ -101,6 +100,7 @@ export default class Unspents {
                   eth.getTransaction(ethUtil.bufferToHex(u.outpoint.hash))
                 )
               ).then(transactions => {
+                console.log(transactions);
                 transactions.forEach((tx, i) => {
                   (unspent[
                     i
@@ -128,5 +128,63 @@ export default class Unspents {
     makePeriodFromRange(startBlock, endBlock).then(period =>
       this.bridge.startExit(period.proof(Tx.fromRaw(raw)), u.outpoint.index)
     );
+  }
+
+  @autobind
+  public consolidate() {
+    const chunks = this.list.reduce(
+      (dict, u) => {
+        if (Output.isNFT(u.output.color)) {
+          return dict;
+        }
+        dict[u.output.color] = dict[u.output.color] || [[] as UnspentWithTx[]];
+
+        const currentChunk =
+          dict[u.output.color][dict[u.output.color].length - 1];
+        currentChunk.push(u);
+        if (currentChunk.length === 15) {
+          dict[u.output.color].push([] as UnspentWithTx[]);
+        }
+
+        return dict;
+      },
+      {} as { [key: string]: UnspentWithTx[][] }
+    );
+
+    const consolidates = Object.keys(chunks).reduce(
+      (txs, color) => {
+        return chunks[color].reduce((txs, chunk) => {
+          const inputs = chunk.reduce(
+            (inputs, u) => {
+              const index = inputs.findIndex(
+                input =>
+                  input.prevout.hash.compare(u.outpoint.hash) === 0 &&
+                  input.prevout.index === u.outpoint.index
+              );
+
+              if (index === -1) {
+                inputs.push(new Input(u.outpoint));
+              }
+
+              return inputs;
+            },
+            [] as Input[]
+          );
+          const value = chunk.reduce((v, u) => v + Number(u.output.value), 0);
+          txs.push(
+            Tx.consolidate(
+              inputs,
+              new Output(value, this.account.address, Number(color))
+            )
+          );
+          return txs;
+        }, txs);
+      },
+      [] as Array<Tx<Type.CONSOLIDATE>>
+    );
+
+    consolidates.forEach(consolidate => {
+      pWeb3.eth.sendSignedTransaction(consolidate.toRaw());
+    });
   }
 }

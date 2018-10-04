@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import { Link } from 'react-router-dom';
-import { computed } from 'mobx';
+import { computed, toJS } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Select, Form, Input, Button, Table } from 'antd';
@@ -98,6 +98,7 @@ export default class Deposit extends React.Component {
         ))}
       </Select>
     );
+    console.log(unspents && toJS(unspents.list));
 
     return (
       <Fragment>
@@ -151,8 +152,23 @@ export default class Deposit extends React.Component {
 
         {unspents && (
           <Fragment>
-            <h1>Unspents ({unspents.list.length})</h1>
+            <h1 style={{ alignItems: 'center', display: 'flex' }}>
+              Unspents: {unspents.list.length}
+              {unspents.list.length > 1 && (
+                <Fragment>
+                  {' '}
+                  <Button
+                    size="small"
+                    onClick={unspents.consolidate}
+                    style={{ marginLeft: 10 }}
+                  >
+                    Consolidate
+                  </Button>
+                </Fragment>
+              )}
+            </h1>
             <Table
+              style={{ marginTop: 15 }}
               columns={[
                 { title: 'Value', dataIndex: 'value', key: 'value' },
                 { title: 'Input', dataIndex: 'input', key: 'input' },
@@ -187,7 +203,7 @@ export default class Deposit extends React.Component {
                             Exit
                           </Button>
                         )}
-                        {unspents.periodBlocksRange[0] <
+                        {unspents.periodBlocksRange[0] <=
                           u.transaction.blockNumber && (
                           <span>
                             Wait until height {unspents.periodBlocksRange[1]}
