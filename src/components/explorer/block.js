@@ -23,10 +23,10 @@ const Block = ({ explorer }) => {
     <Card title={title} className="explorer-section">
       <div className="explorer-nav">
         <Button>
-          <Link to={`/explorer/${block.number - 1}`}> Prev </Link>
+          <Link to={`/explorer/${block.number - 1}`}>Prev</Link>
         </Button>
         <Button>
-          <Link to={`/explorer/${block.number + 1}`}> Next </Link>
+          <Link to={`/explorer/${block.number + 1}`}>Next</Link>
         </Button>
       </div>
       <h3>Hash:</h3>

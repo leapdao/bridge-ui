@@ -22,3 +22,6 @@ export const DEFAULT_PARSEC_NODE = '1';
 
 export { range } from './range.ts';
 export { txSuccess } from './txSuccess.ts';
+
+export const shortenHash = hash =>
+  [hash.slice(0, 8), '...', hash.slice(60)].join('');

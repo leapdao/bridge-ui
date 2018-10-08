@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import { Table } from 'antd';
 
 import Searchable from './searchable';
+import { shortenHash } from '../../utils';
 
 const TransactionList = ({ txs }) => {
   const transactions = txs.map(tx => ({
@@ -22,7 +23,7 @@ const TransactionList = ({ txs }) => {
       title: 'Hash',
       dataIndex: 'hash',
       key: 'hash',
-      render: text => <Searchable text={text} />,
+      render: text => <Searchable text={text} title={shortenHash(text)} />,
     },
     {
       title: 'From',

@@ -3,14 +3,15 @@ import PropTypes from 'prop-types';
 
 import { Link } from 'react-router-dom';
 
-const Searchable = ({ text }) => {
+const Searchable = ({ text, title }) => {
   /* eslint-disable */
-  return <Link to={`/explorer/${text}`}>{text}</Link>;
+  return <Link to={`/explorer/${text}`}>{title || text}</Link>;
   /* eslint-enable */
 };
 
 Searchable.propTypes = {
   text: PropTypes.any,
+  title: PropTypes.any,
 };
 
 export default Searchable;
