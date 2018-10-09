@@ -3,8 +3,12 @@ import PropTypes from 'prop-types';
 import { Card, List } from 'antd';
 
 import { observer, inject } from 'mobx-react';
+import { Type } from 'parsec-lib';
 
 import Searchable from './searchable';
+import { swapObject } from '../../utils';
+
+const TYPES = swapObject(Type);
 
 const Transaction = ({ explorer }) => {
   const tx = explorer.current;
@@ -22,6 +26,8 @@ const Transaction = ({ explorer }) => {
       <Searchable text={tx.to} />
       <h3>Value:</h3>
       {tx.value}
+      <h3>Type:</h3>
+      {TYPES[tx.type]}
       <h3>Inputs:</h3>
       <List
         itemLayout="vertical"

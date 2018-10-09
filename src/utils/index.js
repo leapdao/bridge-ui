@@ -24,4 +24,11 @@ export { range } from './range.ts';
 export { txSuccess } from './txSuccess.ts';
 
 export const shortenHash = hash =>
-  [hash.slice(0, 8), '...', hash.slice(60)].join('');
+  [hash.slice(0, 8), '...', hash.slice(hash.length - 6)].join('');
+
+export const swapObject = object => {
+  return Object.entries(object).reduce(
+    (result, [key, value]) => Object.assign(result, { [value]: key }),
+    {}
+  );
+};

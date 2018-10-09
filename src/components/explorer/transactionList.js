@@ -15,7 +15,7 @@ const TransactionList = ({ txs }) => {
   }));
   const columns = [
     {
-      title: 'ID',
+      title: '',
       dataIndex: 'id',
       key: 'id',
     },
@@ -29,13 +29,13 @@ const TransactionList = ({ txs }) => {
       title: 'From',
       dataIndex: 'from',
       key: 'from',
-      render: text => <Searchable text={text} />,
+      render: text => <Searchable text={text} title={shortenHash(text)} />,
     },
     {
       title: 'To',
       dataIndex: 'to',
       key: 'to',
-      render: text => <Searchable text={text} />,
+      render: text => <Searchable text={text} title={shortenHash(text)} />,
     },
     {
       title: 'Value',

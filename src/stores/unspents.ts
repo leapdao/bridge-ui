@@ -118,14 +118,16 @@ export default class Unspents {
   }
 
   @autobind
-  public exitUnspent(i) {
-    const u = this.list[i];
-    const { blockNumber, raw } = u.transaction;
+  public exitUnspent(unspent: UnspentWithTx) {
+    const { blockNumber, raw } = unspent.transaction;
     const periodNumber = Math.floor(blockNumber / 32);
     const startBlock = periodNumber * 32;
     const endBlock = periodNumber * 32 + 32;
     makePeriodFromRange(startBlock, endBlock).then(period =>
-      this.bridge.startExit(period.proof(Tx.fromRaw(raw)), u.outpoint.index)
+      this.bridge.startExit(
+        period.proof(Tx.fromRaw(raw)),
+        unspent.outpoint.index
+      )
     );
   }
 

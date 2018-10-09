@@ -180,7 +180,7 @@ export default class Deposit extends React.Component {
                   (a, b) =>
                     b.transaction.blockNumber - a.transaction.blockNumber
                 )
-                .map((u, i) => {
+                .map(u => {
                   const token = tokens.tokenForColor(u.output.color);
                   const inputHash = ethUtil.bufferToHex(u.outpoint.hash);
                   return {
@@ -200,7 +200,7 @@ export default class Deposit extends React.Component {
                           u.transaction.blockNumber && (
                           <Button
                             size="small"
-                            onClick={() => unspents.exitUnspent(i)}
+                            onClick={() => unspents.exitUnspent(u)}
                           >
                             Exit
                           </Button>
