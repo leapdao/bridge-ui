@@ -11,6 +11,14 @@ import { swapObject } from '../../utils';
 
 const TYPES = swapObject(Type);
 
+const InputItem = observer(({ input }) => {
+  return (
+    <List.Item>
+      <Searchable text={input.hash} />: {input.index}
+    </List.Item>
+  );
+});
+
 const Transaction = ({ explorer }) => {
   const tx = explorer.current;
   return (
@@ -37,11 +45,7 @@ const Transaction = ({ explorer }) => {
       <List
         itemLayout="vertical"
         dataSource={tx.inputs}
-        renderItem={input => (
-          <List.Item>
-            <Searchable text={input.hash} />: {input.index}
-          </List.Item>
-        )}
+        renderItem={input => <InputItem input={input} />}
       />
       <h3>Outputs:</h3>
       <List
