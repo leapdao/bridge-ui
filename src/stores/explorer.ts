@@ -10,6 +10,8 @@ import { observable, computed } from 'mobx';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx } from 'parsec-lib';
 
+const LS_PREFIX = 'PSC1:';
+
 export enum Types {
   BLOCK,
   TRANSACTION,
@@ -126,8 +128,10 @@ export default class Explorer {
     if (this.cache[hashOrNumber]) {
       return Promise.resolve(this.cache[hashOrNumber]);
     }
-    if (localStorage.getItem('PSC:' + hashOrNumber)) {
-      const blockOrTx = JSON.parse(localStorage.getItem('PSC:' + hashOrNumber));
+    if (localStorage.getItem(LS_PREFIX + hashOrNumber)) {
+      const blockOrTx = JSON.parse(
+        localStorage.getItem(LS_PREFIX + hashOrNumber)
+      );
       this.cache[hashOrNumber] = blockOrTx;
       return Promise.resolve(blockOrTx);
     }
@@ -146,17 +150,17 @@ export default class Explorer {
             ...Tx.fromRaw(tx.raw),
           }));
           localStorage.setItem(
-            'PSC:' + blockOrTx.number.toString(),
+            LS_PREFIX + blockOrTx.number.toString(),
             JSON.stringify(blockOrTx)
           );
           localStorage.setItem(
-            'PSC:' + blockOrTx.hash,
+            LS_PREFIX + blockOrTx.hash,
             JSON.stringify(blockOrTx)
           );
           this.cache[blockOrTx.number.toString()] = blockOrTx;
           this.cache[blockOrTx.hash] = blockOrTx;
           blockOrTx.transactions.forEach(tx => {
-            localStorage.setItem('PSC:' + tx.hash, JSON.stringify(tx));
+            localStorage.setItem(LS_PREFIX + tx.hash, JSON.stringify(tx));
             this.cache[tx.hash] = tx;
           });
 
@@ -164,7 +168,7 @@ export default class Explorer {
         }
         if (type === Types.TRANSACTION) {
           const tx = { ...blockOrTx, ...Tx.fromRaw(blockOrTx.raw) };
-          localStorage.setItem('PSC:' + hashOrNumber, JSON.stringify(tx));
+          localStorage.setItem(LS_PREFIX + hashOrNumber, JSON.stringify(tx));
           this.cache[hashOrNumber] = tx;
           return tx;
         }
