@@ -80,27 +80,7 @@ export default class Explorer {
   }
 
   private init() {
-    this.web3.eth
-      .getBlockNumber()
-      .then(latestBlock => {
-        this.latestBlock = latestBlock;
-        const blocks = [];
-        for (var i = 2; i <= this.latestBlock; i++) {
-          blocks.push(i);
-        }
-        return Promise.all(blocks.map(nr => this.getBlockOrTx(nr)))
-          .then(bc => {
-            this.blockchain = bc;
-          })
-          .then(() => {
-            if (!this.current) {
-              return this.search(this.latestBlock);
-            }
-          });
-      })
-      .then(() => {
-        this.initialSync = false;
-      });
+    this.initialSync = false;
   }
 
   private getAddress(address) {
@@ -128,13 +108,13 @@ export default class Explorer {
     if (this.cache[hashOrNumber]) {
       return Promise.resolve(this.cache[hashOrNumber]);
     }
-    if (localStorage.getItem(LS_PREFIX + hashOrNumber)) {
-      const blockOrTx = JSON.parse(
-        localStorage.getItem(LS_PREFIX + hashOrNumber)
-      );
-      this.cache[hashOrNumber] = blockOrTx;
-      return Promise.resolve(blockOrTx);
-    }
+    // if (localStorage.getItem(LS_PREFIX + hashOrNumber)) {
+    //   const blockOrTx = JSON.parse(
+    //     localStorage.getItem(LS_PREFIX + hashOrNumber)
+    //   );
+    //   this.cache[hashOrNumber] = blockOrTx;
+    //   return Promise.resolve(blockOrTx);
+    // }
 
     return this.web3.eth
       .getBlock(hashOrNumber, true)
@@ -147,7 +127,7 @@ export default class Explorer {
         if (type === Types.BLOCK) {
           blockOrTx.transactions = blockOrTx.transactions.map(tx => ({
             ...tx,
-            ...Tx.fromRaw(tx.raw),
+            ...Tx.fromRaw(tx.raw).toJSON(),
           }));
           localStorage.setItem(
             LS_PREFIX + blockOrTx.number.toString(),
@@ -160,15 +140,15 @@ export default class Explorer {
           this.cache[blockOrTx.number.toString()] = blockOrTx;
           this.cache[blockOrTx.hash] = blockOrTx;
           blockOrTx.transactions.forEach(tx => {
-            localStorage.setItem(LS_PREFIX + tx.hash, JSON.stringify(tx));
+            //   localStorage.setItem(LS_PREFIX + tx.hash, JSON.stringify(tx));
             this.cache[tx.hash] = tx;
           });
 
           return blockOrTx;
         }
         if (type === Types.TRANSACTION) {
-          const tx = { ...blockOrTx, ...Tx.fromRaw(blockOrTx.raw) };
-          localStorage.setItem(LS_PREFIX + hashOrNumber, JSON.stringify(tx));
+          const tx = { ...blockOrTx, ...Tx.fromRaw(blockOrTx.raw).toJSON() };
+          // localStorage.setItem(LS_PREFIX + hashOrNumber, JSON.stringify(tx));
           this.cache[hashOrNumber] = tx;
           return tx;
         }
