@@ -29,6 +29,11 @@ export default class Explorer extends React.Component {
   constructor(props) {
     super(props);
 
+    const { search } = props.match.params;
+    if (props.explorer) {
+      props.explorer.search(search);
+    }
+
     getParsecWeb3()
       .getConfig()
       .then(config => {
@@ -39,6 +44,14 @@ export default class Explorer extends React.Component {
           this.props.bridge.address = config.bridgeAddr;
         }
       });
+  }
+
+  componentWillReceiveProps(nextProps) {
+    const { search } = this.props.match.params;
+    const { search: nextSearch } = nextProps.match.params;
+    if (search !== nextSearch) {
+      this.props.explorer.search(nextSearch);
+    }
   }
 
   @observable
@@ -89,6 +102,7 @@ export default class Explorer extends React.Component {
 
 Explorer.propTypes = {
   explorer: PropTypes.object,
+  match: PropTypes.object.isRequired,
   network: PropTypes.object,
   psc: PropTypes.object,
   bridge: PropTypes.object,

@@ -42,13 +42,18 @@ export default class Explorer {
 
   public search(hashOrNumber) {
     this.searching = true;
-    (this.web3.utils.isAddress(hashOrNumber)
-      ? this.getAddress(hashOrNumber)
-      : this.getBlockOrTx(hashOrNumber)
-    ).then(result => {
-      this.success = !!result;
-      this.current = result || this.current;
-      this.searching = false;
+    (hashOrNumber
+      ? Promise.resolve(hashOrNumber)
+      : this.web3.eth.getBlockNumber()
+    ).then(searchParam => {
+      (this.web3.utils.isAddress(searchParam)
+        ? this.getAddress(searchParam)
+        : this.getBlockOrTx(searchParam)
+      ).then(result => {
+        this.success = !!result;
+        this.current = result || this.current;
+        this.searching = false;
+      });
     });
   }
 
