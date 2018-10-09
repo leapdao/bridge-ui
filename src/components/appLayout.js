@@ -16,6 +16,7 @@ import { Dropdown, Icon, Layout, Menu, Spin } from 'antd';
 import parsecLabsLogo from '../parseclabs.svg';
 
 import Message from './message';
+import TokenValue from './tokenValue';
 
 import '../style.css';
 
@@ -98,9 +99,13 @@ class AppLayout extends React.Component {
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
               {psc &&
-                psc.balanceString && (
+                psc.balance &&
+                psc.ready && (
                   <Fragment>
-                    Balance: <strong>{psc.balanceString}</strong>
+                    Balance:{' '}
+                    <strong>
+                      <TokenValue value={psc.balance} color={psc.color} />
+                    </strong>
                   </Fragment>
                 )}
             </span>

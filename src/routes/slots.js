@@ -14,6 +14,7 @@ import BigNumber from 'bignumber.js';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
+import TokenValue from '../components/tokenValue';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -183,12 +184,9 @@ export default class Slots extends React.Component {
               );
             }
           )}
-          {this.renderRow(
-            'Stake',
-            'stake',
-            'newStake',
-            val => psc && `${psc.toTokens(val)} ${psc.symbol}`
-          )}
+          {this.renderRow('Stake', 'stake', 'newStake', val => (
+            <TokenValue value={val} color={0} />
+          ))}
           {this.renderRow('Act. epoch', 'activationEpoch')}
           {psc &&
             psc.ready && (

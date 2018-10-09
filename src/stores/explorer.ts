@@ -57,7 +57,7 @@ export default class Explorer {
       if (obj.uncles) {
         return Types.BLOCK;
       }
-      if (obj.value) {
+      if (obj.value !== undefined) {
         return Types.TRANSACTION;
       }
       if (obj.balance) {
@@ -136,6 +136,10 @@ export default class Explorer {
         const type = Explorer.getType(blockOrTx);
 
         if (type === Types.BLOCK) {
+          blockOrTx.transactions = blockOrTx.transactions.map(tx => ({
+            ...tx,
+            ...Tx.fromRaw(tx.raw),
+          }));
           localStorage.setItem(
             'PSC:' + blockOrTx.number.toString(),
             JSON.stringify(blockOrTx)
@@ -146,11 +150,11 @@ export default class Explorer {
           );
           this.cache[blockOrTx.number.toString()] = blockOrTx;
           this.cache[blockOrTx.hash] = blockOrTx;
-          blockOrTx.transactions.map(tx => {
-            tx = { ...tx, ...Tx.fromRaw(tx.raw) };
+          blockOrTx.transactions.forEach(tx => {
             localStorage.setItem('PSC:' + tx.hash, JSON.stringify(tx));
             this.cache[tx.hash] = tx;
           });
+
           return blockOrTx;
         }
         if (type === Types.TRANSACTION) {

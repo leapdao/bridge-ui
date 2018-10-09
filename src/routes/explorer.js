@@ -16,6 +16,7 @@ import { Form, Input, Button } from 'antd';
 import AppLayout from '../components/appLayout';
 import Active from '../components/explorer/active';
 import { NETWORKS } from '../utils';
+import getParsecWeb3 from '../utils/getParsecWeb3';
 
 @inject(({ tokens, network, explorer, bridge }) => ({
   psc: tokens.list && tokens.list[0],
@@ -25,6 +26,21 @@ import { NETWORKS } from '../utils';
 }))
 @observer
 export default class Explorer extends React.Component {
+  constructor(props) {
+    super(props);
+
+    getParsecWeb3()
+      .getConfig()
+      .then(config => {
+        if (
+          this.props.bridge &&
+          this.props.bridge.address !== config.bridgeAddr
+        ) {
+          this.props.bridge.address = config.bridgeAddr;
+        }
+      });
+  }
+
   @observable
   value;
 

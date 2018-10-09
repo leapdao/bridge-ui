@@ -14,7 +14,9 @@ import { Select, Form, Input, Button, Table } from 'antd';
 import ethUtil from 'ethereumjs-util';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
+import TokenValue from '../components/tokenValue';
 import { shortenHash } from '../utils';
+
 @inject('tokens', 'bridge', 'network', 'unspents')
 @observer
 export default class Deposit extends React.Component {
@@ -147,7 +149,12 @@ export default class Deposit extends React.Component {
           <dt>Token contract address</dt>
           <dd>{this.selectedToken.address}</dd>
           <dt>Token balance</dt>
-          <dd>{this.selectedToken.decimalsBalance}</dd>
+          <dd>
+            <TokenValue
+              value={this.selectedToken.balance}
+              color={this.selectedToken.color}
+            />
+          </dd>
         </dl>
 
         {unspents && (
@@ -181,10 +188,9 @@ export default class Deposit extends React.Component {
                     b.transaction.blockNumber - a.transaction.blockNumber
                 )
                 .map(u => {
-                  const token = tokens.tokenForColor(u.output.color);
                   const inputHash = ethUtil.bufferToHex(u.outpoint.hash);
                   return {
-                    value: `${token.toTokens(u.output.value)} ${token.symbol}`,
+                    value: <TokenValue {...u.output} />,
                     input: (
                       <Fragment>
                         <Link to={`/explorer/${inputHash}`}>

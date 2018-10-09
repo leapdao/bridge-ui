@@ -5,14 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import {
-  observable,
-  action,
-  reaction,
-  computed,
-  autorun,
-  IObservableArray,
-} from 'mobx';
+import { observable, action, computed, autorun, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import Contract from 'web3/eth/contract';
@@ -86,15 +79,6 @@ export default class Token extends ContractStore {
   @computed
   public get decimalsBalance() {
     return this.balance && this.toTokens(this.balance);
-  }
-
-  @computed
-  public get balanceString() {
-    if (this.balance && this.ready) {
-      return `${this.decimalsBalance} ${this.symbol}`;
-    }
-
-    return null;
   }
 
   @computed

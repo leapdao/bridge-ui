@@ -64,6 +64,10 @@ export default class Tokens {
   }
 
   public tokenForColor(color: number) {
+    if (!this.list) {
+      return undefined;
+    }
+
     const index = Output.isNFT(color)
       ? this.erc20TokenCount + (color - NFT_COLOR_BASE)
       : color;

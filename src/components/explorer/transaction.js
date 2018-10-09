@@ -5,6 +5,7 @@ import { Card, List } from 'antd';
 import { observer, inject } from 'mobx-react';
 import { Type } from 'parsec-lib';
 
+import TokenValue from '../tokenValue';
 import Searchable from './searchable';
 import { swapObject } from '../../utils';
 
@@ -25,7 +26,11 @@ const Transaction = ({ explorer }) => {
       <h3>To:</h3>
       <Searchable text={tx.to} />
       <h3>Value:</h3>
-      {tx.value}
+      {tx.outputs && tx.outputs[0] ? (
+        <TokenValue value={tx.value} color={tx.outputs[0].color} />
+      ) : (
+        tx.value
+      )}
       <h3>Type:</h3>
       {TYPES[tx.type]}
       <h3>Inputs:</h3>
@@ -48,7 +53,7 @@ const Transaction = ({ explorer }) => {
             <br />
             Color: {output.color}
             <br />
-            Value: {output.value}
+            Value: <TokenValue {...output} />
           </List.Item>
         )}
       />
