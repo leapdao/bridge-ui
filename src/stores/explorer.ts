@@ -9,6 +9,8 @@ import Web3 = require('web3'); // weird imports for strange typings
 import { observable, computed } from 'mobx';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx } from 'parsec-lib';
+import { Block, Transaction } from 'web3/eth/types';
+import { range } from '../utils/range';
 
 const LS_PREFIX = 'PSC1:';
 
@@ -21,8 +23,8 @@ export enum Types {
 export default class Explorer {
   private web3: Web3;
   private cache;
-  private blockchain;
-  private latestBlock: number;
+  private blockchain: Block[] = [];
+  private latestBlock: number = 2;
 
   @observable
   public initialSync: boolean;
@@ -36,10 +38,27 @@ export default class Explorer {
 
   constructor() {
     this.cache = {};
-    this.blockchain = [];
     this.web3 = getParsecWeb3();
     this.initialSync = true;
     this.init();
+  }
+
+  private getBlockchain(): Promise<Block[]> {
+    return this.web3.eth.getBlockNumber().then(blockNumber => {
+      if (this.latestBlock === blockNumber) {
+        return this.blockchain;
+      }
+
+      const fromBlock = this.latestBlock;
+      this.latestBlock = blockNumber;
+
+      return Promise.all(
+        range(fromBlock, this.latestBlock).map(n => this.getBlockOrTx(n))
+      ).then(blocks => {
+        this.blockchain = this.blockchain.concat(blocks);
+        return this.blockchain;
+      });
+    });
   }
 
   public search(hashOrNumber) {
@@ -84,23 +103,24 @@ export default class Explorer {
   }
 
   private getAddress(address) {
-    return this.web3.eth.getBalance(address).then(balance => {
-      const txs = this.blockchain
-        .map(block => {
-          return block.transactions.map(tx => {
-            return tx.from == address || tx.to == address ? tx : undefined;
-          });
-        })
-        .reduce((pre, cur) => {
-          return pre.concat(cur);
-        })
-        .filter(ele => ele);
-      const result = {
-        address: address,
-        balance: balance,
-        txs: txs,
+    return Promise.all([
+      this.web3.eth.getBalance(address),
+      this.getBlockchain(),
+    ]).then(([balance, blocks]) => {
+      const txs = blocks.reduce(
+        (accum, block) =>
+          accum.concat(
+            block.transactions.filter(
+              tx => tx.from === address || tx.to === address
+            )
+          ),
+        [] as Transaction[]
+      );
+      return {
+        address,
+        balance,
+        txs,
       };
-      return result;
     });
   }
 

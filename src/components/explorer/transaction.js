@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { Card, List } from 'antd';
 
@@ -29,10 +29,18 @@ const Transaction = ({ explorer }) => {
       <Searchable text={tx.blockHash} />
       <h3>ID in block:</h3>
       {tx.transactionIndex}
-      <h3>From:</h3>
-      <Searchable text={tx.from} />
-      <h3>To:</h3>
-      <Searchable text={tx.to} />
+      {tx.from && (
+        <Fragment>
+          <h3>From:</h3>
+          <Searchable text={tx.from} />
+        </Fragment>
+      )}
+      {tx.to && (
+        <Fragment>
+          <h3>To:</h3>
+          <Searchable text={tx.to} />
+        </Fragment>
+      )}
       <h3>Value:</h3>
       {tx.outputs && tx.outputs[0] ? (
         <TokenValue value={tx.value} color={tx.outputs[0].color} />
