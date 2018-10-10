@@ -7,16 +7,20 @@
 
 import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
+import { Route } from 'react-router';
 import { observable } from 'mobx';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-import { Alert, Form, Input, Button, Divider } from 'antd';
+import { Form, Input, Button, Divider } from 'antd';
 
 import AppLayout from '../components/appLayout';
-import Active from '../components/explorer/active';
 import { NETWORKS } from '../utils';
 import getParsecWeb3 from '../utils/getParsecWeb3';
+
+import Block from './block';
+import Transaction from './transaction';
+import Address from './address';
 
 @inject(({ tokens, network, explorer, bridge }) => ({
   psc: tokens.list && tokens.list[0],
@@ -28,11 +32,6 @@ import getParsecWeb3 from '../utils/getParsecWeb3';
 export default class Explorer extends React.Component {
   constructor(props) {
     super(props);
-
-    const { search } = props.match.params;
-    if (props.explorer) {
-      props.explorer.search(search);
-    }
 
     getParsecWeb3()
       .getConfig()
@@ -46,19 +45,11 @@ export default class Explorer extends React.Component {
       });
   }
 
-  componentWillReceiveProps(nextProps) {
-    const { search } = this.props.match.params;
-    const { search: nextSearch } = nextProps.match.params;
-    if (search !== nextSearch) {
-      this.props.explorer.search(nextSearch);
-    }
-  }
-
   @observable
   value;
 
   render() {
-    const { explorer, bridge, network, psc } = this.props;
+    const { explorer, bridge, network, psc, match } = this.props;
 
     return (
       <AppLayout>
@@ -83,12 +74,10 @@ export default class Explorer extends React.Component {
 
         <Divider />
 
-        {!explorer.success &&
-          !explorer.searching && (
-            <Alert type="error" message="No results found for your search." />
-          )}
-
-        <Active />
+        <Route path={`${match.path}/`} exact component={Block} />
+        <Route path={`${match.path}/block/:hashOrNumber`} component={Block} />
+        <Route path={`${match.path}/tx/:hash`} component={Transaction} />
+        <Route path={`${match.path}/address/:addr`} component={Address} />
 
         <h1>Chain info</h1>
         <dl className="info">

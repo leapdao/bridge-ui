@@ -62,8 +62,7 @@ ReactDOM.render(
           exact
           render={() => <Redirect to={`/${process.env.BRIDGE_ADDR}`} />}
         />
-        <Route path="/explorer" exact component={Explorer} />
-        <Route path="/explorer/:search" component={Explorer} />
+        <Route path="/explorer" component={Explorer} />
         <Route
           path="/:bridgeAddr"
           render={props => {

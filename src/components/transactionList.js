@@ -2,10 +2,10 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { Table } from 'antd';
 import { Type } from 'parsec-lib';
+import { Link } from 'react-router-dom';
 
-import Searchable from './searchable';
-import TokenValue from '../tokenValue';
-import { shortenHash, swapObject } from '../../utils';
+import TokenValue from './tokenValue';
+import { shortenHash, swapObject } from '../utils';
 
 const TYPES = swapObject(Type);
 
@@ -30,19 +30,25 @@ const TransactionList = ({ txs }) => {
       title: 'Hash',
       dataIndex: 'hash',
       key: 'hash',
-      render: text => <Searchable text={text} title={shortenHash(text)} />,
+      render: text => (
+        <Link to={`/explorer/tx/${text}`}>{shortenHash(text)}</Link>
+      ),
     },
     {
       title: 'From',
       dataIndex: 'from',
       key: 'from',
-      render: text => <Searchable text={text} title={shortenHash(text)} />,
+      render: text => (
+        <Link to={`/explorer/address/${text}`}>{shortenHash(text)}</Link>
+      ),
     },
     {
       title: 'To',
       dataIndex: 'to',
       key: 'to',
-      render: text => <Searchable text={text} title={shortenHash(text)} />,
+      render: text => (
+        <Link to={`/explorer/address/${text}`}>{shortenHash(text)}</Link>
+      ),
     },
     {
       title: 'Value',
