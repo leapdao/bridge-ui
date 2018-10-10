@@ -6,13 +6,13 @@
  */
 
 import Web3 = require('web3'); // weird imports for strange typings
-import { observable, computed } from 'mobx';
+import { observable, computed, reaction } from 'mobx';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx } from 'parsec-lib';
 import { Block, Transaction } from 'web3/eth/types';
 import { range } from '../utils/range';
 
-const LS_PREFIX = 'PSC1:';
+const LOCAL_STORAGE_KEY = 'EXPLORER_CACHE';
 
 export enum Types {
   BLOCK,
@@ -21,13 +21,11 @@ export enum Types {
 }
 
 export default class Explorer {
-  private web3: Web3;
-  private cache;
+  private web3: Web3 = getParsecWeb3();
   private blockchain: Block[] = [];
   private latestBlock: number = 2;
+  private _cache = {};
 
-  @observable
-  public initialSync: boolean;
   @observable
   public searching: boolean;
   @observable
@@ -37,10 +35,21 @@ export default class Explorer {
   public current;
 
   constructor() {
-    this.cache = {};
-    this.web3 = getParsecWeb3();
-    this.initialSync = true;
-    this.init();
+    try {
+      const lsCache = localStorage.getItem(LOCAL_STORAGE_KEY);
+      if (lsCache) {
+        this._cache = JSON.parse(lsCache);
+      }
+    } catch (e) {}
+  }
+
+  private get cache() {
+    return this._cache;
+  }
+
+  private setCache(key, value) {
+    this._cache[key] = value;
+    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this._cache));
   }
 
   private getBlockchain(): Promise<Block[]> {
@@ -98,10 +107,6 @@ export default class Explorer {
     return Explorer.getType(this.current);
   }
 
-  private init() {
-    this.initialSync = false;
-  }
-
   private getAddress(address) {
     return Promise.all([
       this.web3.eth.getBalance(address),
@@ -128,13 +133,6 @@ export default class Explorer {
     if (this.cache[hashOrNumber]) {
       return Promise.resolve(this.cache[hashOrNumber]);
     }
-    // if (localStorage.getItem(LS_PREFIX + hashOrNumber)) {
-    //   const blockOrTx = JSON.parse(
-    //     localStorage.getItem(LS_PREFIX + hashOrNumber)
-    //   );
-    //   this.cache[hashOrNumber] = blockOrTx;
-    //   return Promise.resolve(blockOrTx);
-    // }
 
     return this.web3.eth
       .getBlock(hashOrNumber, true)
@@ -149,27 +147,17 @@ export default class Explorer {
             ...tx,
             ...Tx.fromRaw(tx.raw).toJSON(),
           }));
-          localStorage.setItem(
-            LS_PREFIX + blockOrTx.number.toString(),
-            JSON.stringify(blockOrTx)
-          );
-          localStorage.setItem(
-            LS_PREFIX + blockOrTx.hash,
-            JSON.stringify(blockOrTx)
-          );
-          this.cache[blockOrTx.number.toString()] = blockOrTx;
-          this.cache[blockOrTx.hash] = blockOrTx;
+          this.setCache(blockOrTx.number, blockOrTx);
+          this.setCache(blockOrTx.hash, blockOrTx);
           blockOrTx.transactions.forEach(tx => {
-            //   localStorage.setItem(LS_PREFIX + tx.hash, JSON.stringify(tx));
-            this.cache[tx.hash] = tx;
+            this.setCache(tx.hash, tx);
           });
 
           return blockOrTx;
         }
         if (type === Types.TRANSACTION) {
           const tx = { ...blockOrTx, ...Tx.fromRaw(blockOrTx.raw).toJSON() };
-          // localStorage.setItem(LS_PREFIX + hashOrNumber, JSON.stringify(tx));
-          this.cache[hashOrNumber] = tx;
+          this.setCache(hashOrNumber, tx);
           return tx;
         }
         return undefined;

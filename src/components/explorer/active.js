@@ -23,14 +23,7 @@ const Active = ({ explorer }) => {
       {!explorer.success && (
         <Alert type="error" message="No results found for your search." />
       )}
-      {!explorer.initialSync ? (
-        branch[explorer.currentType]
-      ) : (
-        <Alert
-          type="info"
-          message="Syncing state with node, this may take some time..."
-        />
-      )}
+      {branch[explorer.currentType]}
     </div>
   );
 };
