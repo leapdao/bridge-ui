@@ -131,55 +131,52 @@ export default class Unspents {
     );
   }
 
-  @autobind
-  public consolidate() {
-    const chunks = this.list.reduce(
-      (dict, u) => {
-        if (Output.isNFT(u.output.color)) {
-          return dict;
-        }
-        dict[u.output.color] = dict[u.output.color] || [[] as UnspentWithTx[]];
+  public listForColor(color: number) {
+    return this.list.filter(u => u.output.color === color);
+  }
 
-        const currentChunk =
-          dict[u.output.color][dict[u.output.color].length - 1];
+  @autobind
+  public consolidate(color: number) {
+    const list = this.listForColor(color);
+    const chunks = list.reduce(
+      (acc, u) => {
+        const currentChunk = acc[acc.length - 1];
         currentChunk.push(u);
         if (currentChunk.length === 15) {
-          dict[u.output.color].push([] as UnspentWithTx[]);
+          acc.push([] as UnspentWithTx[]);
         }
 
-        return dict;
+        return acc;
       },
-      {} as { [key: string]: UnspentWithTx[][] }
+      [[]] as UnspentWithTx[][]
     );
 
-    const consolidates = Object.keys(chunks).reduce(
-      (txs, color) => {
-        return chunks[color].reduce((txs, chunk) => {
-          const inputs = chunk.reduce(
-            (inputs, u) => {
-              const index = inputs.findIndex(
-                input =>
-                  input.prevout.hash.compare(u.outpoint.hash) === 0 &&
-                  input.prevout.index === u.outpoint.index
-              );
+    const consolidates = chunks.reduce(
+      (txs, chunk) => {
+        const inputs = chunk.reduce(
+          (inputs, u) => {
+            const index = inputs.findIndex(
+              input =>
+                input.prevout.hash.compare(u.outpoint.hash) === 0 &&
+                input.prevout.index === u.outpoint.index
+            );
 
-              if (index === -1) {
-                inputs.push(new Input(u.outpoint));
-              }
+            if (index === -1) {
+              inputs.push(new Input(u.outpoint));
+            }
 
-              return inputs;
-            },
-            [] as Input[]
-          );
-          const value = chunk.reduce((v, u) => v + Number(u.output.value), 0);
-          txs.push(
-            Tx.consolidate(
-              inputs,
-              new Output(value, this.account.address, Number(color))
-            )
-          );
-          return txs;
-        }, txs);
+            return inputs;
+          },
+          [] as Input[]
+        );
+        const value = chunk.reduce((v, u) => v + Number(u.output.value), 0);
+        txs.push(
+          Tx.consolidate(
+            inputs,
+            new Output(value, this.account.address, Number(color))
+          )
+        );
+        return txs;
       },
       [] as Array<Tx<Type.CONSOLIDATE>>
     );

@@ -83,6 +83,9 @@ export default class Deposit extends React.Component {
       return null;
     }
 
+    const utxoList =
+      unspents && unspents.listForColor(this.selectedToken.color);
+
     const tokenSelect = (
       <Select
         defaultValue={selectedIdx}
@@ -157,23 +160,25 @@ export default class Deposit extends React.Component {
           </dd>
         </dl>
 
-        {unspents && (
+        {utxoList && (
           <Fragment>
-            <h1 style={{ alignItems: 'center', display: 'flex' }}>
-              Unspents: {unspents.list.length}
-              {unspents.list.length > 1 && (
+            <h2 style={{ alignItems: 'center', display: 'flex' }}>
+              Unspents ({this.selectedToken.symbol})
+              {utxoList.length > 1 && (
                 <Fragment>
                   {' '}
                   <Button
                     size="small"
-                    onClick={unspents.consolidate}
+                    onClick={() =>
+                      unspents.consolidate(this.selectedToken.color)
+                    }
                     style={{ marginLeft: 10 }}
                   >
-                    Consolidate
+                    Consolidate {this.selectedToken.symbol}
                   </Button>
                 </Fragment>
               )}
-            </h1>
+            </h2>
             <Table
               style={{ marginTop: 15 }}
               columns={[
@@ -182,7 +187,7 @@ export default class Deposit extends React.Component {
                 { title: 'Height', dataIndex: 'height', key: 'height' },
                 { title: 'Exit', dataIndex: 'exit', key: 'exit' },
               ]}
-              dataSource={unspents.list
+              dataSource={utxoList
                 .sort(
                   (a, b) =>
                     b.transaction.blockNumber - a.transaction.blockNumber
@@ -225,8 +230,9 @@ export default class Deposit extends React.Component {
           </Fragment>
         )}
 
-        <h1>Finalize exits</h1>
-        <Button onClick={() => bridge.finalizeExits(0)}>Finalize exits</Button>
+        <Button onClick={() => bridge.finalizeExits(this.selectedToken.color)}>
+          Finalize {this.selectedToken.symbol} exits
+        </Button>
       </Fragment>
     );
   }
