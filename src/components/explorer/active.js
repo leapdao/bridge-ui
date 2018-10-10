@@ -20,9 +20,10 @@ const Active = ({ explorer }) => {
 
   return (
     <div>
-      {!explorer.success && (
-        <Alert type="error" message="No results found for your search." />
-      )}
+      {!explorer.success &&
+        !explorer.searching && (
+          <Alert type="error" message="No results found for your search." />
+        )}
       {branch[explorer.currentType]}
     </div>
   );

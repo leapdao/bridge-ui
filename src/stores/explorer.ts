@@ -6,7 +6,8 @@
  */
 
 import Web3 = require('web3'); // weird imports for strange typings
-import { observable, computed, reaction } from 'mobx';
+import { observable, computed, action } from 'mobx';
+import autobind from 'autobind-decorator';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx } from 'parsec-lib';
 import { Block, Transaction } from 'web3/eth/types';
@@ -28,6 +29,7 @@ export default class Explorer {
 
   @observable
   public searching: boolean;
+
   @observable
   public success: boolean;
 
@@ -38,7 +40,7 @@ export default class Explorer {
     try {
       const lsCache = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (lsCache) {
-        this._cache = JSON.parse(lsCache);
+        // this._cache = JSON.parse(lsCache);
       }
     } catch (e) {}
   }
@@ -70,6 +72,14 @@ export default class Explorer {
     });
   }
 
+  @autobind
+  @action
+  private finishSearch(result) {
+    this.success = !!result;
+    this.current = result || this.current;
+    this.searching = false;
+  }
+
   public search(hashOrNumber) {
     this.searching = true;
     (hashOrNumber
@@ -79,11 +89,7 @@ export default class Explorer {
       (this.web3.utils.isAddress(searchParam)
         ? this.getAddress(searchParam)
         : this.getBlockOrTx(searchParam)
-      ).then(result => {
-        this.success = !!result;
-        this.current = result || this.current;
-        this.searching = false;
-      });
+      ).then(this.finishSearch);
     });
   }
 
