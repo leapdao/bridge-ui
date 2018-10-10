@@ -28,6 +28,15 @@ type ParsecBlock = Block & {
   transactions: ParsecTransaction[];
 } & TxJSON;
 
+const myTransaction = (addr: string) => {
+  addr = addr.toLowerCase();
+  return (tx: ParsecTransaction) => {
+    const from = (tx.from || '').toLowerCase();
+    const to = (tx.to || '').toLowerCase();
+    return from === addr || to === addr;
+  };
+};
+
 export default class Explorer {
   private web3: Web3 = getParsecWeb3();
   private blockchain: Block[] = [];
@@ -99,18 +108,15 @@ export default class Explorer {
     return Explorer.getType(this.current);
   }
 
-  public getAddress(address) {
+  public getAddress(address: string) {
+    address = address.toLowerCase();
     return Promise.all([
       this.web3.eth.getBalance(address),
       this.getBlockchain(),
     ]).then(([balance, blocks]) => {
       const txs = blocks.reduce(
         (accum, block) =>
-          accum.concat(
-            block.transactions.filter(
-              tx => tx.from === address || tx.to === address
-            )
-          ),
+          accum.concat(block.transactions.filter(myTransaction(address))),
         [] as Transaction[]
       );
       return {
