@@ -9,7 +9,7 @@ import Web3 = require('web3'); // weird imports for strange typings
 import { observable, computed, action } from 'mobx';
 import autobind from 'autobind-decorator';
 import getParsecWeb3 from '../utils/getParsecWeb3';
-import { Tx } from 'parsec-lib';
+import { Tx, TxJSON } from 'parsec-lib';
 import { Block, Transaction } from 'web3/eth/types';
 import { range } from '../utils/range';
 
@@ -20,6 +20,14 @@ export enum Types {
   TRANSACTION,
   ADDRESS,
 }
+
+type ParsecTransaction = Transaction & {
+  raw: string;
+} & TxJSON;
+
+type ParsecBlock = Block & {
+  transactions: ParsecTransaction[];
+} & TxJSON;
 
 export default class Explorer {
   private web3: Web3 = getParsecWeb3();
@@ -132,6 +140,47 @@ export default class Explorer {
         balance,
         txs,
       };
+    });
+  }
+
+  private getTransaction(hash): Promise<ParsecTransaction> {
+    if (
+      this.cache[hash] &&
+      Explorer.getType(this.cache[hash]) === Types.TRANSACTION
+    ) {
+      return Promise.resolve(this.cache[hash]);
+    }
+
+    return this.web3.eth.getTransaction(hash).then(tx => {
+      const result = {
+        ...tx,
+        ...Tx.fromRaw((tx as any).raw).toJSON(),
+      } as ParsecTransaction;
+      this.setCache(hash, result);
+      return result;
+    });
+  }
+
+  private getBlock(hashOrNumber): Promise<ParsecBlock> {
+    if (
+      this.cache[hashOrNumber] &&
+      Explorer.getType(this.cache[hashOrNumber]) === Types.BLOCK
+    ) {
+      return Promise.resolve(this.cache[hashOrNumber]);
+    }
+
+    this.web3.eth.getBlock(hashOrNumber, true).then(block => {
+      block.transactions = block.transactions.map(tx => ({
+        ...tx,
+        ...Tx.fromRaw((tx as any).raw).toJSON(),
+      }));
+      this.setCache(block.number, block);
+      this.setCache(block.hash, block);
+      block.transactions.forEach(tx => {
+        this.setCache(tx.hash, tx);
+      });
+
+      return block;
     });
   }
 

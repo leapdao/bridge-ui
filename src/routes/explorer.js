@@ -11,7 +11,7 @@ import { observable } from 'mobx';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-import { Form, Input, Button } from 'antd';
+import { Alert, Form, Input, Button, Divider } from 'antd';
 
 import AppLayout from '../components/appLayout';
 import Active from '../components/explorer/active';
@@ -80,6 +80,14 @@ export default class Explorer extends React.Component {
             </Button>
           </Form.Item>
         </Form>
+
+        <Divider />
+
+        {!explorer.success &&
+          !explorer.searching && (
+            <Alert type="error" message="No results found for your search." />
+          )}
+
         <Active />
 
         <h1>Chain info</h1>

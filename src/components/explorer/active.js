@@ -1,8 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Alert } from 'antd';
-
 import { observer, inject } from 'mobx-react';
 
 import { Types } from '../../stores/explorer.ts';
@@ -18,15 +16,7 @@ const Active = ({ explorer }) => {
     [Types.ADDRESS]: <Address />,
   };
 
-  return (
-    <div>
-      {!explorer.success &&
-        !explorer.searching && (
-          <Alert type="error" message="No results found for your search." />
-        )}
-      {branch[explorer.currentType]}
-    </div>
-  );
+  return branch[explorer.currentType] || null;
 };
 
 Active.propTypes = {
