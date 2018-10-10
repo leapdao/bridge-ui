@@ -11,7 +11,7 @@ import { Route } from 'react-router';
 import { observable } from 'mobx';
 import PropTypes from 'prop-types';
 
-import { Form, Input, Button, Divider } from 'antd';
+import { Form, Input, Button, Divider, Alert } from 'antd';
 
 import AppLayout from '../components/appLayout';
 import { NETWORKS } from '../utils';
@@ -69,14 +69,28 @@ export default class Explorer extends React.Component {
               type="primary"
               loading={explorer.searching}
               onClick={() => {
-                explorer.search(this.value, this.props.history).then(() => {
-                  this.value = '';
-                });
+                explorer.search(this.value, this.props.history).then(
+                  () => {
+                    this.value = '';
+                  },
+                  () => {}
+                );
               }}
             >
               Go!
             </Button>
           </Form.Item>
+          {!explorer.success &&
+            !explorer.searching && (
+              <Alert
+                type="error"
+                message="No results found for your search."
+                closable
+                onClose={() => {
+                  explorer.success = true;
+                }}
+              />
+            )}
         </Form>
 
         <Divider />

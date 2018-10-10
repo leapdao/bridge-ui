@@ -35,10 +35,10 @@ export default class Explorer {
   private _cache = {};
 
   @observable
-  public searching: boolean;
+  public searching: boolean = false;
 
   @observable
-  public success: boolean;
+  public success: boolean = true;
 
   @observable
   public current;
@@ -185,13 +185,20 @@ export default class Explorer {
                 history.push(`/explorer/block/${hashOrNumber}`);
               } else {
                 this.success = false;
+                return Promise.reject('Not found');
               }
             });
           }
         })
-        .then(() => {
-          this.searching = false;
-        });
+        .then(
+          () => {
+            this.searching = false;
+          },
+          err => {
+            this.searching = false;
+            return Promise.reject(err);
+          }
+        );
     }
   }
 }
