@@ -6,8 +6,7 @@
  */
 
 import Web3 = require('web3'); // weird imports for strange typings
-import { observable, computed, action } from 'mobx';
-import autobind from 'autobind-decorator';
+import { observable, computed } from 'mobx';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx, TxJSON } from 'parsec-lib';
 import { Block, Transaction } from 'web3/eth/types';
@@ -165,5 +164,34 @@ export default class Explorer {
         return block as ParsecBlock;
       }
     });
+  }
+
+  public search(hashOrNumber, history) {
+    this.searching = true;
+    this.success = true;
+    if (this.web3.utils.isAddress(hashOrNumber)) {
+      history.push(`/explorer/address/${hashOrNumber}`);
+      this.searching = false;
+      return Promise.resolve();
+    } else {
+      return this.web3.eth
+        .getTransaction(hashOrNumber)
+        .then(tx => {
+          if (tx) {
+            history.push(`/explorer/tx/${hashOrNumber}`);
+          } else {
+            return this.web3.eth.getBlock(hashOrNumber).then(block => {
+              if (block) {
+                history.push(`/explorer/block/${hashOrNumber}`);
+              } else {
+                this.success = false;
+              }
+            });
+          }
+        })
+        .then(() => {
+          this.searching = false;
+        });
+    }
   }
 }

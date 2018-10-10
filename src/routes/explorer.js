@@ -10,7 +10,6 @@ import { observer, inject } from 'mobx-react';
 import { Route } from 'react-router';
 import { observable } from 'mobx';
 import PropTypes from 'prop-types';
-import { Link } from 'react-router-dom';
 
 import { Form, Input, Button, Divider } from 'antd';
 
@@ -46,7 +45,7 @@ export default class Explorer extends React.Component {
   }
 
   @observable
-  value;
+  value = '';
 
   render() {
     const { explorer, bridge, network, psc, match } = this.props;
@@ -66,8 +65,16 @@ export default class Explorer extends React.Component {
             />
           </Form.Item>
           <Form.Item>
-            <Button type="primary" loading={explorer.searching}>
-              <Link to={`/explorer/${this.value}`}>Go!</Link>
+            <Button
+              type="primary"
+              loading={explorer.searching}
+              onClick={() => {
+                explorer.search(this.value, this.props.history).then(() => {
+                  this.value = '';
+                });
+              }}
+            >
+              Go!
             </Button>
           </Form.Item>
         </Form>
@@ -100,6 +107,7 @@ export default class Explorer extends React.Component {
 Explorer.propTypes = {
   explorer: PropTypes.object,
   match: PropTypes.object.isRequired,
+  history: PropTypes.object.isRequired,
   network: PropTypes.object,
   psc: PropTypes.object,
   bridge: PropTypes.object,
