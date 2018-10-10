@@ -198,7 +198,7 @@ export default class Deposit extends React.Component {
                     value: <TokenValue {...u.output} />,
                     input: (
                       <Fragment>
-                        <Link to={`/explorer/${inputHash}`}>
+                        <Link to={`/explorer/tx/${inputHash}`}>
                           {shortenHash(inputHash)}
                         </Link>{' '}
                         ({u.outpoint.index})
