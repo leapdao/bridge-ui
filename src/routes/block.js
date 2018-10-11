@@ -78,7 +78,7 @@ class Block extends React.Component {
     return (
       <Card title={`Block ${this.block.number}`} className="explorer-section">
         <div className="explorer-nav">
-          {this.block.number > 2 && (
+          {this.block.number > 0 && (
             <Button>
               <Link to={`/explorer/block/${this.block.number - 1}`}>Prev</Link>
             </Button>
