@@ -99,11 +99,7 @@ class Transaction extends React.Component {
           </Fragment>
         )}
         <h3>Value:</h3>
-        {this.tx.outputs && this.tx.outputs[0] ? (
-          <TokenValue value={this.tx.value} color={this.tx.outputs[0].color} />
-        ) : (
-          this.tx.value
-        )}
+        <TokenValue value={this.tx.value} color={this.tx.color} />
         <h3>Type:</h3>
         {TYPES[this.tx.type]}
         <h3>Inputs:</h3>

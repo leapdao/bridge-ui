@@ -16,7 +16,7 @@ const TransactionList = ({ txs }) => {
       hash: tx.hash,
       from: tx.from,
       to: tx.to,
-      value: { value: tx.value, color: tx.outputs[0] && tx.outputs[0].color },
+      value: { value: tx.value, color: tx.color },
       type: TYPES[tx.type],
     };
   });
