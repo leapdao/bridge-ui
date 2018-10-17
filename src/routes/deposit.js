@@ -15,6 +15,7 @@ import ethUtil from 'ethereumjs-util';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import TokenValue from '../components/tokenValue';
+import TransferForm from '../components/transferForm';
 import { shortenHash } from '../utils';
 
 @inject('tokens', 'bridge', 'network', 'unspents')
@@ -107,7 +108,7 @@ export default class Deposit extends React.Component {
 
     return (
       <Fragment>
-        <h1>Make a deposit</h1>
+        <h2>Make a deposit</h2>
 
         <Web3SubmitWarning />
 
@@ -166,6 +167,21 @@ export default class Deposit extends React.Component {
             />
           </dd>
         </dl>
+
+        <h2>Transfer tokens</h2>
+        <TransferForm
+          maxValue={
+            this.selectedToken.plasmaBalance &&
+            this.selectedToken.toTokens(this.selectedToken.plasmaBalance)
+          }
+          color={this.selectedToken.color}
+          onSubmit={(addr, amount) =>
+            this.selectedToken.transfer(
+              addr,
+              this.selectedToken.toCents(amount)
+            )
+          }
+        />
 
         {utxoList && (
           <Fragment>

@@ -17,7 +17,7 @@ const TokenValue = ({ value, color, tokens }) => {
 };
 
 TokenValue.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   color: PropTypes.number.isRequired,
   tokens: PropTypes.object,
 };

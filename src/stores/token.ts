@@ -13,6 +13,7 @@ import {
   IObservableArray,
   reaction,
 } from 'mobx';
+import { helpers, Tx } from 'parsec-lib';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import Contract from 'web3/eth/contract';
@@ -25,6 +26,8 @@ import ContractStore from './contractStore';
 import Explorer from './explorer';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
+import getParsecWeb3 from '../utils/getParsecWeb3';
+import getWeb3 from '../utils/getWeb3';
 
 const tokenInfo = (
   token: Contract,
@@ -124,6 +127,37 @@ export default class Token extends ContractStore {
     if (this.isNft) return tokenCentsValue;
 
     return new BigNumber(tokenCentsValue).div(10 ** this.decimals).toNumber();
+  }
+
+  public transfer(to: string, amount: number): Promise<any> {
+    if (!this.iWeb3) {
+      return Promise.reject('No metamask');
+    }
+
+    const parsecWeb3 = getParsecWeb3();
+    return parsecWeb3
+      .getUnspent(this.account.address)
+      .then(unspent => {
+        const inputs = helpers.calcInputs(
+          unspent,
+          this.account.address,
+          amount,
+          this.color
+        );
+        const outputs = helpers.calcOutputs(
+          unspent,
+          inputs,
+          this.account.address,
+          to,
+          amount,
+          this.color
+        );
+        const tx = Tx.transfer(inputs, outputs);
+        return tx.signWeb3(this.iWeb3);
+      })
+      .then(signedTx => {
+        return parsecWeb3.eth.sendSignedTransaction(signedTx.toRaw());
+      });
   }
 
   public approveAndCall(

@@ -28,6 +28,10 @@ export default class ContractStore {
     this.abi = abi;
     this.address = address;
     this.transactions = transactions;
+
+    if ((window as any).web3) {
+      this.iWeb3 = this.iWeb3 || (getWeb3(true) as Web3);
+    }
   }
 
   @computed
@@ -58,8 +62,7 @@ export default class ContractStore {
 
   @computed
   public get iContract(): Contract | undefined {
-    if ((window as any).web3) {
-      this.iWeb3 = this.iWeb3 || (getWeb3(true) as Web3);
+    if (this.iWeb3) {
       return new this.iWeb3.eth.Contract(this.abi, this.address);
     }
   }
