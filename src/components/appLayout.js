@@ -46,7 +46,9 @@ class AppLayout extends React.Component {
             path,
           },
         }) => {
-          const base = path.startsWith('/explorer') ? '' : match.url;
+          const base = path.startsWith('/explorer')
+            ? ''
+            : (match.url || '').replace(/\/$/, '');
           section = path.startsWith('/explorer') ? 'explorer' : section; // eslint-disable-line
           return (
             <Menu
@@ -57,8 +59,8 @@ class AppLayout extends React.Component {
               <Menu.Item key="slots">
                 <Link to={`${base}/`}>Slots auction</Link>
               </Menu.Item>
-              <Menu.Item key="deposit">
-                <Link to={`${base}/deposit`}>Deposit/exit</Link>
+              <Menu.Item key="wallet">
+                <Link to={`${base}/wallet`}>Wallet</Link>
               </Menu.Item>
               <Menu.Item key="registerToken">
                 <Link to={`${base}/registerToken`}>Register token</Link>

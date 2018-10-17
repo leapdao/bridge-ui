@@ -14,7 +14,7 @@ import { Route } from 'react-router';
 import { Spin } from 'antd';
 
 import Slots from '../routes/slots';
-import Deposit from '../routes/deposit';
+import Wallet from '../routes/wallet';
 import Faucet from '../routes/faucet';
 import RegisterToken from '../routes/registerToken';
 
@@ -39,7 +39,10 @@ class App extends React.Component {
   }
 
   render() {
-    const { account, match } = this.props;
+    const {
+      account,
+      match: { path },
+    } = this.props;
 
     if (!account.ready) {
       return (
@@ -50,14 +53,10 @@ class App extends React.Component {
     }
     return (
       <AppLayout>
-        <Route path={`${match.path}/`} exact component={Slots} />
-        <Route path={`${match.path}/deposit`} exact component={Deposit} />
-        <Route
-          path={`${match.path}/registerToken`}
-          exact
-          component={RegisterToken}
-        />
-        <Route path={`${match.path}/faucet`} exact component={Faucet} />
+        <Route path={`${path}/`} exact component={Slots} />
+        <Route path={`${path}/wallet`} exact component={Wallet} />
+        <Route path={`${path}/registerToken`} exact component={RegisterToken} />
+        <Route path={`${path}/faucet`} exact component={Faucet} />
       </AppLayout>
     );
   }

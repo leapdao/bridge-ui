@@ -13,10 +13,10 @@ import PropTypes from 'prop-types';
 import { Select, Form, Input, Button, Table } from 'antd';
 import ethUtil from 'ethereumjs-util';
 
-import Web3SubmitWarning from '../components/web3SubmitWarning';
-import TokenValue from '../components/tokenValue';
-import TransferForm from '../components/transferForm';
-import { shortenHash } from '../utils';
+import Web3SubmitWarning from '../../components/web3SubmitWarning';
+import TokenValue from '../../components/tokenValue';
+import TransferForm from '../../components/transferForm';
+import { shortenHash } from '../../utils';
 
 @inject('tokens', 'bridge', 'network', 'unspents')
 @observer
