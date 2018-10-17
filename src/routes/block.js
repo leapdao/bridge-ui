@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { observable } from 'mobx';
+import { observable, reaction } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Card, Button, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
@@ -24,6 +24,15 @@ class Block extends React.Component {
   constructor(props) {
     super(props);
     this.fetch(props.match.params.hashOrNumber);
+
+    reaction(
+      () => this.props.explorer.latestBlock,
+      () => {
+        if (!props.match.params.hashOrNumber) {
+          this.fetch();
+        }
+      }
+    );
   }
 
   componentWillReceiveProps(nextProps) {
