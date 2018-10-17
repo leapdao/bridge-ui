@@ -5,7 +5,7 @@ import { inject, observer } from 'mobx-react';
 const TokenValue = ({ value, color, tokens }) => {
   const token = tokens && tokens.tokenForColor(color);
 
-  if (!token || !token.ready) {
+  if (!token || !token.ready || value === undefined) {
     return null;
   }
 

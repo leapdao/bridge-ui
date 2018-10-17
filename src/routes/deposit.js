@@ -158,6 +158,13 @@ export default class Deposit extends React.Component {
               color={this.selectedToken.color}
             />
           </dd>
+          <dt>Plasma balance</dt>
+          <dd>
+            <TokenValue
+              value={this.selectedToken.plasmaBalance}
+              color={this.selectedToken.color}
+            />
+          </dd>
         </dl>
 
         {utxoList && (

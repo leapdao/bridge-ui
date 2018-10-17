@@ -14,6 +14,7 @@ import Token from './token';
 import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
 import { Output } from 'parsec-lib';
+import Explorer from './explorer';
 
 export default class Tokens {
   @observable
@@ -25,7 +26,8 @@ export default class Tokens {
   constructor(
     private account: Account,
     private bridge: Bridge,
-    private txs: Transactions
+    private txs: Transactions,
+    private explorer: Explorer
   ) {
     this.erc20TokenCount = 0;
     this.nftTokenCount = 0;
@@ -81,7 +83,8 @@ export default class Tokens {
         .tokens(color)
         .call()
         .then(
-          ({ 0: address }) => new Token(this.account, this.txs, address, color)
+          ({ 0: address }) =>
+            new Token(this.account, this.txs, address, color, this.explorer)
         );
     });
   }

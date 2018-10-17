@@ -34,13 +34,13 @@ if (!process.env.BRIDGE_ADDR) {
 
 const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
 
+const explorer = new ExplorerStore();
 const transactions = new Transactions();
 const account = new Account();
 const bridge = new Bridge(account, transactions);
-const tokens = new Tokens(account, bridge, transactions);
+const tokens = new Tokens(account, bridge, transactions, explorer);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
 const unspents = new Unspents(bridge, account);
-const explorer = new ExplorerStore();
 
 ReactDOM.render(
   <BrowserRouter>

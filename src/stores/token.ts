@@ -5,7 +5,14 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, computed, autorun, IObservableArray } from 'mobx';
+import {
+  observable,
+  action,
+  computed,
+  autorun,
+  IObservableArray,
+  reaction,
+} from 'mobx';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import Contract from 'web3/eth/contract';
@@ -15,6 +22,7 @@ import { txSuccess, isNFT } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
+import Explorer from './explorer';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 
@@ -52,12 +60,15 @@ export default class Token extends ContractStore {
   public decimals: number;
   @observable
   public balance?: number;
+  @observable
+  public plasmaBalance?: number;
 
   constructor(
     account: Account,
     transactions: Transactions,
     address: string,
-    color: number
+    color: number,
+    private explorer: Explorer
   ) {
     super(isNFT(color) ? erc721 : erc20, address, transactions);
 
@@ -65,6 +76,7 @@ export default class Token extends ContractStore {
     this.color = color;
 
     autorun(this.loadBalance);
+    autorun(this.loadPlasmaBalance);
     tokenInfo(this.contract, color).then(this.setInfo);
 
     if (this.events) {
@@ -74,6 +86,8 @@ export default class Token extends ContractStore {
         }
       });
     }
+
+    reaction(() => explorer.latestBlock, this.loadPlasmaBalance);
   }
 
   @computed
@@ -151,6 +165,20 @@ export default class Token extends ContractStore {
       .balanceOf(this.account.address)
       .call()
       .then(this.updateBalance);
+  }
+
+  @autobind
+  @action
+  private updatePlasmaBalance(balance: number) {
+    this.plasmaBalance = balance;
+  }
+
+  @autobind
+  private loadPlasmaBalance() {
+    this.plasmaContract.methods
+      .balanceOf(this.account.address)
+      .call()
+      .then(this.updatePlasmaBalance);
   }
 
   private allowanceOrTokenId(valueOrTokenId: number) {
