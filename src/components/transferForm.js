@@ -3,7 +3,7 @@ import ethUtil from 'ethereumjs-util';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { Input, Button } from 'antd';
+import { Input, Button, Form } from 'antd';
 import autobind from 'autobind-decorator';
 
 @inject('tokens')
@@ -56,7 +56,8 @@ class TransferForm extends React.Component {
   showErrors = false;
 
   @autobind
-  handleSubmit() {
+  handleSubmit(e) {
+    e.preventDefault();
     const { onSubmit } = this.props;
 
     if (this.valueError || this.receiverError) {
@@ -102,15 +103,8 @@ class TransferForm extends React.Component {
     }
 
     return (
-      <Fragment>
-        <div
-          style={{
-            whiteSpace: 'nowrap',
-            marginBottom: 10,
-          }}
-        >
-          Amount:
-          <br />
+      <Form onSubmit={this.handleSubmit} className="transferForm">
+        <Form.Item label="Amount">
           <Input
             value={this.value}
             style={{ width: 450, font: 'inherit' }}
@@ -125,14 +119,8 @@ class TransferForm extends React.Component {
                 <span style={{ color: 'red' }}>{this.valueError}</span>
               </Fragment>
             )}
-        </div>
-        <div
-          style={{
-            whiteSpace: 'nowrap',
-            marginBottom: 10,
-          }}
-        >
-          Receiver address: <br />
+        </Form.Item>
+        <Form.Item label="Receiver address">
           <Input
             value={this.receiver}
             style={{ width: 450, font: 'inherit' }}
@@ -145,15 +133,13 @@ class TransferForm extends React.Component {
                 <span style={{ color: 'red' }}>{this.receiverError}</span>
               </Fragment>
             )}
-        </div>
-        <Button
-          type="primary"
-          disabled={this.disabled}
-          onClick={this.handleSubmit}
-        >
-          Send
-        </Button>
-      </Fragment>
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit" disabled={this.disabled}>
+            Send
+          </Button>
+        </Form.Item>
+      </Form>
     );
   }
 }

@@ -50,3 +50,12 @@ h2:first-child {
 .explorer-section .ant-list-item .ant-list-item-content {
   margin-bottom: 5px;
 }
+
+.transferForm .ant-form-item-label {
+  line-height: 20px;
+}
+
+.transferForm .ant-form-item {
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
