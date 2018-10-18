@@ -11,6 +11,7 @@ import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx, TxJSON } from 'parsec-lib';
 import { Block, Transaction } from 'web3/eth/types';
 import { range } from '../utils/range';
+import autobind from 'autobind-decorator';
 
 const LOCAL_STORAGE_KEY = 'EXPLORER_CACHE';
 
@@ -40,11 +41,18 @@ const myTransaction = (addr: string) => {
 export default class Explorer {
   private web3: Web3 = getParsecWeb3();
   private blockchain: Block[] = [];
-  private latestBlock: number = 2;
   private _cache = {};
 
   @observable
+  public latestBlock: number = 0;
+
+  @observable
   public searching: boolean = false;
+
+  @observable
+  public syncing: boolean = false;
+
+  private syncingPromise: Promise<Block[]>;
 
   @observable
   public success: boolean = true;
@@ -59,6 +67,8 @@ export default class Explorer {
         this._cache = JSON.parse(lsCache);
       }
     } catch (e) {}
+
+    setInterval(this.getBlockchain, 5000);
   }
 
   private get cache() {
@@ -70,22 +80,35 @@ export default class Explorer {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this._cache));
   }
 
+  @autobind
   private getBlockchain(): Promise<Block[]> {
-    return this.web3.eth.getBlockNumber().then(blockNumber => {
-      if (this.latestBlock === blockNumber) {
-        return this.blockchain;
-      }
+    this.syncing = true;
+    if (this.syncingPromise) {
+      return this.syncingPromise;
+    }
+    this.syncingPromise = this.web3.eth
+      .getBlockNumber()
+      .then(blockNumber => {
+        if (this.latestBlock === blockNumber) {
+          return this.blockchain;
+        }
 
-      const fromBlock = this.latestBlock;
-      this.latestBlock = blockNumber;
+        const fromBlock = this.latestBlock;
+        this.latestBlock = blockNumber;
 
-      return Promise.all(
-        range(fromBlock, this.latestBlock).map(n => this.getBlock(n))
-      ).then(blocks => {
-        this.blockchain = this.blockchain.concat(blocks);
-        return this.blockchain;
+        return Promise.all(
+          range(fromBlock, this.latestBlock).map(n => this.getBlock(n))
+        ).then(blocks => {
+          this.blockchain = this.blockchain.concat(blocks);
+          return this.blockchain;
+        });
+      })
+      .then(blocks => {
+        this.syncing = false;
+        this.syncingPromise = null;
+        return blocks;
       });
-    });
+    return this.syncingPromise;
   }
 
   private static getType(obj) {

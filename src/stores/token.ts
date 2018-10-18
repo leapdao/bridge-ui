@@ -5,7 +5,15 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, computed, autorun, IObservableArray } from 'mobx';
+import {
+  observable,
+  action,
+  computed,
+  autorun,
+  IObservableArray,
+  reaction,
+} from 'mobx';
+import { helpers, Tx } from 'parsec-lib';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import Contract from 'web3/eth/contract';
@@ -15,8 +23,11 @@ import { txSuccess, isNFT } from '../utils';
 
 import Account from './account';
 import ContractStore from './contractStore';
+import Explorer from './explorer';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
+import getParsecWeb3 from '../utils/getParsecWeb3';
+import getWeb3 from '../utils/getWeb3';
 
 const tokenInfo = (
   token: Contract,
@@ -52,12 +63,15 @@ export default class Token extends ContractStore {
   public decimals: number;
   @observable
   public balance?: number;
+  @observable
+  public plasmaBalance?: number;
 
   constructor(
     account: Account,
     transactions: Transactions,
     address: string,
-    color: number
+    color: number,
+    private explorer: Explorer
   ) {
     super(isNFT(color) ? erc721 : erc20, address, transactions);
 
@@ -65,6 +79,7 @@ export default class Token extends ContractStore {
     this.color = color;
 
     autorun(this.loadBalance);
+    autorun(this.loadPlasmaBalance);
     tokenInfo(this.contract, color).then(this.setInfo);
 
     if (this.events) {
@@ -74,6 +89,8 @@ export default class Token extends ContractStore {
         }
       });
     }
+
+    reaction(() => explorer.latestBlock, this.loadPlasmaBalance);
   }
 
   @computed
@@ -110,6 +127,37 @@ export default class Token extends ContractStore {
     if (this.isNft) return tokenCentsValue;
 
     return new BigNumber(tokenCentsValue).div(10 ** this.decimals).toNumber();
+  }
+
+  public transfer(to: string, amount: number): Promise<any> {
+    if (!this.iWeb3) {
+      return Promise.reject('No metamask');
+    }
+
+    const parsecWeb3 = getParsecWeb3();
+    return parsecWeb3
+      .getUnspent(this.account.address)
+      .then(unspent => {
+        const inputs = helpers.calcInputs(
+          unspent,
+          this.account.address,
+          amount,
+          this.color
+        );
+        const outputs = helpers.calcOutputs(
+          unspent,
+          inputs,
+          this.account.address,
+          to,
+          amount,
+          this.color
+        );
+        const tx = Tx.transfer(inputs, outputs);
+        return tx.signWeb3(this.iWeb3);
+      })
+      .then(signedTx => {
+        return parsecWeb3.eth.sendSignedTransaction(signedTx.toRaw());
+      });
   }
 
   public approveAndCall(
@@ -151,6 +199,20 @@ export default class Token extends ContractStore {
       .balanceOf(this.account.address)
       .call()
       .then(this.updateBalance);
+  }
+
+  @autobind
+  @action
+  private updatePlasmaBalance(balance: number) {
+    this.plasmaBalance = balance;
+  }
+
+  @autobind
+  private loadPlasmaBalance() {
+    this.plasmaContract.methods
+      .balanceOf(this.account.address)
+      .call()
+      .then(this.updatePlasmaBalance);
   }
 
   private allowanceOrTokenId(valueOrTokenId: number) {

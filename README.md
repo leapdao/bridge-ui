@@ -8,6 +8,10 @@ You can:
 
 - View and buy slots
 - Make deposit
+- Transfer plasma tokens
+- Exit UTXOs
+- Browse network with block explorer
+- Register token contract
 - Get some tokens
 - ...
 

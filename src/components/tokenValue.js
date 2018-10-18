@@ -5,7 +5,7 @@ import { inject, observer } from 'mobx-react';
 const TokenValue = ({ value, color, tokens }) => {
   const token = tokens && tokens.tokenForColor(color);
 
-  if (!token || !token.ready) {
+  if (!token || !token.ready || value === undefined) {
     return null;
   }
 
@@ -17,7 +17,7 @@ const TokenValue = ({ value, color, tokens }) => {
 };
 
 TokenValue.propTypes = {
-  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]),
   color: PropTypes.number.isRequired,
   tokens: PropTypes.object,
 };
