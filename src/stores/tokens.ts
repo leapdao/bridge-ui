@@ -82,10 +82,15 @@ export default class Tokens {
       return this.bridge.contract.methods
         .tokens(color)
         .call()
-        .then(
-          ({ 0: address }) =>
-            new Token(this.account, this.txs, address, color, this.explorer)
-        );
+        .then(({ 0: address }) => {
+          return new Token(
+            this.account,
+            this.txs,
+            address,
+            color,
+            this.explorer
+          );
+        });
     });
   }
 

@@ -33,12 +33,12 @@ export default class Transfer extends React.Component {
             this.selectedToken.toTokens(this.selectedToken.plasmaBalance)
           }
           color={this.selectedToken.color}
-          onSubmit={(addr, amount) => {
+          onSubmit={(addr, amount) =>
             this.selectedToken.transfer(
               addr,
               this.selectedToken.toCents(amount)
-            );
-          }}
+            )
+          }
           disabled={!network || !network.canSubmit}
         />
       </Fragment>

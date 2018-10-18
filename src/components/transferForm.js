@@ -64,12 +64,17 @@ class TransferForm extends React.Component {
       this.showErrors = true;
     } else if (onSubmit) {
       this.submitting = true;
-      Promise.resolve(onSubmit(this.receiver, this.value)).then(() => {
-        this.value = '';
-        this.receiver = '';
-        this.submitting = false;
-        this.showErrors = false;
-      });
+      Promise.resolve(onSubmit(this.receiver, this.value)).then(
+        () => {
+          this.value = '';
+          this.receiver = '';
+          this.submitting = false;
+          this.showErrors = false;
+        },
+        () => {
+          this.submitting = false;
+        }
+      );
     }
   }
 

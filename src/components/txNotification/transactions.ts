@@ -7,11 +7,11 @@
 
 import { action, observable, ObservableMap, runInAction } from 'mobx';
 import autobind from 'autobind-decorator';
-import { TxStatus, DetailedInflightTxReceipt } from "./types";
-
+import { TxStatus, DetailedInflightTxReceipt } from './types';
 
 export default class Transactions {
-  @observable public map: ObservableMap<string, DetailedInflightTxReceipt>;
+  @observable
+  public map: ObservableMap<string, DetailedInflightTxReceipt>;
 
   constructor() {
     this.map = observable.map({});
@@ -20,7 +20,10 @@ export default class Transactions {
   @autobind
   @action
   public update(newTx: DetailedInflightTxReceipt) {
-    const oldTx = this.map.get(newTx.key) || { key: newTx.key, futureReceipt: null };
+    const oldTx = this.map.get(newTx.key) || {
+      key: newTx.key,
+      futureReceipt: null,
+    };
     if (!oldTx.futureReceipt) {
       newTx.status = TxStatus.CREATED;
     }
@@ -40,23 +43,25 @@ export default class Transactions {
         const statusCode = status ? TxStatus.SUCCEED : TxStatus.FAILED;
         this.setStatus(newTx, statusCode);
         this.delayedRemove(newTx.key);
-      })
+      });
+      newTx.futureReceipt.catch(err => {
+        console.log(err);
+      });
     }
     this.map.set(newTx.key, Object.assign(oldTx, newTx));
   }
 
   private setStatus(tx: DetailedInflightTxReceipt, status: TxStatus) {
     runInAction(() => {
-      this.map.set(tx.key, Object.assign(tx, { status }));      
+      this.map.set(tx.key, Object.assign(tx, { status }));
     });
   }
 
   private delayedRemove(key: string) {
     setTimeout(() => {
       runInAction(() => {
-        this.map.delete(key);      
+        this.map.delete(key);
       });
-    }, 2000); 
+    }, 2000);
   }
-
 }

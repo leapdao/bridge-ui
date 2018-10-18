@@ -85,7 +85,6 @@ export default class ContractStore {
       : txReceiptPromise) as Promise<InflightTxReceipt>;
 
     promise.then(inflightTxReceipt => {
-      console.log(inflightTxReceipt);
       this.transactions.update({
         ...metadata,
         key,

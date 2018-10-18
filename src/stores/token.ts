@@ -14,12 +14,14 @@ import {
   reaction,
 } from 'mobx';
 import { helpers, Tx } from 'parsec-lib';
+import Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
 import Contract from 'web3/eth/contract';
 import { EventLog } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
-import { txSuccess, isNFT } from '../utils';
+import { isNFT } from '../utils';
+import { txSuccess } from '../utils/txSuccess';
 
 import Account from './account';
 import ContractStore from './contractStore';
@@ -27,7 +29,6 @@ import Explorer from './explorer';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import getParsecWeb3 from '../utils/getParsecWeb3';
-import getWeb3 from '../utils/getWeb3';
 
 const tokenInfo = (
   token: Contract,
@@ -90,7 +91,7 @@ export default class Token extends ContractStore {
       });
     }
 
-    reaction(() => explorer.latestBlock, this.loadPlasmaBalance);
+    reaction(() => this.explorer.latestBlock, this.loadPlasmaBalance);
   }
 
   @computed
@@ -135,7 +136,8 @@ export default class Token extends ContractStore {
     }
 
     const parsecWeb3 = getParsecWeb3();
-    return parsecWeb3
+    const promiEvent = Web3PromiEvent();
+    parsecWeb3
       .getUnspent(this.account.address)
       .then(unspent => {
         const inputs = helpers.calcInputs(
@@ -153,11 +155,39 @@ export default class Token extends ContractStore {
           this.color
         );
         const tx = Tx.transfer(inputs, outputs);
-        return tx.signWeb3(this.iWeb3);
+        const signReq = tx.signWeb3(this.iWeb3);
+
+        return signReq;
       })
-      .then(signedTx => {
-        return parsecWeb3.eth.sendSignedTransaction(signedTx.toRaw());
+      .then(
+        signedTx => {
+          promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());
+          return {
+            futureReceipt: parsecWeb3.eth.sendSignedTransaction(
+              signedTx.toRaw()
+            ),
+          };
+        },
+        err => {
+          promiEvent.reject(err);
+          promiEvent.eventEmitter.emit('error', err);
+        }
+      )
+      .then(receipt => {
+        promiEvent.eventEmitter.emit('receipt', receipt);
+        promiEvent.resolve({
+          ...receipt,
+          status: 'success',
+        });
       });
+
+    this.watchTx(promiEvent.eventEmitter, 'plasmaSigh', {
+      message: 'Sign plasma transfer',
+      description:
+        'Before you proceed with your tx, you need to sign a message',
+    });
+
+    return txSuccess(promiEvent.eventEmitter);
   }
 
   public approveAndCall(
