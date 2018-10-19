@@ -13,7 +13,7 @@ import {
   IObservableArray,
   reaction,
 } from 'mobx';
-import { helpers, Tx } from 'parsec-lib';
+import { helpers, Tx, Input, Output } from 'parsec-lib';
 import Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
 import BigNumber from 'bignumber.js';
@@ -148,6 +148,17 @@ export default class Token extends ContractStore {
     parsecWeb3
       .getUnspent(this.account.address)
       .then(unspent => {
+        if (this.isNft) {
+          const { outpoint } = unspent.find(
+            ({ output }) =>
+              Number(output.color) === Number(this.color) &&
+              output.value === amount
+          );
+          const inputs = [new Input(outpoint)];
+          const outputs = [new Output(amount, to, this.color)];
+          return Tx.transfer(inputs, outputs);
+        }
+
         const inputs = helpers.calcInputs(
           unspent,
           this.account.address,
@@ -162,11 +173,9 @@ export default class Token extends ContractStore {
           amount,
           this.color
         );
-        const tx = Tx.transfer(inputs, outputs);
-        const signReq = tx.signWeb3(this.iWeb3);
-
-        return signReq;
+        return Tx.transfer(inputs, outputs);
       })
+      .then(tx => tx.signWeb3(this.iWeb3))
       .then(
         signedTx => {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());

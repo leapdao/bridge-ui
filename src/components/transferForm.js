@@ -5,6 +5,7 @@ import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Input, Button, Form } from 'antd';
 import autobind from 'autobind-decorator';
+import AmountInput from './amountInput';
 
 @inject('tokens')
 @observer
@@ -80,13 +81,16 @@ class TransferForm extends React.Component {
 
   @autobind
   handleBlur() {
-    const { minValue } = this.props;
-    this.value = Math.max(Number(minValue), Number(this.value));
+    const { minValue, tokens, color } = this.props;
+    const token = tokens.tokenForColor(color);
+    if (!token.isNft) {
+      this.value = Math.max(Number(minValue), Number(this.value));
+    }
   }
 
   @autobind
-  handleChange(e) {
-    this.value = e.target.value;
+  handleChange(value) {
+    this.value = value;
   }
 
   @autobind
@@ -109,27 +113,28 @@ class TransferForm extends React.Component {
 
     return (
       <Form onSubmit={this.handleSubmit} className="transferForm">
-        <Form.Item label="Amount">
-          <Input
-            value={this.value}
-            style={{ width: 450, font: 'inherit' }}
-            onChange={this.handleChange}
-            onBlur={this.handleBlur}
-            addonAfter={token.symbol}
-          />
-          {this.showErrors &&
-            this.valueError && (
-              <Fragment>
-                <br />
-                <span style={{ color: 'red' }}>{this.valueError}</span>
-              </Fragment>
-            )}
-        </Form.Item>
-        <Form.Item label="Receiver address">
+        <AmountInput
+          plasma
+          width={450}
+          color={color}
+          onBlur={this.handleBlur}
+          onChange={this.handleChange}
+          value={this.value}
+          placeholder="Amount to transfer"
+        />
+        {this.showErrors &&
+          this.valueError && (
+            <Fragment>
+              <br />
+              <span style={{ color: 'red' }}>{this.valueError}</span>
+            </Fragment>
+          )}
+        <Form.Item>
           <Input
             value={this.receiver}
             style={{ width: 450, font: 'inherit' }}
             onChange={this.handleReceiverChange}
+            placeholder="Receiver address"
           />
           {this.showErrors &&
             this.receiverError && (

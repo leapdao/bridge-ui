@@ -9,10 +9,11 @@ import React, { Fragment } from 'react';
 import { computed, observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { Select, Form, Input, Button } from 'antd';
+import { Form, Button } from 'antd';
 import autobind from 'autobind-decorator';
 
 import TokenValue from '../../components/tokenValue';
+import AmountInput from '../../components/amountInput';
 
 @inject('tokens', 'bridge', 'network')
 @observer
@@ -66,23 +67,6 @@ export default class Deposit extends React.Component {
   render() {
     const { tokens, color, onColorChange } = this.props;
 
-    const tokenSelect = (
-      <Select
-        defaultValue={color}
-        style={{ width: this.selectedToken.isNft ? 120 : 80 }}
-        onChange={newColor => {
-          onColorChange(newColor);
-          this.value = tokens.tokenForColor(newColor).isNft ? '' : this.value;
-        }}
-      >
-        {tokens.list.map(token => (
-          <Select.Option key={token} value={token.color}>
-            {token.symbol}
-          </Select.Option>
-        ))}
-      </Select>
-    );
-
     return (
       <Fragment>
         <h2>Make a deposit</h2>
@@ -95,40 +79,20 @@ export default class Deposit extends React.Component {
         )}
 
         <Form onSubmit={this.handleSubmit} layout="inline">
-          {this.selectedToken.isNft && (
-            <Fragment>
-              <Form.Item>
-                <Select
-                  defaultValue={this.value}
-                  style={{
-                    width: 250,
-                  }}
-                  onChange={id => {
-                    this.value = id;
-                  }}
-                >
-                  {this.selectedToken.balance.map(id => (
-                    <Select.Option key={id} value={id}>
-                      {id}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Form.Item>
-              <Form.Item>{tokenSelect}</Form.Item>
-            </Fragment>
-          )}
-          {!this.selectedToken.isNft && (
-            <Form.Item>
-              <Input
-                placeholder="amount to deposit"
-                value={this.value}
-                onChange={this.handleChange}
-                onBlur={this.handleBlur}
-                addonAfter={tokenSelect}
-                style={{ width: 300 }}
-              />
-            </Form.Item>
-          )}
+          <AmountInput
+            placeholder="Amount to deposit"
+            value={this.value}
+            onChange={value => {
+              this.value = value;
+            }}
+            color={color}
+            onColorChange={newColor => {
+              onColorChange(newColor);
+              this.value = tokens.tokenForColor(newColor).isNft
+                ? ''
+                : this.value;
+            }}
+          />
 
           <Form.Item>
             <Button

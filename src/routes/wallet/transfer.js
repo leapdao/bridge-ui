@@ -28,15 +28,13 @@ export default class Transfer extends React.Component {
       <Fragment>
         <h2>Transfer tokens</h2>
         <TransferForm
-          maxValue={
-            this.selectedToken.plasmaBalance &&
-            this.selectedToken.toTokens(this.selectedToken.plasmaBalance)
-          }
           color={this.selectedToken.color}
           onSubmit={(addr, amount) =>
             this.selectedToken.transfer(
               addr,
-              this.selectedToken.toCents(amount)
+              this.selectedToken.isNft
+                ? amount
+                : this.selectedToken.toCents(amount)
             )
           }
           disabled={!network || !network.canSubmit}
