@@ -6,41 +6,49 @@
  */
 
 import React, { Fragment } from 'react';
-import { computed } from 'mobx';
+import { computed, observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Select, Form, Input, Button } from 'antd';
+import autobind from 'autobind-decorator';
 
 import TokenValue from '../../components/tokenValue';
 
 @inject('tokens', 'bridge', 'network')
 @observer
 export default class Deposit extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.state = {
-      value: 0,
-    };
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
   @computed
   get selectedToken() {
     const { tokens, color } = this.props;
     return tokens && tokens.tokenForColor(color);
   }
 
+  @observable
+  value = 0;
+
+  @autobind
   handleSubmit(e) {
     e.preventDefault();
     const { bridge } = this.props;
-    const value = this.selectedToken.toCents(this.state.value);
+    const value = this.selectedToken.toCents(this.value);
     bridge.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
-        this.setState({ value: 0 });
+        this.value = 0;
       });
     });
+  }
+
+  @autobind
+  handleChange(e) {
+    this.value = e.target.value;
+  }
+
+  @autobind
+  handleBlur() {
+    if (!this.selectedToken.isNft) {
+      this.value = Number(this.value) || 0;
+    }
   }
 
   canSubmitValue(value) {
@@ -55,7 +63,6 @@ export default class Deposit extends React.Component {
 
   render() {
     const { tokens, color, onColorChange } = this.props;
-    const { value } = this.state;
 
     const tokenSelect = (
       <Select
@@ -63,9 +70,7 @@ export default class Deposit extends React.Component {
         style={{ width: 80 }}
         onChange={idx => {
           onColorChange(tokens.list[idx].color);
-          this.setState({
-            value: tokens.list[idx].isNft ? '' : value,
-          });
+          this.value = tokens.list[idx].isNft ? '' : this.value;
         }}
       >
         {tokens.list.map((token, idx) => (
@@ -93,12 +98,9 @@ export default class Deposit extends React.Component {
               placeholder={
                 this.selectedToken.isNft ? 'token id' : 'amount to deposit'
               }
-              value={value}
-              onChange={e => this.setState({ value: e.target.value })}
-              onBlur={() =>
-                !this.selectedToken.isNft &&
-                this.setState(state => ({ value: Number(state.value) || 0 }))
-              }
+              value={this.value}
+              onChange={this.handleChange}
+              onBlur={this.handleBlur}
               addonAfter={tokenSelect}
               style={{ width: 300 }}
             />
@@ -108,7 +110,7 @@ export default class Deposit extends React.Component {
             <Button
               htmlType="submit"
               type="primary"
-              disabled={!this.canSubmitValue(value)}
+              disabled={!this.canSubmitValue(this.value)}
             >
               Deposit
             </Button>

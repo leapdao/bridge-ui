@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
@@ -51,13 +52,6 @@ export default class Slots extends React.Component {
   constructor(props) {
     super(props);
 
-    const signerAddr = window.localStorage.getItem('signerAddr');
-    const tenderPubKey = window.localStorage.getItem('tenderPubKey');
-    this.state = {
-      stakes: {},
-      signerAddr,
-      tenderPubKey,
-    };
     this.handleSignerChange = this.handleChange.bind(this, 'signerAddr');
     this.handleTenderPubKeyChange = this.handleChange.bind(
       this,
@@ -66,27 +60,28 @@ export default class Slots extends React.Component {
   }
 
   setStake(i, stake) {
-    this.setState(state => {
-      return {
-        stakes: Object.assign({}, state.stakes, {
-          [i]: isNaN(Number(stake)) ? undefined : stake,
-        }),
-      };
-    });
+    this.stakes[i] = isNaN(Number(stake)) ? undefined : stake;
   }
+
+  @observable
+  stakes = {};
+
+  @observable
+  signerAddr = window.localStorage.getItem('signerAddr');
+
+  @observable
+  tenderPubKey = window.localStorage.getItem('tenderPubKey');
 
   handleChange(key, e) {
     const value = e.target.value.trim();
     window.localStorage.setItem(key, value);
-    this.setState({
-      [key]: value,
-    });
+    this[key] = value;
   }
 
   handleBet(slotId) {
     const { psc, bridge } = this.props;
-    const { signerAddr, tenderPubKey } = this.state;
-    const stake = psc.toCents(this.state.stakes[slotId]);
+    const { signerAddr, tenderPubKey } = this;
+    const stake = psc.toCents(this.stakes[slotId]);
 
     bridge
       .bet(psc, slotId, stake, signerAddr, tenderPubKey)
@@ -132,7 +127,7 @@ export default class Slots extends React.Component {
   }
 
   renderSlots() {
-    const { signerAddr, stakes, tenderPubKey } = this.state;
+    const { signerAddr, stakes, tenderPubKey } = this;
     const { account, network, psc, bridge } = this.props;
 
     return (
@@ -227,7 +222,7 @@ export default class Slots extends React.Component {
   }
 
   render() {
-    const { signerAddr, tenderPubKey } = this.state;
+    const { signerAddr, tenderPubKey } = this;
     const { bridge } = this.props;
 
     const slotsTable = this.renderSlots();

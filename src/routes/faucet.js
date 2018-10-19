@@ -6,9 +6,11 @@
  */
 
 import React, { Fragment } from 'react';
+import { observable, action } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button, Divider, Alert } from 'antd';
+import autobind from 'autobind-decorator';
 import AppLayout from '../components/appLayout';
 
 import requestApi from '../utils/api';
@@ -23,62 +25,70 @@ const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
 }))
 @observer
 export default class Faucet extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      value: '',
-      sending: false,
-      error: null,
-      success: null,
-    };
-    this.handleSubmit = this.handleSubmit.bind(this);
+  @observable
+  value = '';
+  @observable
+  sending = false;
+  @observable
+  error = null;
+  @observable
+  success = null;
+
+  @autobind
+  @action
+  handleSuccess() {
+    this.value = '';
+    this.sending = false;
+    this.success = 'Cool! Wait a minute, we are sending tokens to you';
   }
 
+  @autobind
+  @action
+  handleError(err) {
+    this.sending = false;
+    this.error = err.message;
+  }
+
+  @autobind
+  @action
+  handleChange(e) {
+    this.value = e.target.value;
+    this.success = null;
+    this.error = null;
+  }
+
+  @autobind
+  @action
   handleSubmit(e) {
     e.preventDefault();
-    this.setState({ sending: true });
-    requestFund(this.state.value)
-      .then(() => {
-        this.setState({
-          value: '',
-          sending: false,
-          success: 'Cool! Wait a minute, we are sending tokens to you',
-        });
-      })
-      .catch(err => {
-        this.setState({ sending: false, error: err.message });
-      });
+    this.sending = true;
+    requestFund(this.value)
+      .then(this.handleSuccess)
+      .catch(this.handleError);
   }
 
   render() {
     const { account } = this.props;
-    const { value, sending, error, success } = this.state;
 
     return (
       <AppLayout>
         <h1>Get tokens</h1>
         <Form onSubmit={this.handleSubmit} layout="inline">
-          {success && <Alert type="success" message={success} />}
-          {error && <Alert type="error" message={error} />}
-          {(success || error) && <Divider />}
+          {this.success && <Alert type="success" message={this.success} />}
+          {this.error && <Alert type="error" message={this.error} />}
+          {(this.success || this.error) && <Divider />}
 
           <Form.Item>
             <Input
               addonBefore="Tweet url"
-              value={value}
+              value={this.value}
               style={{ width: 400 }}
-              onChange={e =>
-                this.setState({
-                  value: e.target.value,
-                  success: null,
-                  error: null,
-                })
-              }
+              onChange={this.handleChange}
             />
           </Form.Item>
 
           <Form.Item>
-            <Button htmlType="submit" type="primary" loading={sending}>
+            <Button htmlType="submit" type="primary" loading={this.sending}>
               Request tokens
             </Button>
           </Form.Item>

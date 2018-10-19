@@ -6,11 +6,13 @@
  */
 
 import React, { Fragment } from 'react';
+import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { List, Form, Input, Button, Icon } from 'antd';
 
 import { isValidAddress } from 'ethereumjs-util';
+import autobind from 'autobind-decorator';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 
 const Item = observer(({ item }) => (
@@ -40,29 +42,29 @@ const Item = observer(({ item }) => (
 }))
 @observer
 export default class RegisterToken extends React.Component {
-  constructor(props) {
-    super(props);
+  @observable
+  tokenAddr = '';
 
-    this.state = {
-      tokenAddr: '',
-    };
-    this.handleSubmit = this.handleSubmit.bind(this);
-  }
-
+  @autobind
   handleSubmit(e) {
     e.preventDefault();
     const { bridge } = this.props;
-    const { tokenAddr } = this.state;
 
-    bridge.registerToken(tokenAddr).on('transactionHash', registerTxHash => {
-      console.log('registerToken', registerTxHash); // eslint-disable-line
-      this.setState({ tokenAddr: '' });
-    });
+    bridge
+      .registerToken(this.tokenAddr)
+      .on('transactionHash', registerTxHash => {
+        console.log('registerToken', registerTxHash); // eslint-disable-line
+        this.tokenAddr = '';
+      });
+  }
+
+  @autobind
+  handleChange(e) {
+    this.tokenAddr = e.target.value;
   }
 
   render() {
     const { network, tokens } = this.props;
-    const { tokenAddr } = this.state;
 
     return (
       <Fragment>
@@ -73,8 +75,8 @@ export default class RegisterToken extends React.Component {
         <Form onSubmit={this.handleSubmit} layout="inline">
           <Form.Item>
             <Input
-              value={tokenAddr}
-              onChange={e => this.setState({ tokenAddr: e.target.value })}
+              value={this.tokenAddr}
+              onChange={this.handleChange}
               style={{ width: 300 }}
             />
           </Form.Item>
@@ -84,7 +86,9 @@ export default class RegisterToken extends React.Component {
               htmlType="submit"
               type="primary"
               disabled={
-                !network.canSubmit || !tokenAddr || !isValidAddress(tokenAddr)
+                !network.canSubmit ||
+                !this.tokenAddr ||
+                !isValidAddress(this.tokenAddr)
               }
             >
               Register token
