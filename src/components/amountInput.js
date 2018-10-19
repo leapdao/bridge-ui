@@ -1,4 +1,5 @@
 import React, { Fragment } from 'react';
+import { Output } from 'parsec-lib';
 import PropTypes from 'prop-types';
 import { computed } from 'mobx';
 import { inject, observer } from 'mobx-react';
@@ -14,9 +15,23 @@ export default class AmountInput extends React.Component {
     plasma: PropTypes.bool,
     onColorChange: PropTypes.func,
     onChange: PropTypes.func,
+    onBlur: PropTypes.func,
     width: PropTypes.number,
     value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   };
+
+  componentWillReceiveProps({ color: nextColor, onChange }) {
+    const { color } = this.props;
+    if (color !== nextColor) {
+      if (
+        (Output.isNFT(nextColor) !== Output.isNFT(color) ||
+          Output.isNFT(nextColor)) &&
+        typeof onChange === 'function'
+      ) {
+        onChange('');
+      }
+    }
+  }
 
   @computed
   get token() {
@@ -41,25 +56,22 @@ export default class AmountInput extends React.Component {
   }
 
   @autobind
-  handleBlur() {
-    const { onChange, value } = this.props;
+  handleBlur(e) {
+    const { onChange, onBlur, value } = this.props;
     if (!this.token.isNft && typeof onChange === 'function') {
       onChange(Number(value) || 0);
+    }
+
+    if (typeof onBlur === 'function') {
+      onBlur(e);
     }
   }
 
   @autobind
   handleColorChange(newColor) {
-    const { color, onColorChange, tokens } = this.props;
+    const { onColorChange } = this.props;
     if (typeof onColorChange === 'function') {
       onColorChange(newColor);
-    }
-    if (
-      tokens.tokenForColor(newColor).isNft !==
-        tokens.tokenForColor(color).isNft ||
-      tokens.tokenForColor(newColor).isNft
-    ) {
-      this.value = '';
     }
   }
 
@@ -67,7 +79,7 @@ export default class AmountInput extends React.Component {
     const { tokens, color } = this.props;
     return (
       <Select
-        defaultValue={color}
+        value={color}
         style={{ width: this.token.isNft ? 120 : 80 }}
         onChange={this.handleColorChange}
       >
@@ -81,7 +93,7 @@ export default class AmountInput extends React.Component {
   }
 
   render() {
-    const { onColorChange, width = 250, plasma } = this.props;
+    const { onColorChange, value, width = 250, plasma } = this.props;
     const balance = plasma ? this.token.plasmaBalance : this.token.balance;
 
     return (
@@ -90,9 +102,11 @@ export default class AmountInput extends React.Component {
           <Fragment>
             <Form.Item>
               <Select
-                defaultValue={this.value}
+                value={value}
                 style={{ width }}
                 onChange={this.handleNFTChange}
+                notFoundContent="No tokens"
+                allowClear
               >
                 {balance.map(id => (
                   <Select.Option key={id} value={id}>
@@ -110,7 +124,7 @@ export default class AmountInput extends React.Component {
           <Form.Item>
             <Input
               {...this.props}
-              value={this.value}
+              value={value}
               onChange={this.handleChange}
               onBlur={this.handleBlur}
               addonAfter={

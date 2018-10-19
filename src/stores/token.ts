@@ -198,7 +198,7 @@ export default class Token extends ContractStore {
         });
       });
 
-    this.watchTx(promiEvent.eventEmitter, 'plasmaSigh', {
+    this.watchTx(promiEvent.eventEmitter, 'plasmaSign', {
       message: 'Sign plasma transfer',
       description:
         'Before you proceed with your tx, you need to sign a message',

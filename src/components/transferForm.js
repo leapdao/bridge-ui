@@ -11,18 +11,23 @@ import AmountInput from './amountInput';
 @observer
 class TransferForm extends React.Component {
   get valueError() {
-    const { minValue, maxValue } = this.props;
+    const { tokens, color } = this.props;
+    const token = tokens.tokenForColor(color);
 
     if (!this.value) {
       return 'Required';
     }
 
-    if (maxValue && Number(this.value) > maxValue) {
-      return `Should <= ${maxValue}`;
-    }
+    if (!token.isNft) {
+      const maxValue =
+        token.plasmaBalance && token.toTokens(token.plasmaBalance);
+      if (maxValue && Number(this.value) > maxValue) {
+        return `Should <= ${maxValue}`;
+      }
 
-    if (Number(this.value) < minValue) {
-      return `Should >= ${minValue}`;
+      if (Number(this.value) <= 0) {
+        return 'Should > 0';
+      }
     }
 
     return undefined;
@@ -81,10 +86,10 @@ class TransferForm extends React.Component {
 
   @autobind
   handleBlur() {
-    const { minValue, tokens, color } = this.props;
+    const { tokens, color } = this.props;
     const token = tokens.tokenForColor(color);
     if (!token.isNft) {
-      this.value = Math.max(Number(minValue), Number(this.value));
+      this.value = Math.max(0, Number(this.value));
     }
   }
 
@@ -155,16 +160,10 @@ class TransferForm extends React.Component {
 }
 
 TransferForm.propTypes = {
-  minValue: PropTypes.number,
-  maxValue: PropTypes.number,
   onSubmit: PropTypes.func,
   disabled: PropTypes.bool,
   tokens: PropTypes.object,
   color: PropTypes.number.isRequired,
-};
-
-TransferForm.defaultProps = {
-  minValue: 0,
 };
 
 export default TransferForm;
