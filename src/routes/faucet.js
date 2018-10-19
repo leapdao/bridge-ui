@@ -9,6 +9,7 @@ import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Form, Input, Button, Divider, Alert } from 'antd';
+import AppLayout from '../components/appLayout';
 
 import requestApi from '../utils/api';
 
@@ -54,7 +55,7 @@ export default class Faucet extends React.Component {
     const { value, sending, error, success } = this.state;
 
     return (
-      <Fragment>
+      <AppLayout>
         <h1>Get tokens</h1>
         <Form onSubmit={this.handleSubmit} layout="inline">
           {success && <Alert type="success" message={success} />}
@@ -96,7 +97,7 @@ export default class Faucet extends React.Component {
             </Fragment>
           )}
         </Form>
-      </Fragment>
+      </AppLayout>
     );
   }
 }

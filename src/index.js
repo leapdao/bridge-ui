@@ -25,11 +25,14 @@ import TxNotification from './components/txNotification/index.tsx';
 
 import App from './components/app';
 import Explorer from './routes/explorer';
+import Faucet from './routes/faucet';
 
 if (!process.env.BRIDGE_ADDR) {
+  /* eslint-disable no-console */
   console.error(
     'Missing Bridge contract address. Please rebuild with BRIDGE_ADDR env variable set'
   );
+  /* eslint-enable no-console */
 }
 
 const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
@@ -63,6 +66,7 @@ ReactDOM.render(
           render={() => <Redirect to={`/${process.env.BRIDGE_ADDR}`} />}
         />
         <Route path="/explorer" component={Explorer} />
+        <Route path="/faucet" component={Faucet} />
         <Route
           path="/:bridgeAddr"
           render={props => {
@@ -70,7 +74,7 @@ ReactDOM.render(
             if (ADDR_REGEX.test(section)) {
               return <App {...props} />;
             }
-            if (section !== 'explorer') {
+            if (section !== 'explorer' && section !== 'faucet') {
               return (
                 <Redirect
                   to={`/${process.env.BRIDGE_ADDR}${props.location.pathname}`}

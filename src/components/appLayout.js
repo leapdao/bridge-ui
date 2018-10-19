@@ -20,6 +20,8 @@ import TokenValue from './tokenValue';
 
 import '../style.css';
 
+const rootRoutes = ['explorer', 'faucet'];
+
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
   account: stores.account,
@@ -46,10 +48,10 @@ class AppLayout extends React.Component {
             path,
           },
         }) => {
-          const base = path.startsWith('/explorer')
-            ? ''
-            : (match.url || '').replace(/\/$/, '');
-          section = path.startsWith('/explorer') ? 'explorer' : section; // eslint-disable-line
+          const rootRoute = rootRoutes.find(r => path.startsWith(`/${r}`));
+          // const isExplorer = path.startsWith('/explorer');
+          const base = rootRoute ? '' : (match.url || '').replace(/\/$/, '');
+          section = rootRoute || section; // eslint-disable-line
           return (
             <Menu
               selectedKeys={[section || 'slots']}
@@ -66,7 +68,7 @@ class AppLayout extends React.Component {
                 <Link to={`${base}/registerToken`}>Register token</Link>
               </Menu.Item>
               <Menu.Item key="faucet">
-                <Link to={`${base}/faucet`}>Get tokens</Link>
+                <Link to="/faucet">Get tokens</Link>
               </Menu.Item>
               <Menu.Item key="explorer">
                 <Link to="/explorer">Explorer</Link>
