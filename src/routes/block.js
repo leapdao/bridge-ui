@@ -76,6 +76,8 @@ class Block extends React.Component {
   }
 
   render() {
+    const { explorer } = this.props;
+
     if (!this.success && !this.fetching) {
       return <Alert type="error" message="Block not found" />;
     }
@@ -92,9 +94,11 @@ class Block extends React.Component {
               <Link to={`/explorer/block/${this.block.number - 1}`}>Prev</Link>
             </Button>
           )}
-          <Button>
-            <Link to={`/explorer/block/${this.block.number + 1}`}>Next</Link>
-          </Button>
+          {this.block.number < explorer.latestBlock && (
+            <Button>
+              <Link to={`/explorer/block/${this.block.number + 1}`}>Next</Link>
+            </Button>
+          )}
         </div>
         <h3>Hash:</h3>
         {this.block.hash}

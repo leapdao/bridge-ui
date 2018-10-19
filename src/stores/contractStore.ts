@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 = require('web3'); // weird imports for strange typings
+import Web3 from 'web3';
 import { computed, observable } from 'mobx';
 import Contract from 'web3/eth/contract';
 import PromiEvent from 'web3/promiEvent';

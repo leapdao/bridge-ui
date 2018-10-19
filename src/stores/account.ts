@@ -7,7 +7,7 @@
 
 /* eslint-disable no-underscore-dangle */
 
-import Web3 = require('web3'); // weird imports for strange typings
+import Web3 from 'web3';
 import { observable, computed } from 'mobx';
 import getWeb3 from '../utils/getWeb3';
 

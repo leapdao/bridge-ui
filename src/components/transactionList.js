@@ -12,6 +12,7 @@ const TYPES = swapObject(Type);
 const TransactionList = ({ txs }) => {
   const transactions = txs.map(tx => {
     return {
+      key: tx.hash,
       id: tx.transactionIndex,
       hash: tx.hash,
       from: tx.from,

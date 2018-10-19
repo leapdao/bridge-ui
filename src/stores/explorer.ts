@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 = require('web3'); // weird imports for strange typings
+import Web3 from 'web3';
 import { observable, computed } from 'mobx';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx, TxJSON } from 'parsec-lib';
@@ -68,6 +68,7 @@ export default class Explorer {
       }
     } catch (e) {}
 
+    this.getBlockchain();
     setInterval(this.getBlockchain, 5000);
   }
 
