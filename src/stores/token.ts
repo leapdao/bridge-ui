@@ -29,6 +29,7 @@ import Explorer from './explorer';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import getParsecWeb3 from '../utils/getParsecWeb3';
+import { range } from '../utils/range';
 
 const tokenInfo = (
   token: Contract,
@@ -63,9 +64,9 @@ export default class Token extends ContractStore {
   @observable
   public decimals: number;
   @observable
-  public balance?: number;
+  public balance?: number | string[];
   @observable
-  public plasmaBalance?: number;
+  public plasmaBalance?: number | string[];
 
   constructor(
     account: Account,
@@ -79,24 +80,31 @@ export default class Token extends ContractStore {
     this.account = account;
     this.color = color;
 
-    autorun(this.loadBalance);
-    autorun(this.loadPlasmaBalance);
+    autorun(this.loadBalance.bind(null, false));
+    autorun(this.loadBalance.bind(null, true));
     tokenInfo(this.contract, color).then(this.setInfo);
 
     if (this.events) {
       this.events.on('Transfer', (event: EventLog) => {
         if (isOurTransfer(event, this.account)) {
-          this.loadBalance();
+          this.loadBalance(false);
         }
       });
     }
 
-    reaction(() => this.explorer.latestBlock, this.loadPlasmaBalance);
+    reaction(
+      () => this.explorer.latestBlock,
+      this.loadBalance.bind(null, true)
+    );
   }
 
   @computed
   public get decimalsBalance() {
-    return this.balance && this.toTokens(this.balance);
+    if (this.isNft) {
+      return (this.balance as string[]).length;
+    }
+
+    return this.balance && this.toTokens(this.balance as number);
   }
 
   @computed
@@ -219,30 +227,37 @@ export default class Token extends ContractStore {
 
   @autobind
   @action
-  private updateBalance(balance: number) {
-    this.balance = balance;
+  private updateBalance(balance: number | string[], plasma = false) {
+    if (plasma) {
+      this.plasmaBalance = balance;
+    } else {
+      this.balance = balance;
+    }
   }
 
   @autobind
-  private loadBalance() {
-    this.contract.methods
+  private loadBalance(plasma = false) {
+    const contract = plasma ? this.plasmaContract : this.contract;
+    contract.methods
       .balanceOf(this.account.address)
       .call()
-      .then(this.updateBalance);
-  }
+      .then(balance => {
+        if (this.isNft) {
+          return Promise.all(
+            range(0, balance - 1).map(i =>
+              contract.methods
+                .tokenOfOwnerByIndex(this.account.address, i)
+                .call()
+            )
+          ) as Promise<string[]>;
+        }
 
-  @autobind
-  @action
-  private updatePlasmaBalance(balance: number) {
-    this.plasmaBalance = balance;
-  }
-
-  @autobind
-  private loadPlasmaBalance() {
-    this.plasmaContract.methods
-      .balanceOf(this.account.address)
-      .call()
-      .then(this.updatePlasmaBalance);
+        return balance;
+      })
+      .then(balance => {
+        console.log('loadBalance', balance);
+        this.updateBalance(balance, plasma);
+      });
   }
 
   private allowanceOrTokenId(valueOrTokenId: number) {
