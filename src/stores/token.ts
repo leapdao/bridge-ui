@@ -255,7 +255,6 @@ export default class Token extends ContractStore {
         return balance;
       })
       .then(balance => {
-        console.log('loadBalance', balance);
         this.updateBalance(balance, plasma);
       });
   }

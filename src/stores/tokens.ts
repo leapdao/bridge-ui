@@ -65,16 +65,22 @@ export default class Tokens {
     return !this.list.some(token => !token.ready);
   }
 
+  public tokenIndexForColor(color: number) {
+    if (!this.list) {
+      return -1;
+    }
+
+    return Output.isNFT(color)
+      ? this.erc20TokenCount + (color - NFT_COLOR_BASE)
+      : color;
+  }
+
   public tokenForColor(color: number) {
     if (!this.list) {
       return undefined;
     }
 
-    const index = Output.isNFT(color)
-      ? this.erc20TokenCount + (color - NFT_COLOR_BASE)
-      : color;
-
-    return this.list[index];
+    return this.list[this.tokenIndexForColor(color)];
   }
 
   private loadTokenColorRange(from: number, to: number): Promise<Token>[] {

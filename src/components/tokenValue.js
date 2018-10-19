@@ -11,7 +11,8 @@ const TokenValue = ({ value, color, tokens }) => {
 
   return (
     <Fragment>
-      {token.isNft ? value.length : token.toTokens(value)} {token.symbol}
+      {Array.isArray(value) ? value.length : token.toTokens(value)}{' '}
+      {token.symbol}
     </Fragment>
   );
 };

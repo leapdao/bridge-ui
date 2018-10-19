@@ -30,7 +30,9 @@ export default class Deposit extends React.Component {
   handleSubmit(e) {
     e.preventDefault();
     const { bridge } = this.props;
-    const value = this.selectedToken.toCents(this.value);
+    const value = this.selectedToken.isNft
+      ? this.value
+      : this.selectedToken.toCents(this.value);
     bridge.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
@@ -67,14 +69,14 @@ export default class Deposit extends React.Component {
     const tokenSelect = (
       <Select
         defaultValue={color}
-        style={{ width: 80 }}
-        onChange={idx => {
-          onColorChange(tokens.list[idx].color);
-          this.value = tokens.list[idx].isNft ? '' : this.value;
+        style={{ width: this.selectedToken.isNft ? 120 : 80 }}
+        onChange={newColor => {
+          onColorChange(newColor);
+          this.value = tokens.tokenForColor(newColor).isNft ? '' : this.value;
         }}
       >
-        {tokens.list.map((token, idx) => (
-          <Select.Option key={token} value={idx}>
+        {tokens.list.map(token => (
+          <Select.Option key={token} value={token.color}>
             {token.symbol}
           </Select.Option>
         ))}
@@ -93,18 +95,40 @@ export default class Deposit extends React.Component {
         )}
 
         <Form onSubmit={this.handleSubmit} layout="inline">
-          <Form.Item>
-            <Input
-              placeholder={
-                this.selectedToken.isNft ? 'token id' : 'amount to deposit'
-              }
-              value={this.value}
-              onChange={this.handleChange}
-              onBlur={this.handleBlur}
-              addonAfter={tokenSelect}
-              style={{ width: 300 }}
-            />
-          </Form.Item>
+          {this.selectedToken.isNft && (
+            <Fragment>
+              <Form.Item>
+                <Select
+                  defaultValue={this.value}
+                  style={{
+                    width: 250,
+                  }}
+                  onChange={id => {
+                    this.value = id;
+                  }}
+                >
+                  {this.selectedToken.balance.map(id => (
+                    <Select.Option key={id} value={id}>
+                      {id}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+              <Form.Item>{tokenSelect}</Form.Item>
+            </Fragment>
+          )}
+          {!this.selectedToken.isNft && (
+            <Form.Item>
+              <Input
+                placeholder="amount to deposit"
+                value={this.value}
+                onChange={this.handleChange}
+                onBlur={this.handleBlur}
+                addonAfter={tokenSelect}
+                style={{ width: 300 }}
+              />
+            </Form.Item>
+          )}
 
           <Form.Item>
             <Button
