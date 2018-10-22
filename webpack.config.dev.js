@@ -77,7 +77,7 @@ module.exports = {
     ],
   },
   plugins: [
-    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR']),
+    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR', 'PARSEC_NODE']),
     new HtmlPlugin({
       template: 'src/index.html',
     }),
