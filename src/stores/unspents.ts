@@ -9,7 +9,7 @@ import { observable, reaction, computed } from 'mobx';
 import { Unspent, Tx, Period, Block, Input, Output, Type } from 'parsec-lib';
 import Eth from 'web3/eth/index';
 import { Transaction } from 'web3/eth/types';
-import ethUtil from 'ethereumjs-util';
+import { bufferToHex } from 'ethereumjs-util';
 
 import Bridge from './bridge';
 import Account from './account';
@@ -97,7 +97,7 @@ export default class Unspents {
             .then(unspent => {
               return Promise.all(
                 unspent.map(u =>
-                  eth.getTransaction(ethUtil.bufferToHex(u.outpoint.hash))
+                  eth.getTransaction(bufferToHex(u.outpoint.hash))
                 )
               ).then(transactions => {
                 transactions.forEach((tx, i) => {

@@ -14,9 +14,7 @@ let web3;
 export default () => {
   if (!web3) {
     const node = PARSEC_NODES[process.env.PARSEC_NODE || DEFAULT_PARSEC_NODE];
-    web3 = new Web3();
-    web3.setProvider(new web3.providers.HttpProvider(node));
-    web3 = helpers.extendWeb3(web3);
+    web3 = helpers.extendWeb3(new Web3(new Web3.providers.HttpProvider(node)));
   }
   return web3;
 };

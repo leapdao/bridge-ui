@@ -16,7 +16,7 @@ import {
 import { helpers, Tx, Input, Output } from 'parsec-lib';
 import Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
-import BigNumber from 'bignumber.js';
+import BN = require('bn.js');
 import Contract from 'web3/eth/contract';
 import { EventLog } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
@@ -124,7 +124,7 @@ export default class Token extends ContractStore {
   public toCents(tokenValue: number): number {
     if (this.isNft) return tokenValue;
 
-    return new BigNumber(tokenValue).mul(10 ** this.decimals).toNumber();
+    return tokenValue * 10 ** this.decimals;
   }
 
   /**
@@ -135,7 +135,7 @@ export default class Token extends ContractStore {
   public toTokens(tokenCentsValue: number): number {
     if (this.isNft) return tokenCentsValue;
 
-    return new BigNumber(tokenCentsValue).div(10 ** this.decimals).toNumber();
+    return tokenCentsValue / 10 ** this.decimals;
   }
 
   public transfer(to: string, amount: number): Promise<any> {
@@ -271,7 +271,7 @@ export default class Token extends ContractStore {
   private allowanceOrTokenId(valueOrTokenId: number) {
     if (this.isNft) return valueOrTokenId;
 
-    return `0x${new BigNumber(2).pow(255).toString(16)}`;
+    return `0x${new BN(2, 10).pow(new BN(255, 10)).toString(16)}`;
   }
 
   private hasEnoughAllowance(spender: string, value: number): Promise<Boolean> {

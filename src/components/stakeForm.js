@@ -3,7 +3,6 @@ import { observer } from 'mobx-react';
 import { observable, computed } from 'mobx';
 import PropTypes from 'prop-types';
 import { Input, Button } from 'antd';
-import BigNumber from 'bignumber.js';
 import autobind from 'autobind-decorator';
 
 const fieldValue = v => String(v >= 0 ? v : '');
@@ -39,9 +38,8 @@ class StakeForm extends React.Component {
   @autobind
   handleUpdate() {
     const { minValue, onChange } = this.props;
-    const minStake = new BigNumber(minValue);
     const zero = this.value === 0 || this.value === '0';
-    onChange(zero ? 0 : Math.max(Number(minStake), Number(this.value)));
+    onChange(zero ? 0 : Math.max(Number(minValue), Number(this.value)));
   }
 
   @autobind

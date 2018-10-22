@@ -7,7 +7,6 @@
 
 import { observable, action, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
-import BigNumber from 'bignumber.js';
 import Contract from 'web3/eth/contract';
 import { bridge as bridgeAbi } from '../utils/abis';
 
@@ -48,12 +47,12 @@ const readSlots = (bridge: Contract) => {
           new Slot({
             eventCounter,
             owner,
-            stake: new BigNumber(stake),
+            stake: Number(stake),
             signer,
             tendermint,
             activationEpoch: Number(activationEpoch),
             newOwner,
-            newStake: new BigNumber(newStake),
+            newStake: Number(newStake),
             newSigner,
             newTendermint,
           })

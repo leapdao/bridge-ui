@@ -5,29 +5,45 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
+import * as PropTypes from 'prop-types';
 import { observer, inject } from 'mobx-react';
-import { notification, Spin, Icon } from 'antd';
+
+import 'antd/lib/spin/style';
+import * as Spin from 'antd/lib/spin';
+import 'antd/lib/icon/style';
+import * as Icon from 'antd/lib/icon';
+import 'antd/lib/notification/style';
+import * as notification from 'antd/lib/notification';
+
 import { TxStatus } from './types';
+
+/*
+ * Because of bad typings in antd
+ */
+const antd = {
+  Icon: Icon as any,
+  Spin: Spin as any,
+  notification: notification as any,
+};
 
 const statusDetails = {
   [TxStatus.CREATED]: {
     text: 'Waiting for signature..',
-    icon: <Icon type="key" />,
+    icon: <antd.Icon type="key" />,
   },
-  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: <Spin /> },
+  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: <antd.Spin /> },
   [TxStatus.SUCCEED]: {
     text: 'Success',
-    icon: <Icon type="check-circle" style={{ color: 'green' }} />,
+    icon: <antd.Icon type="check-circle" style={{ color: 'green' }} />,
   },
   [TxStatus.FAILED]: {
     text: 'Transaction failed',
-    icon: <Icon type="close-circle" style={{ color: 'red' }} />,
+    icon: <antd.Icon type="close-circle" style={{ color: 'red' }} />,
   },
   [TxStatus.CANCELLED]: {
     text: 'Cancelled',
-    icon: <Icon type="close-circle-o" style={{ color: 'red' }} />,
+    icon: <antd.Icon type="close-circle-o" style={{ color: 'red' }} />,
   },
 };
 
@@ -36,7 +52,7 @@ const TxNotification: React.SFC<{
 }> = ({ transactions }) => {
   transactions.map.observe(txChange => {
     if (txChange.type === 'delete') {
-      notification.close(txChange.name);
+      antd.notification.close(txChange.name);
       return;
     }
 
@@ -57,7 +73,7 @@ const TxNotification: React.SFC<{
       description: description,
     };
 
-    notification.open(msg);
+    antd.notification.open(msg);
   });
   return null;
 };

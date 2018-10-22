@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import 'antd/dist/antd.css';
+// import 'antd/dist/antd.css';
 
 import React from 'react';
 import { observer, inject } from 'mobx-react';
