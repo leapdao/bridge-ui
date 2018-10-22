@@ -11,7 +11,6 @@ import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
-import BigNumber from 'bignumber.js';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
@@ -188,9 +187,7 @@ export default class Slots extends React.Component {
               <tr>
                 <th style={formCellStyle} />
                 {bridge.slots.map((slot, i) => {
-                  const minStake = BigNumber.max(slot.stake, slot.newStake).mul(
-                    1.05
-                  );
+                  const minStake = Math.max(slot.stake, slot.newStake) * 1.05;
                   const minValue = psc.toTokens(minStake);
                   const ownStake = addrCmp(slot.owner, account.address || '')
                     ? minValue
