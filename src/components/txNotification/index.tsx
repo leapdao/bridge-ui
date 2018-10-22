@@ -18,13 +18,14 @@ import * as notification from 'antd/lib/notification';
 
 import { TxStatus } from './types';
 
+/*
+ * Because of bad typings in antd
+ */
 const antd = {
   Icon: Icon as any,
   Spin: Spin as any,
   notification: notification as any,
 };
-
-console.log(antd);
 
 const statusDetails = {
   [TxStatus.CREATED]: {

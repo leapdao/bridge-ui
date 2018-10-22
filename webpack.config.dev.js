@@ -20,13 +20,21 @@ module.exports = {
     rules: [
       {
         test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/,
+        use: [
+          'cache-loader',
+          {
+            loader: 'babel-loader',
+            options: {
+              cacheDirectory: true,
+            },
+          },
+        ],
+        include: path.resolve(__dirname, 'src'),
       },
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+        use: ['cache-loader', 'ts-loader'],
+        include: path.resolve(__dirname, 'src'),
       },
       {
         test: /\.(css|less)$/,
@@ -79,7 +87,7 @@ module.exports = {
   plugins: [
     new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR', 'PARSEC_NODE']),
     new HtmlPlugin({
-      template: 'src/index.html',
+      template: 'src/index-webpack.html',
     }),
   ],
   devServer: {
