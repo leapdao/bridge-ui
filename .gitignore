@@ -1,4 +1,5 @@
 .cache
+.cache-loader
 dist
 node_modules
 stats.json

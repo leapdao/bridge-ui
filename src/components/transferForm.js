@@ -10,17 +10,20 @@ import AmountInput from './amountInput';
 @inject('tokens')
 @observer
 class TransferForm extends React.Component {
-  get valueError() {
+  get token() {
     const { tokens, color } = this.props;
-    const token = tokens.tokenForColor(color);
+    return tokens && tokens.tokenForColor(color);
+  }
 
+  get valueError() {
     if (!this.value) {
       return 'Required';
     }
 
-    if (!token.isNft) {
+    if (!this.token.isNft) {
       const maxValue =
-        token.plasmaBalance && token.toTokens(token.plasmaBalance);
+        this.token.plasmaBalance &&
+        this.token.toTokens(this.token.plasmaBalance);
       if (maxValue && Number(this.value) > maxValue) {
         return `Should <= ${maxValue}`;
       }
@@ -50,7 +53,7 @@ class TransferForm extends React.Component {
   }
 
   @observable
-  value = 0;
+  value = this.token.isNft ? '' : 0;
 
   @observable
   receiver = '';
@@ -86,9 +89,7 @@ class TransferForm extends React.Component {
 
   @autobind
   handleBlur() {
-    const { tokens, color } = this.props;
-    const token = tokens.tokenForColor(color);
-    if (!token.isNft) {
+    if (!this.token.isNft) {
       this.value = Math.max(0, Number(this.value));
     }
   }
@@ -110,9 +111,7 @@ class TransferForm extends React.Component {
       return null;
     }
 
-    const token = tokens.tokenForColor(color);
-
-    if (!token || !token.ready) {
+    if (!this.token || !this.token.ready) {
       return null;
     }
 

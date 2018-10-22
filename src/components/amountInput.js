@@ -108,7 +108,7 @@ export default class AmountInput extends React.Component {
                 notFoundContent="No tokens"
                 allowClear
               >
-                {balance.map(id => (
+                {(balance || []).map(id => (
                   <Select.Option key={id} value={id}>
                     {id}
                   </Select.Option>

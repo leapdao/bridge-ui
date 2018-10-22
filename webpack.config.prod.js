@@ -7,6 +7,13 @@ const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
 
+const threadLoader = {
+  loader: 'thread-loader',
+  options: {
+    workers: require('os').cpus.length - 1,
+  },
+};
+
 module.exports = {
   entry: './src/index.js',
   mode: 'production',
@@ -19,25 +26,40 @@ module.exports = {
     extensions: ['.js', '.ts'],
     alias: {
       'bn.js': require.resolve('bn.js'),
+      elliptic: require.resolve('elliptic'),
+      '@ant-design/icons/lib/dist$': path.resolve(__dirname, './src/icons.js'),
       // react: 'preact-compat',
       // 'react-dom': 'preact-compat',
       // // Not necessary unless you consume a module using `createClass`
       // 'create-react-class': 'preact-compat/lib/create-react-class',
       // // Not necessary unless you consume a module requiring `react-dom-factories`
       // 'react-dom-factories': 'preact-compat/lib/react-dom-factories',
+
+      'web3-eth-ens': require.resolve('./dummies/web3-eth-ens.js'),
+      'web3-providers-ipc': require.resolve('./dummies/web3-providers.js'),
     },
   },
   module: {
     rules: [
       {
         test: /\.js$/,
-        use: 'babel-loader',
-        exclude: /node_modules/,
+        use: ['cache-loader', threadLoader, 'babel-loader'],
+        include: path.resolve(__dirname, 'src'),
       },
       {
         test: /\.tsx?$/,
-        use: 'ts-loader',
-        exclude: /node_modules/,
+        use: [
+          'cache-loader',
+          threadLoader,
+          'babel-loader',
+          {
+            loader: 'ts-loader',
+            options: {
+              happyPackMode: true,
+            },
+          },
+        ],
+        include: path.resolve(__dirname, 'src'),
       },
       {
         test: /\.(css|less)$/,
@@ -125,7 +147,7 @@ module.exports = {
     new ExtractTextPlugin({
       filename: 'main.[hash].css',
     }),
-    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR']),
+    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR', 'PARSEC_NODE']),
     new HtmlPlugin({
       template: 'src/index.html',
     }),
