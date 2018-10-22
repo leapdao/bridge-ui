@@ -25,7 +25,16 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts'],
     alias: {
+      'web3-core-requestmanager': require.resolve('web3-core-requestmanager'),
+      'web3-providers-ws': require.resolve('web3-providers-ws'),
+      'web3-utils': require.resolve('web3-utils'),
+      'web3-core': require.resolve('web3-core'),
+      'web3-core-helpers': require.resolve('web3-core-helpers'),
+      'web3-core-method': require.resolve('web3-core-method'),
+      'web3-eth-ens': require.resolve('./dummies/web3-eth-ens.js'),
+      'web3-providers-ipc': require.resolve('./dummies/web3-providers.js'),
       'bn.js': require.resolve('bn.js'),
+
       elliptic: require.resolve('elliptic'),
       '@ant-design/icons/lib/dist$': path.resolve(__dirname, './src/icons.js'),
       // react: 'preact-compat',
@@ -34,9 +43,6 @@ module.exports = {
       // 'create-react-class': 'preact-compat/lib/create-react-class',
       // // Not necessary unless you consume a module requiring `react-dom-factories`
       // 'react-dom-factories': 'preact-compat/lib/react-dom-factories',
-
-      'web3-eth-ens': require.resolve('./dummies/web3-eth-ens.js'),
-      'web3-providers-ipc': require.resolve('./dummies/web3-providers.js'),
     },
   },
   module: {
