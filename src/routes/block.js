@@ -18,7 +18,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
   hour12: false,
 });
 
-@inject('explorer')
+@inject('explorer', 'node')
 @observer
 class Block extends React.Component {
   constructor(props) {
@@ -26,7 +26,7 @@ class Block extends React.Component {
     this.fetch(props.match.params.hashOrNumber);
 
     reaction(
-      () => this.props.explorer.latestBlock,
+      () => this.props.node.latestBlock,
       () => {
         if (!props.match.params.hashOrNumber) {
           this.fetch();
@@ -76,7 +76,7 @@ class Block extends React.Component {
   }
 
   render() {
-    const { explorer } = this.props;
+    const { node } = this.props;
 
     if (!this.success && !this.fetching) {
       return <Alert type="error" message="Block not found" />;
@@ -94,7 +94,7 @@ class Block extends React.Component {
               <Link to={`/explorer/block/${this.block.number - 1}`}>Prev</Link>
             </Button>
           )}
-          {this.block.number < explorer.latestBlock && (
+          {this.block.number < node.latestBlock && (
             <Button>
               <Link to={`/explorer/block/${this.block.number + 1}`}>Next</Link>
             </Button>
@@ -114,6 +114,7 @@ class Block extends React.Component {
 Block.propTypes = {
   match: PropTypes.object,
   explorer: PropTypes.object,
+  node: PropTypes.object,
 };
 
 export default Block;

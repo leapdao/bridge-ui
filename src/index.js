@@ -19,6 +19,7 @@ import Account from './stores/account.ts';
 import Network from './stores/network.ts';
 import ExplorerStore from './stores/explorer.ts';
 import Unspents from './stores/unspents.ts';
+import NodeStore from './stores/node.ts';
 
 import Transactions from './components/txNotification/transactions.ts';
 import TxNotification from './components/txNotification/index.tsx';
@@ -39,11 +40,12 @@ const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
 
 const transactions = new Transactions();
 const account = new Account();
+const node = new NodeStore();
 const bridge = new Bridge(account, transactions);
-const explorer = new ExplorerStore();
-const tokens = new Tokens(account, bridge, transactions, explorer);
+const explorer = new ExplorerStore(node);
+const tokens = new Tokens(account, bridge, transactions, node);
 const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
-const unspents = new Unspents(bridge, account);
+const unspents = new Unspents(bridge, account, node);
 
 ReactDOM.render(
   <BrowserRouter>
@@ -56,6 +58,7 @@ ReactDOM.render(
         transactions,
         explorer,
         unspents,
+        node,
       }}
     >
       <Fragment>

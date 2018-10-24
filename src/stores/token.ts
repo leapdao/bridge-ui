@@ -25,11 +25,11 @@ import { txSuccess } from '../utils/txSuccess';
 
 import Account from './account';
 import ContractStore from './contractStore';
-import Explorer from './explorer';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { range } from '../utils/range';
+import NodeStore from './node';
 
 const tokenInfo = (
   token: Contract,
@@ -73,7 +73,7 @@ export default class Token extends ContractStore {
     transactions: Transactions,
     address: string,
     color: number,
-    private explorer: Explorer
+    private node: NodeStore
   ) {
     super(isNFT(color) ? erc721 : erc20, address, transactions);
 
@@ -92,10 +92,7 @@ export default class Token extends ContractStore {
       });
     }
 
-    reaction(
-      () => this.explorer.latestBlock,
-      this.loadBalance.bind(null, true)
-    );
+    reaction(() => this.node.latestBlock, this.loadBalance.bind(null, true));
   }
 
   @computed

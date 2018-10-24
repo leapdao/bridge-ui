@@ -16,6 +16,7 @@ import Account from './account';
 import autobind from 'autobind-decorator';
 import { range } from '../utils/range';
 import getParsecWeb3 from '../utils/getParsecWeb3';
+import NodeStore from './node';
 
 const pWeb3 = getParsecWeb3();
 
@@ -52,7 +53,11 @@ export default class Unspents {
   @observable
   private latestBlock: number;
 
-  constructor(private bridge: Bridge, private account: Account) {
+  constructor(
+    private bridge: Bridge,
+    private account: Account,
+    private node: NodeStore
+  ) {
     reaction(() => this.account.address, this.clearUnspents);
     reaction(() => this.account.address, this.fetchUnspents);
     reaction(
@@ -62,7 +67,7 @@ export default class Unspents {
         bridge.events.on('ExitStarted', this.fetchUnspents);
       }
     );
-    setInterval(this.fetchUnspents, 5000);
+    reaction(() => this.node.latestBlock, this.fetchUnspents);
   }
 
   @computed
@@ -89,31 +94,27 @@ export default class Unspents {
     const eth = (pWeb3 as any).eth as Eth;
 
     if (this.account.address) {
-      eth.getBlockNumber().then(blockNumber => {
-        if (this.latestBlock !== blockNumber) {
-          this.latestBlock = blockNumber;
-          pWeb3
-            .getUnspent(this.account.address)
-            .then(unspent => {
-              return Promise.all(
-                unspent.map(u =>
-                  eth.getTransaction(bufferToHex(u.outpoint.hash))
-                )
-              ).then(transactions => {
-                transactions.forEach((tx, i) => {
-                  (unspent[
-                    i
-                  ] as UnspentWithTx).transaction = tx as ParsecTransaction;
-                });
-
-                return unspent as UnspentWithTx[];
+      if (this.latestBlock !== this.node.latestBlock) {
+        this.latestBlock = this.node.latestBlock;
+        pWeb3
+          .getUnspent(this.account.address)
+          .then(unspent => {
+            return Promise.all(
+              unspent.map(u => eth.getTransaction(bufferToHex(u.outpoint.hash)))
+            ).then(transactions => {
+              transactions.forEach((tx, i) => {
+                (unspent[
+                  i
+                ] as UnspentWithTx).transaction = tx as ParsecTransaction;
               });
-            })
-            .then(unspent => {
-              this.list = observable.array(unspent);
+
+              return unspent as UnspentWithTx[];
             });
-        }
-      });
+          })
+          .then(unspent => {
+            this.list = observable.array(unspent);
+          });
+      }
     }
   }
 
