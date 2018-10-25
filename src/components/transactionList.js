@@ -5,7 +5,7 @@ import { Type } from 'parsec-lib';
 import { Link } from 'react-router-dom';
 
 import TokenValue from './tokenValue';
-import { shortenHash, swapObject } from '../utils';
+import { shortenHex, swapObject } from '../utils';
 
 const TYPES = swapObject(Type);
 
@@ -32,7 +32,7 @@ const TransactionList = ({ txs }) => {
       dataIndex: 'hash',
       key: 'hash',
       render: text => (
-        <Link to={`/explorer/tx/${text}`}>{shortenHash(text)}</Link>
+        <Link to={`/explorer/tx/${text}`}>{shortenHex(text)}</Link>
       ),
     },
     {
@@ -40,7 +40,7 @@ const TransactionList = ({ txs }) => {
       dataIndex: 'from',
       key: 'from',
       render: text => (
-        <Link to={`/explorer/address/${text}`}>{shortenHash(text)}</Link>
+        <Link to={`/explorer/address/${text}`}>{shortenHex(text)}</Link>
       ),
     },
     {
@@ -48,7 +48,7 @@ const TransactionList = ({ txs }) => {
       dataIndex: 'to',
       key: 'to',
       render: text => (
-        <Link to={`/explorer/address/${text}`}>{shortenHash(text)}</Link>
+        <Link to={`/explorer/address/${text}`}>{shortenHex(text)}</Link>
       ),
     },
     {

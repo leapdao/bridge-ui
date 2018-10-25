@@ -23,8 +23,8 @@ export const DEFAULT_PARSEC_NODE = '1';
 export { range } from './range.ts';
 export { txSuccess } from './txSuccess.ts';
 
-export const shortenHash = hash =>
-  hash && [hash.slice(0, 8), '...', hash.slice(hash.length - 6)].join('');
+export const shortenHex = hex =>
+  hex && [hex.slice(0, 8), '...', hex.slice(hex.length - 6)].join('');
 
 export const swapObject = object => {
   return Object.entries(object).reduce(

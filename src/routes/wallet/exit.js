@@ -14,7 +14,7 @@ import { Button, Table } from 'antd';
 import ethUtil from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
-import { shortenHash } from '../../utils';
+import { shortenHex } from '../../utils';
 
 @inject('tokens', 'bridge', 'network', 'unspents')
 @observer
@@ -72,7 +72,7 @@ export default class Exit extends React.Component {
                 input: (
                   <Fragment>
                     <Link to={`/explorer/tx/${inputHash}`}>
-                      {shortenHash(inputHash)}
+                      {shortenHex(inputHash)}
                     </Link>{' '}
                     ({u.outpoint.index})
                   </Fragment>

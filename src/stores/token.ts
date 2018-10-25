@@ -14,7 +14,7 @@ import {
   reaction,
 } from 'mobx';
 import { helpers, Tx, Input, Output } from 'parsec-lib';
-import Web3PromiEvent from 'web3-core-promievent';
+import * as Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
 import BN = require('bn.js');
 import Contract from 'web3/eth/contract';
