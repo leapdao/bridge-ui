@@ -18,22 +18,22 @@ export default class Account {
   public ready = false;
 
   constructor() {
-    getInjectedWeb3().then((web3: Web3) => {
-      if ((window as any).web3) {
+    if ((window as any).ethereum) {
+      getInjectedWeb3().then((web3: Web3) => {
         setInterval(() => {
           web3.eth.getAccounts().then(accounts => {
             this.address = accounts[0];
           });
         }, 1000);
-  
+
         web3.eth.getAccounts().then(accounts => {
           this.address = accounts[0];
           this.ready = true;
         });
-      } else {
-        this.ready = true;
-      }  
-    });
+      });
+    } else {
+      this.ready = true;
+    }
   }
 
   public set address(address: string | null) {
