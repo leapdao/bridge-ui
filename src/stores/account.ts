@@ -9,7 +9,7 @@
 
 import Web3 from 'web3';
 import { observable, computed } from 'mobx';
-import getWeb3 from '../utils/getWeb3';
+import getInjectedWeb3 from '../utils/getInjectedWeb3';
 
 export default class Account {
   @observable
@@ -18,21 +18,22 @@ export default class Account {
   public ready = false;
 
   constructor() {
-    const web3 = getWeb3(true) as Web3;
-    if ((window as any).web3) {
-      setInterval(() => {
+    getInjectedWeb3().then((web3: Web3) => {
+      if ((window as any).web3) {
+        setInterval(() => {
+          web3.eth.getAccounts().then(accounts => {
+            this.address = accounts[0];
+          });
+        }, 1000);
+  
         web3.eth.getAccounts().then(accounts => {
           this.address = accounts[0];
+          this.ready = true;
         });
-      }, 1000);
-
-      web3.eth.getAccounts().then(accounts => {
-        this.address = accounts[0];
+      } else {
         this.ready = true;
-      });
-    } else {
-      this.ready = true;
-    }
+      }  
+    });
   }
 
   public set address(address: string | null) {

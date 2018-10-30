@@ -12,13 +12,14 @@ import PromiEvent from 'web3/promiEvent';
 import { TransactionReceipt } from 'web3/types';
 import Transactions from '../components/txNotification/transactions';
 import getWeb3 from '../utils/getWeb3';
+import getInjectedWeb3 from '../utils/getInjectedWeb3';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { InflightTxReceipt } from '../utils/types';
 import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 
 export default class ContractStore {
   @observable
-  public address: string;
+  public address: string;  
   public abi: any[];
   public iWeb3?: Web3;
   public transactions: Transactions;
@@ -30,7 +31,10 @@ export default class ContractStore {
     this.transactions = transactions;
 
     if ((window as any).web3) {
-      this.iWeb3 = this.iWeb3 || (getWeb3(true) as Web3);
+      getInjectedWeb3().then((web3: Web3) => {
+        this.iWeb3 = web3;
+        return web3;
+      }) as Promise<Web3>;
     }
   }
 

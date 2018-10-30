@@ -8,7 +8,7 @@
 import Web3 from 'web3';
 import { observable, computed } from 'mobx';
 import Account from './account';
-import getWeb3 from '../utils/getWeb3';
+import getInjectedWeb3 from '../utils/getInjectedWeb3';
 
 export default class Network {
   @observable
@@ -19,10 +19,11 @@ export default class Network {
     public readonly network: string
   ) {
     if ((window as any).web3) {
-      const web3 = getWeb3(true) as Web3;
-      web3.eth.net.getId().then(mmNetwork => {
-        this._mmNetwork = String(mmNetwork);
-      });
+      getInjectedWeb3()
+        .then((web3: Web3) => web3.eth.net.getId())
+        .then(mmNetwork => {
+          this._mmNetwork = String(mmNetwork);
+        });
     }
   }
 

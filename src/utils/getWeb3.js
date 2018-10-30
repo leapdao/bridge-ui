@@ -9,17 +9,12 @@ import Web3 from 'web3';
 import { NETWORKS, DEFAULT_NETWORK } from '.';
 
 let web3;
-let injectedWeb3;
 
-export default (injected = false) => {
-  if (!injected && !web3) {
-    const network = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
-    web3 = new Web3(new Web3.providers.HttpProvider(network.provider));
-  }
+export default () => {
+  if (web3) return web3;
 
-  if (injected && !injectedWeb3) {
-    injectedWeb3 = new Web3(window.web3.currentProvider);
-  }
+  const network = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
+  web3 = new Web3(new Web3.providers.HttpProvider(network.provider));
 
-  return injected ? injectedWeb3 : web3;
+  return web3;
 };
