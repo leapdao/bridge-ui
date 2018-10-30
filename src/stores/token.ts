@@ -244,6 +244,9 @@ export default class Token extends ContractStore {
 
   @autobind
   private loadBalance(plasma = false) {
+    if (!this.account.address) {
+      return;
+    }
     const contract = plasma ? this.plasmaContract : this.contract;
     contract.methods
       .balanceOf(this.account.address)
