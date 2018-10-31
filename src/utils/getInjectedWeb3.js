@@ -15,19 +15,22 @@ export default () => {
 
   // Handle privacy mode (EIP-1102)
   // https://medium.com/metamask/https-medium-com-metamask-breaking-change-injecting-web3-7722797916a8
-  if (window.ethereum) {
+  const metamask = window.ethereum && window.ethereum._metamask; // eslint-disable-line no-underscore-dangle
+  if (metamask) {
     enablePromise =
       enablePromise ||
-      window.ethereum
-        .enable()
-        .then(() => {
+      metamask.isApproved().then(approved => {
+        if (approved) {
           injectedWeb3 = new Web3(window.ethereum);
           return injectedWeb3;
-        })
-        .catch(e => {
-          // User denied account access...
-          console.warn(e);
+        }
+
+        return window.ethereum.enable().then(() => {
+          injectedWeb3 = new Web3(window.ethereum);
+          return injectedWeb3;
         });
+      });
+
     return enablePromise;
   }
   injectedWeb3 = new Web3(window.web3.currentProvider);
