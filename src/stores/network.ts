@@ -5,26 +5,32 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 from 'web3';
-import { observable, computed } from 'mobx';
+import { observable, computed, reaction } from 'mobx';
 import Account from './account';
-import getInjectedWeb3 from '../utils/getInjectedWeb3';
+import Web3Store from './web3';
+import autobind from 'autobind-decorator';
 
 export default class Network {
   @observable
   private _mmNetwork: string;
 
   constructor(
-    public readonly account: Account,
+    private readonly account: Account,
+    private readonly web3: Web3Store,
     public readonly network: string
   ) {
-    if ((window as any).web3) {
-      getInjectedWeb3()
-        .then((web3: Web3) => web3.eth.net.getId())
-        .then(mmNetwork => {
-          this._mmNetwork = String(mmNetwork);
-        });
+    if (this.web3.injected) {
+      this.fetchNetwork();
+    } else {
+      reaction(() => this.web3.injected, this.fetchNetwork);
     }
+  }
+
+  @autobind
+  private fetchNetwork() {
+    this.web3.injected.eth.net.getId().then(mmNetwork => {
+      this._mmNetwork = String(mmNetwork);
+    });
   }
 
   @computed

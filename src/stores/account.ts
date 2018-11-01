@@ -7,9 +7,9 @@
 
 /* eslint-disable no-underscore-dangle */
 
-import Web3 from 'web3';
-import { observable, computed } from 'mobx';
-import getInjectedWeb3 from '../utils/getInjectedWeb3';
+import { observable, computed, reaction, action } from 'mobx';
+import Web3Store from './web3';
+import autobind from 'autobind-decorator';
 
 export default class Account {
   @observable
@@ -17,23 +17,44 @@ export default class Account {
   @observable
   public ready = false;
 
-  constructor() {
-    if ((window as any).ethereum) {
-      getInjectedWeb3().then((web3: Web3) => {
-        setInterval(() => {
-          web3.eth.getAccounts().then(accounts => {
-            this.address = accounts[0];
-          });
-        }, 1000);
+  constructor(private web3: Web3Store) {
+    reaction(() => this.web3.ready, this.init);
+  }
 
-        web3.eth.getAccounts().then(accounts => {
-          this.address = accounts[0];
-          this.ready = true;
-        });
+  @autobind
+  @action
+  private init() {
+    console.log(
+      this.web3.injectedAvailable,
+      this.web3.injected,
+      this.web3.ready
+    );
+    if (this.web3.injectedAvailable && this.web3.injected) {
+      this.watchAccounts().then(() => {
+        this.ready = true;
       });
     } else {
       this.ready = true;
+      reaction(
+        () => this.web3.injected,
+        (_, r) => {
+          r.dispose();
+          this.watchAccounts();
+        }
+      );
     }
+  }
+
+  private watchAccounts() {
+    setInterval(() => {
+      this.web3.injected.eth.getAccounts().then(accounts => {
+        this.address = accounts[0];
+      });
+    }, 1000);
+
+    return this.web3.injected.eth.getAccounts().then(accounts => {
+      this.address = accounts[0];
+    });
   }
 
   public set address(address: string | null) {

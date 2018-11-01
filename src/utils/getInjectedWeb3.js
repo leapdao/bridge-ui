@@ -19,7 +19,7 @@ export default () => {
   if (metamask) {
     enablePromise =
       enablePromise ||
-      metamask.isApproved().then(approved => {
+      Promise.resolve(true).then(approved => {
         if (approved) {
           injectedWeb3 = new Web3(window.ethereum);
           return injectedWeb3;
@@ -35,4 +35,8 @@ export default () => {
   }
   injectedWeb3 = new Web3(window.web3.currentProvider);
   return Promise.resolve(injectedWeb3);
+};
+
+export const setInjectedWeb3 = provider => {
+  injectedWeb3 = new Web3(provider);
 };

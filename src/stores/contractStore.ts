@@ -12,35 +12,29 @@ import PromiEvent from 'web3/promiEvent';
 import { TransactionReceipt } from 'web3/types';
 import Transactions from '../components/txNotification/transactions';
 import getWeb3 from '../utils/getWeb3';
-import getInjectedWeb3 from '../utils/getInjectedWeb3';
 import getParsecWeb3 from '../utils/getParsecWeb3';
 import { InflightTxReceipt } from '../utils/types';
 import ContractEventsSubscription from '../utils/ContractEventsSubscription';
+import Web3Store from './web3';
 
 export default class ContractStore {
   @observable
-  public address: string;  
-  public abi: any[];
-  public iWeb3?: Web3;
-  public transactions: Transactions;
+  public address: string;
+
   private activeEventSub: ContractEventsSubscription;
 
-  constructor(abi: any[], address: string, transactions: Transactions) {
-    this.abi = abi;
+  constructor(
+    public abi: any[],
+    address: string,
+    public transactions: Transactions,
+    public web3: Web3Store
+  ) {
     this.address = address;
-    this.transactions = transactions;
-
-    if ((window as any).web3) {
-      getInjectedWeb3().then((web3: Web3) => {
-        this.iWeb3 = web3;
-        return web3;
-      }) as Promise<Web3>;
-    }
   }
 
   @computed
   public get events(): ContractEventsSubscription | undefined {
-    if (!this.contract.options.address) return;
+    if (!this.contract) return;
     console.log(
       `Setting up event listener for contract at ${
         this.contract.options.address
@@ -61,13 +55,16 @@ export default class ContractStore {
   @computed
   public get contract(): Contract {
     const web3 = getWeb3() as Web3;
-    return new web3.eth.Contract(this.abi, this.address);
+    console.log(this.address);
+    if (this.address) {
+      return new web3.eth.Contract(this.abi, this.address);
+    }
   }
 
   @computed
   public get iContract(): Contract | undefined {
-    if (this.iWeb3) {
-      return new this.iWeb3.eth.Contract(this.abi, this.address);
+    if (this.web3.injected) {
+      return new this.web3.injected.eth.Contract(this.abi, this.address);
     }
   }
 

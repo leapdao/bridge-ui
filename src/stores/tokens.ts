@@ -15,6 +15,7 @@ import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
 import { Output } from 'parsec-lib';
 import NodeStore from './node';
+import Web3Store from './web3';
 
 export default class Tokens {
   @observable
@@ -27,7 +28,8 @@ export default class Tokens {
     private account: Account,
     private bridge: Bridge,
     private txs: Transactions,
-    private node: NodeStore
+    private node: NodeStore,
+    private web3: Web3Store
   ) {
     this.erc20TokenCount = 0;
     this.nftTokenCount = 0;
@@ -89,7 +91,14 @@ export default class Tokens {
         .tokens(color)
         .call()
         .then(({ 0: address }) => {
-          return new Token(this.account, this.txs, address, color, this.node);
+          return new Token(
+            this.account,
+            this.txs,
+            address,
+            color,
+            this.node,
+            this.web3
+          );
         });
     });
   }
