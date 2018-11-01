@@ -28,7 +28,6 @@ import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 import { range } from '../utils/range';
 import NodeStore from './node';
 import Web3Store from './web3';
@@ -143,9 +142,8 @@ export default class Token extends ContractStore {
       return Promise.reject('No metamask');
     }
 
-    const parsecWeb3 = getParsecWeb3();
     const promiEvent = Web3PromiEvent();
-    parsecWeb3
+    this.web3.plasma
       .getUnspent(this.account.address)
       .then(unspent => {
         if (this.isNft) {
@@ -180,8 +178,8 @@ export default class Token extends ContractStore {
         signedTx => {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());
           return {
-            futureReceipt: parsecWeb3.eth.sendSignedTransaction(
-              signedTx.toRaw()
+            futureReceipt: this.web3.plasma.eth.sendSignedTransaction(
+              signedTx.toRaw() as any
             ),
           };
         },

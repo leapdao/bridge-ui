@@ -1,24 +1,22 @@
 import { observable } from 'mobx';
 import autobind from 'autobind-decorator';
-import getParsecWeb3 from '../utils/getParsecWeb3';
+import Web3Store from './web3';
 
 export default class NodeStore {
   @observable
   public latestBlock: number = 0;
 
-  constructor() {
+  constructor(private web3: Web3Store) {
     this.loadLatestBlock();
     setInterval(this.loadLatestBlock, 2000);
   }
 
   @autobind
   private loadLatestBlock() {
-    getParsecWeb3()
-      .eth.getBlockNumber()
-      .then((num: number) => {
-        if (this.latestBlock !== num) {
-          this.latestBlock = num;
-        }
-      });
+    this.web3.plasma.eth.getBlockNumber().then((num: number) => {
+      if (this.latestBlock !== num) {
+        this.latestBlock = num;
+      }
+    });
   }
 }

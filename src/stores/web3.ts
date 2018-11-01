@@ -1,10 +1,23 @@
 import { observable, action } from 'mobx';
 import Web3Type from 'web3';
+import { helpers, ExtendedWeb3 } from 'parsec-lib';
 import Web3 from './web3_ts_workaround';
+import {
+  PARSEC_NODES,
+  DEFAULT_PARSEC_NODE,
+  NETWORKS,
+  DEFAULT_NETWORK,
+} from '../utils';
 
 export default class Web3Store {
   @observable.ref
   public injected: Web3Type | null = null;
+
+  @observable.ref
+  public plasma: ExtendedWeb3;
+
+  @observable.ref
+  public local: Web3Type;
 
   @observable
   public injectedAvailable = false;
@@ -16,6 +29,17 @@ export default class Web3Store {
   public ready = false;
 
   constructor() {
+    const plasmaProvider =
+      PARSEC_NODES[process.env.PARSEC_NODE || DEFAULT_PARSEC_NODE];
+    this.plasma = helpers.extendWeb3(
+      new Web3(new Web3.providers.HttpProvider(plasmaProvider))
+    );
+
+    const localNetwork = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
+    this.local = new Web3(
+      new Web3.providers.HttpProvider(localNetwork.provider)
+    );
+
     const { ethereum, web3 } = window as any;
     const metamask = ethereum && ethereum._metamask; // eslint-disable-line no-underscore-dangle
 

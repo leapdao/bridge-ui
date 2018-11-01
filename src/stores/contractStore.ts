@@ -11,8 +11,6 @@ import Contract from 'web3/eth/contract';
 import PromiEvent from 'web3/promiEvent';
 import { TransactionReceipt } from 'web3/types';
 import Transactions from '../components/txNotification/transactions';
-import getWeb3 from '../utils/getWeb3';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 import { InflightTxReceipt } from '../utils/types';
 import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 import Web3Store from './web3';
@@ -46,7 +44,7 @@ export default class ContractStore {
     }
     this.activeEventSub = new ContractEventsSubscription(
       this.contract,
-      getWeb3()
+      this.web3.local
     );
     this.activeEventSub.start();
     return this.activeEventSub;
@@ -54,10 +52,8 @@ export default class ContractStore {
 
   @computed
   public get contract(): Contract {
-    const web3 = getWeb3() as Web3;
-    console.log(this.address);
     if (this.address) {
-      return new web3.eth.Contract(this.abi, this.address);
+      return new this.web3.local.eth.Contract(this.abi, this.address);
     }
   }
 
@@ -70,8 +66,7 @@ export default class ContractStore {
 
   @computed
   public get plasmaContract(): Contract | undefined {
-    const web3 = getParsecWeb3() as Web3;
-    return new web3.eth.Contract(this.abi, this.address);
+    return new this.web3.plasma.eth.Contract(this.abi, this.address);
   }
 
   public watchTx(

@@ -42,16 +42,16 @@ const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
 const web3 = new Web3Store();
 const transactions = new Transactions();
 const account = new Account(web3);
-const node = new NodeStore();
+const node = new NodeStore(web3);
 const bridge = new Bridge(account, transactions, web3);
-const explorer = new ExplorerStore(node);
+const explorer = new ExplorerStore(node, web3);
 const tokens = new Tokens(account, bridge, transactions, node, web3);
 const network = new Network(
   account,
   web3,
   process.env.NETWORK_ID || DEFAULT_NETWORK
 );
-const unspents = new Unspents(bridge, account, node);
+const unspents = new Unspents(bridge, account, node, web3);
 
 ReactDOM.render(
   <BrowserRouter>
