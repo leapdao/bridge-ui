@@ -18,17 +18,16 @@ export default class Account {
   public ready = false;
 
   constructor(private web3: Web3Store) {
-    reaction(() => this.web3.ready, this.init);
+    if (this.web3.ready) {
+      this.init();
+    } else {
+      reaction(() => this.web3.ready, this.init);
+    }
   }
 
   @autobind
   @action
   private init() {
-    console.log(
-      this.web3.injectedAvailable,
-      this.web3.injected,
-      this.web3.ready
-    );
     if (this.web3.injectedAvailable && this.web3.injected) {
       this.watchAccounts().then(() => {
         this.ready = true;
