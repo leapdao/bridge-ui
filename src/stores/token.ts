@@ -5,6 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
+import Web3 from 'web3';
 import {
   observable,
   action,
@@ -27,9 +28,9 @@ import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 import { range } from '../utils/range';
 import NodeStore from './node';
+import Web3Store from './web3';
 
 const tokenInfo = (
   token: Contract,
@@ -73,9 +74,10 @@ export default class Token extends ContractStore {
     transactions: Transactions,
     address: string,
     color: number,
-    private node: NodeStore
+    private node: NodeStore,
+    web3: Web3Store
   ) {
-    super(isNFT(color) ? erc721 : erc20, address, transactions);
+    super(isNFT(color) ? erc721 : erc20, address, transactions, web3);
 
     this.account = account;
     this.color = color;
@@ -136,13 +138,12 @@ export default class Token extends ContractStore {
   }
 
   public transfer(to: string, amount: number): Promise<any> {
-    if (!this.iWeb3) {
+    if (!this.web3.injected) {
       return Promise.reject('No metamask');
     }
 
-    const parsecWeb3 = getParsecWeb3();
     const promiEvent = Web3PromiEvent();
-    parsecWeb3
+    this.web3.plasma
       .getUnspent(this.account.address)
       .then(unspent => {
         if (this.isNft) {
@@ -172,13 +173,13 @@ export default class Token extends ContractStore {
         );
         return Tx.transfer(inputs, outputs);
       })
-      .then(tx => tx.signWeb3(this.iWeb3))
+      .then(tx => tx.signWeb3(this.web3.injected))
       .then(
         signedTx => {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());
           return {
-            futureReceipt: parsecWeb3.eth.sendSignedTransaction(
-              signedTx.toRaw()
+            futureReceipt: this.web3.plasma.eth.sendSignedTransaction(
+              signedTx.toRaw() as any
             ),
           };
         },
@@ -214,7 +215,7 @@ export default class Token extends ContractStore {
     }
 
     return this.maybeApprove(to, value).then(() => {
-      const futureReceipt = this.iWeb3.eth.sendTransaction({
+      const futureReceipt = this.web3.injected.eth.sendTransaction({
         from: this.account.address,
         to,
         data,
@@ -243,6 +244,9 @@ export default class Token extends ContractStore {
 
   @autobind
   private loadBalance(plasma = false) {
+    if (!this.account.address) {
+      return;
+    }
     const contract = plasma ? this.plasmaContract : this.contract;
     contract.methods
       .balanceOf(this.account.address)

@@ -6,8 +6,16 @@
  */
 
 import { observable, reaction, computed } from 'mobx';
-import { Unspent, Tx, Period, Block, Input, Output, Type } from 'parsec-lib';
-import Eth from 'web3/eth/index';
+import {
+  Unspent,
+  Tx,
+  Period,
+  Block,
+  Input,
+  Output,
+  Type,
+  ExtendedWeb3,
+} from 'parsec-lib';
 import { Transaction } from 'web3/eth/types';
 import { bufferToHex } from 'ethereumjs-util';
 
@@ -15,10 +23,8 @@ import Bridge from './bridge';
 import Account from './account';
 import autobind from 'autobind-decorator';
 import { range } from '../utils/range';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 import NodeStore from './node';
-
-const pWeb3 = getParsecWeb3();
+import Web3Store from './web3';
 
 interface ParsecTransaction extends Transaction {
   raw: string;
@@ -26,11 +32,10 @@ interface ParsecTransaction extends Transaction {
 
 type UnspentWithTx = Unspent & { transaction: ParsecTransaction };
 
-function makePeriodFromRange(startBlock, endBlock) {
+function makePeriodFromRange(plasma: ExtendedWeb3, startBlock, endBlock) {
   // ToDo: fix typing in lib
-  const eth = (pWeb3 as any).eth as Eth;
   return Promise.all(
-    range(startBlock, endBlock - 1).map(n => eth.getBlock(n, true))
+    range(startBlock, endBlock - 1).map(n => plasma.eth.getBlock(n, true))
   ).then(blocks => {
     return new Period(
       null,
@@ -56,7 +61,8 @@ export default class Unspents {
   constructor(
     private bridge: Bridge,
     private account: Account,
-    private node: NodeStore
+    private node: NodeStore,
+    private web3: Web3Store
   ) {
     reaction(() => this.account.address, this.clearUnspents);
     reaction(() => this.account.address, this.fetchUnspents);
@@ -91,16 +97,18 @@ export default class Unspents {
   @autobind
   private fetchUnspents() {
     // ToDo: fix typing in lib
-    const eth = (pWeb3 as any).eth as Eth;
-
     if (this.account.address) {
       if (this.latestBlock !== this.node.latestBlock) {
         this.latestBlock = this.node.latestBlock;
-        pWeb3
+        this.web3.plasma
           .getUnspent(this.account.address)
           .then(unspent => {
             return Promise.all(
-              unspent.map(u => eth.getTransaction(bufferToHex(u.outpoint.hash)))
+              unspent.map(u =>
+                this.web3.plasma.eth.getTransaction(
+                  bufferToHex(u.outpoint.hash)
+                )
+              )
             ).then(transactions => {
               transactions.forEach((tx, i) => {
                 (unspent[
@@ -124,7 +132,7 @@ export default class Unspents {
     const periodNumber = Math.floor(blockNumber / 32);
     const startBlock = periodNumber * 32;
     const endBlock = periodNumber * 32 + 32;
-    makePeriodFromRange(startBlock, endBlock).then(period =>
+    makePeriodFromRange(this.web3.plasma, startBlock, endBlock).then(period =>
       this.bridge.startExit(
         period.proof(Tx.fromRaw(raw)),
         unspent.outpoint.index
@@ -183,7 +191,7 @@ export default class Unspents {
     );
 
     consolidates.forEach(consolidate => {
-      pWeb3.eth.sendSignedTransaction(consolidate.toRaw());
+      this.web3.plasma.eth.sendSignedTransaction(consolidate.toRaw() as any);
     });
   }
 }

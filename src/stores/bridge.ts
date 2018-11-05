@@ -18,6 +18,7 @@ import Transactions from '../components/txNotification/transactions';
 
 import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
+import Web3Store from './web3';
 
 const readSlots = (bridge: Contract) => {
   return bridge.methods
@@ -61,18 +62,23 @@ const readSlots = (bridge: Contract) => {
 };
 
 export default class Bridge extends ContractStore {
-  private account: Account;
-
   @observable
   public slots: IObservableArray<Slot> = observable.array([]);
   @observable
   public lastCompleteEpoch: number;
 
-  constructor(account: Account, transactions: Transactions, address?: string) {
-    super(bridgeAbi, address, transactions);
-    this.account = account;
+  constructor(
+    private account: Account,
+    transactions: Transactions,
+    web3: Web3Store,
+    address?: string
+  ) {
+    super(bridgeAbi, address, transactions, web3);
 
-    reaction(() => this.contract, this.init);
+    reaction(() => {
+      console.log(this.contract, this.address);
+      return this.contract;
+    }, this.init);
     reaction(
       () => this.events,
       () => {

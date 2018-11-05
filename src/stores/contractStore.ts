@@ -11,32 +11,28 @@ import Contract from 'web3/eth/contract';
 import PromiEvent from 'web3/promiEvent';
 import { TransactionReceipt } from 'web3/types';
 import Transactions from '../components/txNotification/transactions';
-import getWeb3 from '../utils/getWeb3';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 import { InflightTxReceipt } from '../utils/types';
 import ContractEventsSubscription from '../utils/ContractEventsSubscription';
+import Web3Store from './web3';
 
 export default class ContractStore {
   @observable
   public address: string;
-  public abi: any[];
-  public iWeb3?: Web3;
-  public transactions: Transactions;
+
   private activeEventSub: ContractEventsSubscription;
 
-  constructor(abi: any[], address: string, transactions: Transactions) {
-    this.abi = abi;
+  constructor(
+    public abi: any[],
+    address: string,
+    public transactions: Transactions,
+    public web3: Web3Store
+  ) {
     this.address = address;
-    this.transactions = transactions;
-
-    if ((window as any).web3) {
-      this.iWeb3 = this.iWeb3 || (getWeb3(true) as Web3);
-    }
   }
 
   @computed
   public get events(): ContractEventsSubscription | undefined {
-    if (!this.contract.options.address) return;
+    if (!this.contract) return;
     console.log(
       `Setting up event listener for contract at ${
         this.contract.options.address
@@ -48,7 +44,7 @@ export default class ContractStore {
     }
     this.activeEventSub = new ContractEventsSubscription(
       this.contract,
-      getWeb3()
+      this.web3.local
     );
     this.activeEventSub.start();
     return this.activeEventSub;
@@ -56,21 +52,21 @@ export default class ContractStore {
 
   @computed
   public get contract(): Contract {
-    const web3 = getWeb3() as Web3;
-    return new web3.eth.Contract(this.abi, this.address);
+    if (this.address) {
+      return new this.web3.local.eth.Contract(this.abi, this.address);
+    }
   }
 
   @computed
   public get iContract(): Contract | undefined {
-    if (this.iWeb3) {
-      return new this.iWeb3.eth.Contract(this.abi, this.address);
+    if (this.web3.injected) {
+      return new this.web3.injected.eth.Contract(this.abi, this.address);
     }
   }
 
   @computed
   public get plasmaContract(): Contract | undefined {
-    const web3 = getParsecWeb3() as Web3;
-    return new web3.eth.Contract(this.abi, this.address);
+    return new this.web3.plasma.eth.Contract(this.abi, this.address);
   }
 
   public watchTx(

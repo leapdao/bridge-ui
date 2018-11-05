@@ -20,6 +20,7 @@ import Network from './stores/network.ts';
 import ExplorerStore from './stores/explorer.ts';
 import Unspents from './stores/unspents.ts';
 import NodeStore from './stores/node.ts';
+import Web3Store from './stores/web3.ts';
 
 import Transactions from './components/txNotification/transactions.ts';
 import TxNotification from './components/txNotification/index.tsx';
@@ -38,14 +39,19 @@ if (!process.env.BRIDGE_ADDR) {
 
 const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
 
+const web3 = new Web3Store();
 const transactions = new Transactions();
-const account = new Account();
-const node = new NodeStore();
-const bridge = new Bridge(account, transactions);
-const explorer = new ExplorerStore(node);
-const tokens = new Tokens(account, bridge, transactions, node);
-const network = new Network(account, process.env.NETWORK_ID || DEFAULT_NETWORK);
-const unspents = new Unspents(bridge, account, node);
+const account = new Account(web3);
+const node = new NodeStore(web3);
+const bridge = new Bridge(account, transactions, web3);
+const explorer = new ExplorerStore(node, web3);
+const tokens = new Tokens(account, bridge, transactions, node, web3);
+const network = new Network(
+  account,
+  web3,
+  process.env.NETWORK_ID || DEFAULT_NETWORK
+);
+const unspents = new Unspents(bridge, account, node, web3);
 
 ReactDOM.render(
   <BrowserRouter>
@@ -59,6 +65,7 @@ ReactDOM.render(
         explorer,
         unspents,
         node,
+        web3,
       }}
     >
       <Fragment>

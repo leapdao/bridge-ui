@@ -5,14 +5,13 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 from 'web3';
 import { observable, computed, reaction } from 'mobx';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 import { Tx, TxJSON } from 'parsec-lib';
 import { Block, Transaction } from 'web3/eth/types';
 import { range } from '../utils/range';
 import autobind from 'autobind-decorator';
 import NodeStore from './node';
+import Web3Store from './web3';
 
 const LOCAL_STORAGE_KEY = 'EXPLORER_CACHE';
 
@@ -40,7 +39,6 @@ const myTransaction = (addr: string) => {
 };
 
 export default class Explorer {
-  private web3: Web3 = getParsecWeb3();
   private blockchain: Block[] = [];
   private _cache = {};
 
@@ -61,7 +59,7 @@ export default class Explorer {
   @observable
   public current;
 
-  constructor(private node: NodeStore) {
+  constructor(private node: NodeStore, private web3: Web3Store) {
     try {
       const lsCache = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (lsCache) {
@@ -131,7 +129,7 @@ export default class Explorer {
   public getAddress(address: string) {
     address = address.toLowerCase();
     return Promise.all([
-      this.web3.eth.getBalance(address),
+      this.web3.plasma.eth.getBalance(address),
       this.getBlockchain(),
     ]).then(([balance, blocks]) => {
       const txs = blocks.reduce(
@@ -155,7 +153,7 @@ export default class Explorer {
       return Promise.resolve(this.cache[hash]);
     }
 
-    return this.web3.eth.getTransaction(hash).then(tx => {
+    return this.web3.plasma.eth.getTransaction(hash).then(tx => {
       if (tx) {
         const result = {
           ...tx,
@@ -175,7 +173,7 @@ export default class Explorer {
       return Promise.resolve(this.cache[hashOrNumber]);
     }
 
-    return this.web3.eth.getBlock(hashOrNumber, true).then(block => {
+    return this.web3.plasma.eth.getBlock(hashOrNumber, true).then(block => {
       if (block) {
         block.transactions = block.transactions.map(tx => ({
           ...tx,
@@ -195,18 +193,18 @@ export default class Explorer {
   public search(hashOrNumber, history) {
     this.searching = true;
     this.success = true;
-    if (this.web3.utils.isAddress(hashOrNumber)) {
+    if (this.web3.plasma.utils.isAddress(hashOrNumber)) {
       history.push(`/explorer/address/${hashOrNumber}`);
       this.searching = false;
       return Promise.resolve();
     } else {
-      return this.web3.eth
+      return this.web3.plasma.eth
         .getTransaction(hashOrNumber)
         .then(tx => {
           if (tx) {
             history.push(`/explorer/tx/${hashOrNumber}`);
           } else {
-            return this.web3.eth.getBlock(hashOrNumber).then(block => {
+            return this.web3.plasma.eth.getBlock(hashOrNumber).then(block => {
               if (block) {
                 history.push(`/explorer/block/${hashOrNumber}`);
               } else {

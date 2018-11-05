@@ -6,7 +6,6 @@ import { Card, Button, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
 
 import TransctionList from '../components/transactionList';
-import getParsecWeb3 from '../utils/getParsecWeb3';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -18,7 +17,7 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
   hour12: false,
 });
 
-@inject('explorer', 'node')
+@inject('explorer', 'node', 'web3')
 @observer
 class Block extends React.Component {
   constructor(props) {
@@ -60,12 +59,12 @@ class Block extends React.Component {
   success = false;
 
   fetch(hashOrNumber) {
-    const { explorer } = this.props;
+    const { explorer, web3 } = this.props;
     this.fetching = true;
 
     (hashOrNumber
       ? Promise.resolve(hashOrNumber)
-      : getParsecWeb3().eth.getBlockNumber()
+      : web3.plasma.eth.getBlockNumber()
     ).then(param => {
       explorer.getBlock(param).then(block => {
         this.fetching = false;
@@ -115,6 +114,7 @@ Block.propTypes = {
   match: PropTypes.object,
   explorer: PropTypes.object,
   node: PropTypes.object,
+  web3: PropTypes.object,
 };
 
 export default Block;

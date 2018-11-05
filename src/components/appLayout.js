@@ -11,7 +11,7 @@ import PropTypes from 'prop-types';
 import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
-import { Dropdown, Icon, Layout, Menu, Spin } from 'antd';
+import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
 
 import parsecLabsLogo from '../parseclabs.svg';
 
@@ -25,11 +25,12 @@ const rootRoutes = ['explorer', 'faucet'];
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
   account: stores.account,
+  web3: stores.web3,
 }))
 @observer
 class AppLayout extends React.Component {
   render() {
-    const { psc, account, match } = this.props;
+    const { psc, account, match, web3 } = this.props;
 
     if (!account.ready) {
       return (
@@ -112,6 +113,24 @@ class AppLayout extends React.Component {
                     </strong>
                   </Fragment>
                 )}
+              {web3 &&
+                web3.injectedAvailable &&
+                !web3.injected && (
+                  <Button
+                    onClick={() => {
+                      web3.enable();
+                    }}
+                  >
+                    <span
+                      role="img"
+                      aria-label="fox"
+                      style={{ bottom: -1, position: 'relative' }}
+                    >
+                      🦊
+                    </span>{' '}
+                    Connect MetaMask
+                  </Button>
+                )}
             </span>
             <MediaQuery maxWidth={1048}>
               <Dropdown
@@ -155,6 +174,7 @@ AppLayout.propTypes = {
   // > It should not (necessarily) be passed in by parent components at all!
   // https://github.com/mobxjs/mobx-react#with-typescript
   psc: PropTypes.object,
+  web3: PropTypes.object,
   account: PropTypes.object,
   match: PropTypes.object.isRequired,
   children: PropTypes.any,
