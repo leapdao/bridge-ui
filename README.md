@@ -2,8 +2,6 @@
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 
-![Alt text](screenshot.png)
-
 You can:
 
 - View and buy slots
