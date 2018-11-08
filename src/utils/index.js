@@ -8,8 +8,8 @@ export const NETWORKS = {
 
 export const PLASMA_NODES = {
   0: 'http://localhost:8645',
-  1: 'https://testnet-1.parseclabs.org',
-  2: 'https://testnet-2.parseclabs.org',
+  1: 'https://testnet-1.leapdao.org',
+  2: 'https://testnet-2.leapdao.org',
 };
 
 export const DEFAULT_NETWORK = '4';
