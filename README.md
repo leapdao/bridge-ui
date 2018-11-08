@@ -1,4 +1,4 @@
-# UI for PARSEC Labs plasma bridge contract
+# UI for Leap DAO plasma bridge contract
 
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](http://makeapullrequest.com)
 

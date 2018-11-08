@@ -1,12 +1,12 @@
 /**
- * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
+ * Copyright (c) 2018-present, Leap DAO (leapdao.org)
  *
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
  */
 
 import { observable, computed, reaction } from 'mobx';
-import { Tx, TxJSON } from 'parsec-lib';
+import { Tx, TxJSON } from 'leap-core';
 import { Block, Transaction } from 'web3/eth/types';
 import { range } from '../utils/range';
 import autobind from 'autobind-decorator';
@@ -21,17 +21,17 @@ export enum Types {
   ADDRESS,
 }
 
-type ParsecTransaction = Transaction & {
+type PlasmaTransaction = Transaction & {
   raw: string;
 } & TxJSON;
 
-type ParsecBlock = Block & {
-  transactions: ParsecTransaction[];
+type PlasmaBlock = Block & {
+  transactions: PlasmaTransaction[];
 } & TxJSON;
 
 const myTransaction = (addr: string) => {
   addr = addr.toLowerCase();
-  return (tx: ParsecTransaction) => {
+  return (tx: PlasmaTransaction) => {
     const from = (tx.from || '').toLowerCase();
     const to = (tx.to || '').toLowerCase();
     return from === addr || to === addr;
@@ -145,7 +145,7 @@ export default class Explorer {
     });
   }
 
-  public getTransaction(hash): Promise<ParsecTransaction> {
+  public getTransaction(hash): Promise<PlasmaTransaction> {
     if (
       this.cache[hash] &&
       Explorer.getType(this.cache[hash]) === Types.TRANSACTION
@@ -158,14 +158,14 @@ export default class Explorer {
         const result = {
           ...tx,
           ...Tx.fromRaw((tx as any).raw).toJSON(),
-        } as ParsecTransaction;
+        } as PlasmaTransaction;
         this.setCache(hash, result);
         return result;
       }
     });
   }
 
-  public getBlock(hashOrNumber): Promise<ParsecBlock> {
+  public getBlock(hashOrNumber): Promise<PlasmaBlock> {
     if (
       this.cache[hashOrNumber] &&
       Explorer.getType(this.cache[hashOrNumber]) === Types.BLOCK
@@ -185,7 +185,7 @@ export default class Explorer {
           this.setCache(tx.hash, tx);
         });
 
-        return block as ParsecBlock;
+        return block as PlasmaBlock;
       }
     });
   }

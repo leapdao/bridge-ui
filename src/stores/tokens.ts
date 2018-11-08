@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
+ * Copyright (c) 2018-present, Leap DAO (leapdao.org)
  *
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
@@ -13,7 +13,7 @@ import Account from './account';
 import Token from './token';
 import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
-import { Output } from 'parsec-lib';
+import { Output } from 'leap-core';
 import NodeStore from './node';
 import Web3Store from './web3';
 

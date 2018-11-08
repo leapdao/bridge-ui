@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
+ * Copyright (c) 2018-present, Leap DAO (leapdao.org)
  *
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
@@ -12,8 +12,6 @@ import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
 import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
-
-import parsecLabsLogo from '../parseclabs.svg';
 
 import Message from './message';
 import TokenValue from './tokenValue';
@@ -90,16 +88,6 @@ class AppLayout extends React.Component {
             justifyContent: 'space-between',
           }}
         >
-          <Link to="/">
-            <img
-              src={parsecLabsLogo}
-              width="196"
-              height="50"
-              className="logo"
-              alt=""
-            />
-          </Link>
-
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
@@ -162,7 +150,7 @@ class AppLayout extends React.Component {
             {this.props.children}
           </div>
         </Layout.Content>
-        <Layout.Footer>© PARSEC Labs {new Date().getFullYear()}</Layout.Footer>
+        <Layout.Footer>© Leap DAO {new Date().getFullYear()}</Layout.Footer>
       </Layout>
     );
   }

@@ -1,10 +1,10 @@
 import { observable, action } from 'mobx';
 import Web3Type from 'web3';
-import { helpers, ExtendedWeb3 } from 'parsec-lib';
+import { helpers, ExtendedWeb3 } from 'leap-core';
 import Web3 from './web3_ts_workaround';
 import {
-  PARSEC_NODES,
-  DEFAULT_PARSEC_NODE,
+  PLASMA_NODES,
+  DEFAULT_PLASMA_NODE,
   NETWORKS,
   DEFAULT_NETWORK,
 } from '../utils';
@@ -30,7 +30,7 @@ export default class Web3Store {
 
   constructor() {
     const plasmaProvider =
-      PARSEC_NODES[process.env.PARSEC_NODE || DEFAULT_PARSEC_NODE];
+      PLASMA_NODES[process.env.PLASMA_NODE || DEFAULT_PLASMA_NODE];
     this.plasma = helpers.extendWeb3(
       new Web3(new Web3.providers.HttpProvider(plasmaProvider))
     );

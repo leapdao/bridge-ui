@@ -1,5 +1,5 @@
 import React, { Fragment } from 'react';
-import { Output } from 'parsec-lib';
+import { Output } from 'leap-core';
 import PropTypes from 'prop-types';
 import { computed } from 'mobx';
 import { inject, observer } from 'mobx-react';

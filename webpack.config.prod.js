@@ -153,7 +153,7 @@ module.exports = {
     new ExtractTextPlugin({
       filename: 'main.[hash].css',
     }),
-    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR', 'PARSEC_NODE']),
+    new webpack.EnvironmentPlugin(['NETWORK_ID', 'BRIDGE_ADDR', 'PLASMA_NODE']),
     new HtmlPlugin({
       template: 'src/index.html',
     }),

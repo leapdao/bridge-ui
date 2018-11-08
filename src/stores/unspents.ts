@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2018-present, Parsec Labs (parseclabs.org)
+ * Copyright (c) 2018-present, Leap DAO (leapdao.org)
  *
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
@@ -15,7 +15,7 @@ import {
   Output,
   Type,
   ExtendedWeb3,
-} from 'parsec-lib';
+} from 'leap-core';
 import { Transaction } from 'web3/eth/types';
 import { bufferToHex } from 'ethereumjs-util';
 
@@ -26,11 +26,11 @@ import { range } from '../utils/range';
 import NodeStore from './node';
 import Web3Store from './web3';
 
-interface ParsecTransaction extends Transaction {
+interface PlasmaTransaction extends Transaction {
   raw: string;
 }
 
-type UnspentWithTx = Unspent & { transaction: ParsecTransaction };
+type UnspentWithTx = Unspent & { transaction: PlasmaTransaction };
 
 function makePeriodFromRange(plasma: ExtendedWeb3, startBlock, endBlock) {
   // ToDo: fix typing in lib
@@ -42,7 +42,7 @@ function makePeriodFromRange(plasma: ExtendedWeb3, startBlock, endBlock) {
       blocks.filter(a => !!a).map(({ number, timestamp, transactions }) => {
         const block = new Block(number, {
           timestamp,
-          txs: transactions.map((tx: ParsecTransaction) => Tx.fromRaw(tx.raw)),
+          txs: transactions.map((tx: PlasmaTransaction) => Tx.fromRaw(tx.raw)),
         });
 
         return block;
@@ -113,7 +113,7 @@ export default class Unspents {
               transactions.forEach((tx, i) => {
                 (unspent[
                   i
-                ] as UnspentWithTx).transaction = tx as ParsecTransaction;
+                ] as UnspentWithTx).transaction = tx as PlasmaTransaction;
               });
 
               return unspent as UnspentWithTx[];

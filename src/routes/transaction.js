@@ -2,7 +2,7 @@ import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
 import { observable } from 'mobx';
 import { inject, observer } from 'mobx-react';
-import { Type } from 'parsec-lib';
+import { Type } from 'leap-core';
 import { Card, List, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
 
