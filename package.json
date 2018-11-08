@@ -9,7 +9,7 @@
     "build": "rm -rf dist/ && webpack-cli --config webpack.config.prod.js",
     "stats": "rm -rf dist/ && webpack-cli --config webpack.config.prod.js --json > stats.json",
     "precommit": "lint-staged",
-    "deploy:dev": "aws s3 sync ./dist s3://bridge-dev.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id E3UQO39J2ZIILR --paths /*",
+    "deploy:dev": "aws s3 sync ./dist s3://bridge-dev.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id E3UQO39J2ZIILR --paths '/*'",
     "deploy:mainnet": "echo \"No bucket for mainnet\" && echo 0"
   },
   "lint-staged": {
