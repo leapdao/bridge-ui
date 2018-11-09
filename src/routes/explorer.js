@@ -20,26 +20,17 @@ import Block from './block';
 import Transaction from './transaction';
 import Address from './address';
 
-@inject(({ tokens, network, explorer, bridge, web3 }) => ({
+@inject(({ tokens, network, explorer, bridge }) => ({
   psc: tokens.list && tokens.list[0],
   network,
   explorer,
   bridge,
-  web3,
 }))
 @observer
 export default class Explorer extends React.Component {
   constructor(props) {
     super(props);
-
-    props.web3.plasma.getConfig().then(config => {
-      if (
-        this.props.bridge &&
-        this.props.bridge.address !== config.bridgeAddr
-      ) {
-        this.props.bridge.address = config.bridgeAddr;
-      }
-    });
+    props.bridge.address = props.bridge.defaultAddress;
   }
 
   @observable
@@ -123,5 +114,4 @@ Explorer.propTypes = {
   network: PropTypes.object,
   psc: PropTypes.object,
   bridge: PropTypes.object,
-  web3: PropTypes.object,
 };

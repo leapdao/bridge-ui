@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import React from 'react';
 import { observable, computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
@@ -15,10 +15,16 @@ import Web3SubmitWarning from '../../components/web3SubmitWarning';
 import Deposit from './deposit';
 import Transfer from './transfer';
 import Exit from './exit';
+import AppLayout from '../../components/appLayout';
 
-@inject('tokens', 'network')
+@inject('tokens', 'bridge')
 @observer
 export default class Wallet extends React.Component {
+  constructor(props) {
+    super(props);
+    props.bridge.address = props.bridge.defaultAddress;
+  }
+
   @computed
   get selectedToken() {
     const { tokens } = this.props;
@@ -48,7 +54,7 @@ export default class Wallet extends React.Component {
     }
 
     return (
-      <Fragment>
+      <AppLayout>
         <Web3SubmitWarning />
 
         <Deposit
@@ -61,11 +67,12 @@ export default class Wallet extends React.Component {
         <Transfer color={this.color} />
 
         <Exit color={this.color} />
-      </Fragment>
+      </AppLayout>
     );
   }
 }
 
 Wallet.propTypes = {
   tokens: PropTypes.object,
+  bridge: PropTypes.object,
 };

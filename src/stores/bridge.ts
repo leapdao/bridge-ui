@@ -67,6 +67,8 @@ export default class Bridge extends ContractStore {
   @observable
   public lastCompleteEpoch: number;
 
+  public defaultAddress: string;
+
   constructor(
     private account: Account,
     transactions: Transactions,
@@ -76,7 +78,6 @@ export default class Bridge extends ContractStore {
     super(bridgeAbi, address, transactions, web3);
 
     reaction(() => {
-      console.log(this.contract, this.address);
       return this.contract;
     }, this.init);
     reaction(

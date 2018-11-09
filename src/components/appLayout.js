@@ -18,7 +18,7 @@ import TokenValue from './tokenValue';
 
 import '../style.css';
 
-const rootRoutes = ['explorer', 'faucet'];
+const rootRoutes = ['explorer', 'faucet', 'wallet'];
 
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
@@ -60,11 +60,11 @@ class AppLayout extends React.Component {
               <Menu.Item key="slots">
                 <Link to={`${base}/`}>Slots auction</Link>
               </Menu.Item>
-              <Menu.Item key="wallet">
-                <Link to={`${base}/wallet`}>Wallet</Link>
-              </Menu.Item>
               <Menu.Item key="registerToken">
                 <Link to={`${base}/registerToken`}>Register token</Link>
+              </Menu.Item>
+              <Menu.Item key="wallet">
+                <Link to="/wallet">Wallet</Link>
               </Menu.Item>
               <Menu.Item key="faucet">
                 <Link to="/faucet">Get tokens</Link>

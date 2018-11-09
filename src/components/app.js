@@ -14,7 +14,6 @@ import { Route } from 'react-router';
 import { Spin } from 'antd';
 
 import Slots from '../routes/slots';
-import Wallet from '../routes/wallet';
 import RegisterToken from '../routes/registerToken';
 
 import AppLayout from './appLayout';
@@ -53,7 +52,6 @@ class App extends React.Component {
     return (
       <AppLayout>
         <Route path={`${path}/`} exact component={Slots} />
-        <Route path={`${path}/wallet`} exact component={Wallet} />
         <Route path={`${path}/registerToken`} exact component={RegisterToken} />
       </AppLayout>
     );

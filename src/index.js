@@ -28,14 +28,7 @@ import TxNotification from './components/txNotification/index.tsx';
 import App from './components/app';
 import Explorer from './routes/explorer';
 import Faucet from './routes/faucet';
-
-if (!process.env.BRIDGE_ADDR) {
-  /* eslint-disable no-console */
-  console.error(
-    'Missing Bridge contract address. Please rebuild with BRIDGE_ADDR env variable set'
-  );
-  /* eslint-enable no-console */
-}
+import Wallet from './routes/wallet';
 
 const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
 
@@ -53,50 +46,57 @@ const network = new Network(
 );
 const unspents = new Unspents(bridge, account, node, web3);
 
-ReactDOM.render(
-  <BrowserRouter>
-    <Provider
-      {...{
-        account,
-        tokens,
-        bridge,
-        network,
-        transactions,
-        explorer,
-        unspents,
-        node,
-        web3,
-      }}
-    >
-      <Fragment>
-        <TxNotification />
-        <Route
-          path="/"
-          exact
-          render={() => <Redirect to={`/${process.env.BRIDGE_ADDR}`} />}
-        />
-        <Route path="/explorer" component={Explorer} />
-        <Route path="/faucet" component={Faucet} />
-        <Route
-          path="/:bridgeAddr"
-          render={props => {
-            const section = props.match.params.bridgeAddr;
-            if (ADDR_REGEX.test(section)) {
-              return <App {...props} />;
-            }
-            if (section !== 'explorer' && section !== 'faucet') {
-              return (
-                <Redirect
-                  to={`/${process.env.BRIDGE_ADDR}${props.location.pathname}`}
-                />
-              );
-            }
+web3.plasma.getConfig().then(({ bridgeAddr }) => {
+  bridge.defaultAddress = bridgeAddr;
+  bridge.address = bridgeAddr;
+  ReactDOM.render(
+    <BrowserRouter>
+      <Provider
+        {...{
+          account,
+          tokens,
+          bridge,
+          network,
+          transactions,
+          explorer,
+          unspents,
+          node,
+          web3,
+        }}
+      >
+        <Fragment>
+          <TxNotification />
+          <Route
+            path="/"
+            exact
+            render={() => <Redirect to={`/${bridgeAddr}`} />}
+          />
+          <Route path="/wallet" component={Wallet} />
+          <Route path="/explorer" component={Explorer} />
+          <Route path="/faucet" component={Faucet} />
+          <Route
+            path="/:bridgeAddr"
+            render={props => {
+              const section = props.match.params.bridgeAddr;
+              if (ADDR_REGEX.test(section)) {
+                return <App {...props} />;
+              }
+              if (
+                section !== 'explorer' &&
+                section !== 'faucet' &&
+                section !== 'wallet'
+              ) {
+                return (
+                  <Redirect to={`/${bridgeAddr}${props.location.pathname}`} />
+                );
+              }
 
-            return null;
-          }}
-        />
-      </Fragment>
-    </Provider>
-  </BrowserRouter>,
-  document.getElementById('app')
-);
+              return null;
+            }}
+          />
+        </Fragment>
+      </Provider>
+    </BrowserRouter>,
+    document.getElementById('app')
+  );
+});
