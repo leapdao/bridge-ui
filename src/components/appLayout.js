@@ -8,7 +8,6 @@
 import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
-import { Route, withRouter } from 'react-router';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
 import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
@@ -18,17 +17,39 @@ import TokenValue from './tokenValue';
 
 import '../style.css';
 
-const rootRoutes = ['explorer', 'faucet', 'wallet'];
+function getBridgeSuffix(bridge, currentAddr) {
+  if (
+    currentAddr &&
+    bridge.defaultAddress.toLowerCase() !== currentAddr.toLowerCase()
+  ) {
+    return currentAddr;
+  }
+
+  return '';
+}
 
 @inject(stores => ({
   psc: stores.tokens.list && stores.tokens.list[0],
   account: stores.account,
   web3: stores.web3,
+  bridge: stores.bridge,
 }))
 @observer
 class AppLayout extends React.Component {
+  constructor(props) {
+    super(props);
+    props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
+  }
+
+  componentDidUpdate(prevProps) {
+    if (prevProps.bridgeAddr !== this.props.bridgeAddr) {
+      this.props.bridge.address =
+        this.props.bridgeAddr || this.props.bridge.defaultAddress;
+    }
+  }
+
   render() {
-    const { psc, account, match, web3 } = this.props;
+    const { psc, account, web3, section, bridge, bridgeAddr } = this.props;
 
     if (!account.ready) {
       return (
@@ -39,43 +60,31 @@ class AppLayout extends React.Component {
     }
 
     const menu = horizontal => (
-      <Route
-        path={`${match.path}/:section?`}
-        render={({
-          match: {
-            params: { section = 'slots' },
-            path,
-          },
-        }) => {
-          const rootRoute = rootRoutes.find(r => path.startsWith(`/${r}`));
-          // const isExplorer = path.startsWith('/explorer');
-          const base = rootRoute ? '' : (match.url || '').replace(/\/$/, '');
-          section = rootRoute || section; // eslint-disable-line
-          return (
-            <Menu
-              selectedKeys={[section || 'slots']}
-              mode={horizontal ? 'horizontal' : 'vertical'}
-              style={{ lineHeight: '64px', width: '100%' }}
-            >
-              <Menu.Item key="slots">
-                <Link to={`${base}/`}>Slots auction</Link>
-              </Menu.Item>
-              <Menu.Item key="registerToken">
-                <Link to={`${base}/registerToken`}>Register token</Link>
-              </Menu.Item>
-              <Menu.Item key="wallet">
-                <Link to="/wallet">Wallet</Link>
-              </Menu.Item>
-              <Menu.Item key="faucet">
-                <Link to="/faucet">Get tokens</Link>
-              </Menu.Item>
-              <Menu.Item key="explorer">
-                <Link to="/explorer">Explorer</Link>
-              </Menu.Item>
-            </Menu>
-          );
-        }}
-      />
+      <Menu
+        selectedKeys={[section]}
+        mode={horizontal ? 'horizontal' : 'vertical'}
+        style={{ lineHeight: '64px', width: '100%' }}
+      >
+        <Menu.Item key="slots">
+          <Link to={`/${getBridgeSuffix(bridge, bridgeAddr)}`}>
+            Slots auction
+          </Link>
+        </Menu.Item>
+        <Menu.Item key="registerToken">
+          <Link to={`/registerToken/${getBridgeSuffix(bridge, bridgeAddr)}`}>
+            Register token
+          </Link>
+        </Menu.Item>
+        <Menu.Item key="wallet">
+          <Link to="/wallet">Wallet</Link>
+        </Menu.Item>
+        <Menu.Item key="faucet">
+          <Link to="/faucet">Get tokens</Link>
+        </Menu.Item>
+        <Menu.Item key="explorer">
+          <Link to="/explorer">Explorer</Link>
+        </Menu.Item>
+      </Menu>
     );
 
     return (
@@ -164,8 +173,10 @@ AppLayout.propTypes = {
   psc: PropTypes.object,
   web3: PropTypes.object,
   account: PropTypes.object,
-  match: PropTypes.object.isRequired,
   children: PropTypes.any,
+  section: PropTypes.string,
+  bridgeAddr: PropTypes.string,
+  bridge: PropTypes.object,
 };
 
-export default withRouter(AppLayout);
+export default AppLayout;

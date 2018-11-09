@@ -54,7 +54,7 @@ export default class Wallet extends React.Component {
     }
 
     return (
-      <AppLayout>
+      <AppLayout section="wallet">
         <Web3SubmitWarning />
 
         <Deposit

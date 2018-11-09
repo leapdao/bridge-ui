@@ -15,6 +15,7 @@ import { Form, Input, Divider } from 'antd';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
 import TokenValue from '../components/tokenValue';
+import AppLayout from '../components/appLayout';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -220,12 +221,12 @@ export default class Slots extends React.Component {
 
   render() {
     const { signerAddr, tenderPubKey } = this;
-    const { bridge } = this.props;
+    const { bridge, match } = this.props;
 
     const slotsTable = this.renderSlots();
 
     return (
-      <Fragment>
+      <AppLayout section="slots" bridgeAddr={match.params.bridgeAddr}>
         <h1>Slots auction</h1>
         <Form layout="inline">
           <Form.Item>
@@ -280,7 +281,7 @@ export default class Slots extends React.Component {
         </div>
 
         <Web3SubmitWarning />
-      </Fragment>
+      </AppLayout>
     );
   }
 }
@@ -290,4 +291,5 @@ Slots.propTypes = {
   network: PropTypes.object,
   psc: PropTypes.object,
   bridge: PropTypes.object,
+  match: PropTypes.object,
 };

@@ -14,6 +14,7 @@ import { List, Form, Input, Button, Icon } from 'antd';
 import { isValidAddress } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
+import AppLayout from '../components/appLayout';
 
 const Item = observer(({ item }) => (
   <List.Item key={item.address}>
@@ -64,10 +65,10 @@ export default class RegisterToken extends React.Component {
   }
 
   render() {
-    const { network, tokens } = this.props;
+    const { network, tokens, match } = this.props;
 
     return (
-      <Fragment>
+      <AppLayout section="registerToken" bridgeAddr={match.params.bridgeAddr}>
         <h1>Register a new ERC20/ERC721 token</h1>
 
         <Web3SubmitWarning />
@@ -103,7 +104,7 @@ export default class RegisterToken extends React.Component {
           dataSource={tokens.ready ? tokens.list : undefined}
           renderItem={item => <Item item={item} />}
         />
-      </Fragment>
+      </AppLayout>
     );
   }
 }
@@ -112,4 +113,5 @@ RegisterToken.propTypes = {
   tokens: PropTypes.object,
   network: PropTypes.object,
   bridge: PropTypes.object,
+  match: PropTypes.object,
 };

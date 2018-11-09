@@ -40,7 +40,7 @@ export default class Explorer extends React.Component {
     const { explorer, bridge, network, psc, match } = this.props;
 
     return (
-      <AppLayout>
+      <AppLayout section="explorer">
         <h1>Block Explorer</h1>
         <Form layout="inline">
           <Form.Item>

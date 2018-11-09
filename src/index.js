@@ -7,7 +7,7 @@
 
 import React, { Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import { Route, Redirect } from 'react-router';
+import { Route } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'mobx-react';
 
@@ -25,12 +25,11 @@ import Web3Store from './stores/web3.ts';
 import Transactions from './components/txNotification/transactions.ts';
 import TxNotification from './components/txNotification/index.tsx';
 
-import App from './components/app';
 import Explorer from './routes/explorer';
 import Faucet from './routes/faucet';
 import Wallet from './routes/wallet';
-
-const ADDR_REGEX = /0x[0-9a-fA-f]{40}/;
+import Slots from './routes/slots';
+import RegisterToken from './routes/registerToken';
 
 const web3 = new Web3Store();
 const transactions = new Transactions();
@@ -48,7 +47,6 @@ const unspents = new Unspents(bridge, account, node, web3);
 
 web3.plasma.getConfig().then(({ bridgeAddr }) => {
   bridge.defaultAddress = bridgeAddr;
-  bridge.address = bridgeAddr;
   ReactDOM.render(
     <BrowserRouter>
       <Provider
@@ -66,34 +64,21 @@ web3.plasma.getConfig().then(({ bridgeAddr }) => {
       >
         <Fragment>
           <TxNotification />
+          <Route path="/" exact component={Slots} />
           <Route
-            path="/"
+            path="/:bridgeAddr(0x[0-9a-fA-f]{40})"
             exact
-            render={() => <Redirect to={`/${bridgeAddr}`} />}
+            component={Slots}
+          />
+          <Route path="/registerToken" exact component={RegisterToken} />
+          <Route
+            path="/registerToken/:bridgeAddr(0x[0-9a-fA-f]{40})"
+            exact
+            component={RegisterToken}
           />
           <Route path="/wallet" component={Wallet} />
           <Route path="/explorer" component={Explorer} />
           <Route path="/faucet" component={Faucet} />
-          <Route
-            path="/:bridgeAddr"
-            render={props => {
-              const section = props.match.params.bridgeAddr;
-              if (ADDR_REGEX.test(section)) {
-                return <App {...props} />;
-              }
-              if (
-                section !== 'explorer' &&
-                section !== 'faucet' &&
-                section !== 'wallet'
-              ) {
-                return (
-                  <Redirect to={`/${bridgeAddr}${props.location.pathname}`} />
-                );
-              }
-
-              return null;
-            }}
-          />
         </Fragment>
       </Provider>
     </BrowserRouter>,

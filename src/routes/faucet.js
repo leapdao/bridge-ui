@@ -71,7 +71,7 @@ export default class Faucet extends React.Component {
     const { account } = this.props;
 
     return (
-      <AppLayout>
+      <AppLayout section="faucet">
         <h1>Get tokens</h1>
         <Form onSubmit={this.handleSubmit} layout="inline">
           {this.success && <Alert type="success" message={this.success} />}
