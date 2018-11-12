@@ -59,3 +59,7 @@ h2:first-child {
   margin-bottom: 10px;
   margin-top: 10px;
 }
+
+.monitor-node {
+  margin-right: 10px;
+}

@@ -30,6 +30,7 @@ import Faucet from './routes/faucet';
 import Wallet from './routes/wallet';
 import Slots from './routes/slots';
 import RegisterToken from './routes/registerToken';
+import Status from './routes/status';
 
 const web3 = new Web3Store();
 const transactions = new Transactions();
@@ -79,6 +80,7 @@ web3.plasma.getConfig().then(({ bridgeAddr }) => {
           <Route path="/wallet" component={Wallet} />
           <Route path="/explorer" component={Explorer} />
           <Route path="/faucet" component={Faucet} />
+          <Route path="/status" component={Status} />
         </Fragment>
       </Provider>
     </BrowserRouter>,
