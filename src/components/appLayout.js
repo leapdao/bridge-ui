@@ -84,6 +84,9 @@ class AppLayout extends React.Component {
         <Menu.Item key="explorer">
           <Link to="/explorer">Explorer</Link>
         </Menu.Item>
+        <Menu.Item key="status">
+          <Link to="/status">Status</Link>
+        </Menu.Item>
       </Menu>
     );
 
