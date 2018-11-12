@@ -5,11 +5,9 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 from 'web3';
 import { computed, observable } from 'mobx';
-import Contract from 'web3/eth/contract';
+import { Contract, TransactionReceipt } from 'web3/types';
 import PromiEvent from 'web3/promiEvent';
-import { TransactionReceipt } from 'web3/types';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import ContractEventsSubscription from '../utils/ContractEventsSubscription';

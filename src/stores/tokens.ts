@@ -67,6 +67,25 @@ export default class Tokens {
     return !this.list.some(token => !token.ready);
   }
 
+  public tokenIndexForAddress(address: string) {
+    if (!this.list) {
+      return -1;
+    }
+
+    return this.list.findIndex(
+      t => t.address.toLowerCase() === address.toLowerCase()
+    );
+  }
+
+  public tokenForAddress(address: string) {
+    const index = this.tokenIndexForAddress(address);
+    if (index < 0 || index >= this.list.length) {
+      return undefined;
+    }
+
+    return this.list[index];
+  }
+
   public tokenIndexForColor(color: number) {
     if (!this.list) {
       return -1;
@@ -78,11 +97,12 @@ export default class Tokens {
   }
 
   public tokenForColor(color: number) {
-    if (!this.list) {
+    const index = this.tokenIndexForColor(color);
+    if (index < 0 || index >= this.list.length) {
       return undefined;
     }
 
-    return this.list[this.tokenIndexForColor(color)];
+    return this.list[index];
   }
 
   private loadTokenColorRange(from: number, to: number): Promise<Token>[] {

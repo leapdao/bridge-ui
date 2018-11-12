@@ -55,7 +55,7 @@ const TransactionList = ({ txs }) => {
       title: 'Value',
       dataIndex: 'value',
       key: 'value',
-      render: props => props.color && <TokenValue {...props} />,
+      render: props => props.color !== undefined && <TokenValue {...props} />,
     },
     {
       title: 'Type',

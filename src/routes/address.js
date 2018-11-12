@@ -1,18 +1,27 @@
-import React from 'react';
+import React, { Fragment } from 'react';
 import PropTypes from 'prop-types';
-import { observable } from 'mobx';
+import { observable, reaction } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Card, Alert, Spin } from 'antd';
 
 import TransctionList from '../components/transactionList';
 import TokenValue from '../components/tokenValue';
 
-@inject('explorer')
+@inject('explorer', 'tokens')
 @observer
 class Address extends React.Component {
   constructor(props) {
     super(props);
-    this.fetch(props.match.params.addr);
+    if (props.tokens.ready) {
+      this.fetch(props.match.params.addr);
+    } else {
+      reaction(
+        () => props.tokens.ready,
+        () => {
+          this.fetch(props.match.params.addr);
+        }
+      );
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -33,25 +42,25 @@ class Address extends React.Component {
   }
 
   @observable
-  addr = null;
+  account = null;
   @observable
   fetching = false;
   @observable
   success = false;
 
-  fetch(addr) {
+  fetch(address) {
     const { explorer } = this.props;
     this.fetching = true;
 
-    explorer.getAddress(addr).then(tx => {
+    explorer.getAddress(address).then(account => {
       this.fetching = false;
-      this.success = !!tx;
-      this.addr = tx;
+      this.success = !!account;
+      this.account = account;
     });
   }
 
   render() {
-    if (!this.success && !this.fetching) {
+    if (!this.success && !this.fetching && this.props.tokens.ready) {
       return (
         <Alert
           type="error"
@@ -60,16 +69,33 @@ class Address extends React.Component {
       );
     }
 
-    if (!this.addr || this.fetching) {
+    if (!this.account || this.fetching || !this.props.tokens.ready) {
       return <Spin />;
     }
 
     return (
-      <Card title={`Address ${this.addr.address}`}>
-        <h3> Balance: </h3>
-        <TokenValue value={this.addr.balance} color={0} />
-        <h3> Transactions: </h3>
-        <TransctionList txs={this.addr.txs} />
+      <Card title={`Address ${this.account.address}`}>
+        {!this.account.token && (
+          <Fragment>
+            <h3>Balance</h3>
+            <TokenValue value={this.account.balance} color={0} />
+          </Fragment>
+        )}
+        {this.account.token && (
+          <Fragment>
+            <h3>Token</h3>
+            <dl className="info">
+              <dt>Name</dt>
+              <dd>{this.account.token.name}</dd>
+              <dt>Symbol</dt>
+              <dd>{this.account.token.symbol}</dd>
+              <dt>Decimals</dt>
+              <dd>{this.account.token.decimals}</dd>
+            </dl>
+          </Fragment>
+        )}
+        <h3>Transactions</h3>
+        <TransctionList txs={this.account.txs} />
       </Card>
     );
   }
@@ -78,6 +104,7 @@ class Address extends React.Component {
 Address.propTypes = {
   match: PropTypes.object,
   explorer: PropTypes.object,
+  tokens: PropTypes.object,
 };
 
 export default Address;
