@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
+import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { List, Form, Input, Button, Icon } from 'antd';
 
@@ -31,7 +32,9 @@ const Item = observer(({ item }) => (
           )}
         </Fragment>
       }
-      description={item.address}
+      description={
+        <Link to={`/explorer/address/${item.address}`}>{item.address}</Link>
+      }
     />
   </List.Item>
 ));

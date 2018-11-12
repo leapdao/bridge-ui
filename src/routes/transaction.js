@@ -78,53 +78,67 @@ class Transaction extends React.Component {
 
     return (
       <Card title="Transaction" className="explorer-section">
-        <h3>Hash:</h3>
+        <h3>Hash</h3>
         {this.tx.hash}
-        <h3>Block:</h3>
+        <h3>Block</h3>
         <Link to={`/explorer/block/${this.tx.blockHash}`}>
           {this.tx.blockHash}
         </Link>
-        <h3>ID in block:</h3>
+        <h3>ID in block</h3>
         {this.tx.transactionIndex}
         {this.tx.from && (
           <Fragment>
-            <h3>From:</h3>
+            <h3>From</h3>
             <Link to={`/explorer/address/${this.tx.from}`}>{this.tx.from}</Link>
           </Fragment>
         )}
         {this.tx.to && (
           <Fragment>
-            <h3>To:</h3>
+            <h3>To</h3>
             <Link to={`/explorer/address/${this.tx.to}`}>{this.tx.to}</Link>
           </Fragment>
         )}
-        <h3>Value:</h3>
+        <h3>Value</h3>
         <TokenValue value={this.tx.value} color={this.tx.color} />
-        <h3>Type:</h3>
+        <h3>Type</h3>
         {TYPES[this.tx.type]}
-        <h3>Inputs:</h3>
-        <List
-          itemLayout="vertical"
-          dataSource={this.tx.inputs}
-          renderItem={input => <InputItem input={input} />}
-        />
-        <h3>Outputs:</h3>
-        <List
-          itemLayout="vertical"
-          dataSource={this.tx.outputs}
-          renderItem={output => (
-            <List.Item>
-              Address:{' '}
-              <Link to={`/explorer/address/${output.address}`}>
-                {output.address}
-              </Link>
-              <br />
-              Color: {output.color}
-              <br />
-              Value: <TokenValue {...output} />
-            </List.Item>
-          )}
-        />
+        {this.tx.inputs && this.tx.inputs.length > 0 && (
+          <Fragment>
+            <h3>Inputs</h3>
+            <List
+              itemLayout="vertical"
+              dataSource={this.tx.inputs}
+              renderItem={input => <InputItem input={input} />}
+            />
+          </Fragment>
+        )}
+        {this.tx.outputs && this.tx.outputs.length > 0 && (
+          <Fragment>
+            <h3>Outputs</h3>
+            <List
+              itemLayout="vertical"
+              dataSource={this.tx.outputs}
+              renderItem={output => (
+                <List.Item>
+                  Address:{' '}
+                  <Link to={`/explorer/address/${output.address}`}>
+                    {output.address}
+                  </Link>
+                  <br />
+                  Color: {output.color}
+                  <br />
+                  Value: <TokenValue {...output} />
+                </List.Item>
+              )}
+            />
+          </Fragment>
+        )}
+        {this.tx.options && (
+          <Fragment>
+            <h3>Options:</h3>
+            <pre>{JSON.stringify(this.tx.options, null, 2)}</pre>
+          </Fragment>
+        )}
       </Card>
     );
   }

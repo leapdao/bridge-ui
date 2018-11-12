@@ -8,6 +8,7 @@
 import React, { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Route } from 'react-router';
+import { Link } from 'react-router-dom';
 import { observable } from 'mobx';
 import PropTypes from 'prop-types';
 
@@ -69,17 +70,16 @@ export default class Explorer extends React.Component {
               Go!
             </Button>
           </Form.Item>
-          {!explorer.success &&
-            !explorer.searching && (
-              <Alert
-                type="error"
-                message="No results found for your search."
-                closable
-                onClose={() => {
-                  explorer.success = true;
-                }}
-              />
-            )}
+          {!explorer.success && !explorer.searching && (
+            <Alert
+              type="error"
+              message="No results found for your search."
+              closable
+              onClose={() => {
+                explorer.success = true;
+              }}
+            />
+          )}
         </Form>
 
         <Divider />
@@ -98,7 +98,11 @@ export default class Explorer extends React.Component {
           {psc && (
             <Fragment>
               <dt>Token contract address</dt>
-              <dd>{psc.address}</dd>
+              <dd>
+                <Link to={`/explorer/address/${psc.address}`}>
+                  {psc.address}
+                </Link>
+              </dd>
             </Fragment>
           )}
         </dl>

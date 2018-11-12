@@ -5,7 +5,6 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import Web3 from 'web3';
 import {
   observable,
   action,
@@ -18,8 +17,7 @@ import { helpers, Tx, Input, Output } from 'leap-core';
 import * as Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
 import BN = require('bn.js');
-import Contract from 'web3/eth/contract';
-import { EventLog } from 'web3/types';
+import { EventLog, Contract } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
 import { isNFT } from '../utils';
 import { txSuccess } from '../utils/txSuccess';

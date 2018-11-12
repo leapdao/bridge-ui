@@ -12,6 +12,7 @@ import { range } from '../utils/range';
 import autobind from 'autobind-decorator';
 import NodeStore from './node';
 import Web3Store from './web3';
+import Tokens from './tokens';
 
 const LOCAL_STORAGE_KEY = 'EXPLORER_CACHE';
 
@@ -23,19 +24,24 @@ export enum Types {
 
 type PlasmaTransaction = Transaction & {
   raw: string;
+  color: number;
 } & TxJSON;
 
 type PlasmaBlock = Block & {
   transactions: PlasmaTransaction[];
 } & TxJSON;
 
-const myTransaction = (addr: string) => {
-  addr = addr.toLowerCase();
+const accountTransaction = (address: string) => {
+  address = address.toLowerCase();
   return (tx: PlasmaTransaction) => {
     const from = (tx.from || '').toLowerCase();
     const to = (tx.to || '').toLowerCase();
-    return from === addr || to === addr;
+    return from === address || to === address;
   };
+};
+
+const tokenTransaction = (color: number) => {
+  return (tx: PlasmaTransaction) => tx.color === color;
 };
 
 export default class Explorer {
@@ -59,7 +65,11 @@ export default class Explorer {
   @observable
   public current;
 
-  constructor(private node: NodeStore, private web3: Web3Store) {
+  constructor(
+    private node: NodeStore,
+    private web3: Web3Store,
+    private tokens: Tokens
+  ) {
     try {
       const lsCache = localStorage.getItem(LOCAL_STORAGE_KEY);
       if (lsCache) {
@@ -114,7 +124,7 @@ export default class Explorer {
       if (obj.value !== undefined) {
         return Types.TRANSACTION;
       }
-      if (obj.balance) {
+      if (obj.txs) {
         return Types.ADDRESS;
       }
     }
@@ -128,17 +138,29 @@ export default class Explorer {
 
   public getAddress(address: string) {
     address = address.toLowerCase();
+    console.log(
+      this.tokens.tokenForAddress(address),
+      this.tokens.tokenIndexForAddress(address)
+    );
+    const token = this.tokens.tokenForAddress(address);
     return Promise.all([
       this.web3.plasma.eth.getBalance(address),
       this.getBlockchain(),
     ]).then(([balance, blocks]) => {
       const txs = blocks.reduce(
         (accum, block) =>
-          accum.concat(block.transactions.filter(myTransaction(address))),
+          accum.concat(
+            block.transactions.filter(
+              token
+                ? tokenTransaction(token.color)
+                : accountTransaction(address)
+            )
+          ),
         [] as Transaction[]
       );
       return {
         address,
+        token,
         balance,
         txs,
       };

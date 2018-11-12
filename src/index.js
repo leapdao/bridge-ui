@@ -37,8 +37,8 @@ const transactions = new Transactions();
 const account = new Account(web3);
 const node = new NodeStore(web3);
 const bridge = new Bridge(account, transactions, web3);
-const explorer = new ExplorerStore(node, web3);
 const tokens = new Tokens(account, bridge, transactions, node, web3);
+const explorer = new ExplorerStore(node, web3, tokens);
 const network = new Network(
   account,
   web3,
