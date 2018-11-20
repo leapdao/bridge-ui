@@ -1,25 +1,9 @@
 {
-  "presets": [
-    "react",
-    [
-      "env",
-      {
-        "targets": {
-          "browsers": ["last 2 versions", "safari >= 7"]
-        }
-      }
-    ]
-  ],
   "plugins": [
-    ["import", { "libraryName": "antd", "style": true }],
-    "transform-decorators-legacy",
-    ["transform-class-properties", { "loose": true }],
-    [
-      "transform-runtime",
-      {
-        "polyfill": false,
-        "regenerator": true
-      }
-    ]
-  ]
+    ["@babel/plugin-proposal-decorators", { "legacy": true }],
+    ["@babel/plugin-proposal-class-properties", { "loose": true }],
+    "@babel/syntax-object-rest-spread",
+    ["babel-plugin-import", { "libraryName": "antd", "style": true }]
+  ],
+  "presets": ["@babel/env", "@babel/typescript", "@babel/react"]
 }

@@ -6,6 +6,7 @@ const autoprefixer = require('autoprefixer');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
+const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const threadLoader = {
   loader: 'thread-loader',
@@ -54,17 +55,7 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        use: [
-          'cache-loader',
-          threadLoader,
-          'babel-loader',
-          {
-            loader: 'ts-loader',
-            options: {
-              happyPackMode: true,
-            },
-          },
-        ],
+        use: ['cache-loader', threadLoader, 'babel-loader'],
         include: path.resolve(__dirname, 'src'),
       },
       {
@@ -157,5 +148,6 @@ module.exports = {
     new HtmlPlugin({
       template: 'src/index.html',
     }),
+    new ForkTSCheckerWebpackPlugin(),
   ],
 };

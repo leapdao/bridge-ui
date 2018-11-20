@@ -16,7 +16,7 @@ import {
 import { helpers, Tx, Input, Output } from 'leap-core';
 import * as Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
-import BN = require('bn.js');
+import BN from 'bn.js';
 import { EventLog, Contract } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
 import { isNFT } from '../utils';
@@ -288,13 +288,13 @@ export default class Token extends ContractStore {
   }
 
   /*
-  * Checks transfer allowance for a given spender. If allowance is not enough to transfer a given value,
-  * initiates an approval transaction for 2^256 units. Approving maximum possible amount to make `approve` tx
-  * one time only — subsequent calls won't requre approve anymore.
-  * @param spender Account to approve transfer for
-  * @param value Minimal amount of allowance a spender should have
-  * @returns Promise resolved when allowance is enough for the transfer
-  */
+   * Checks transfer allowance for a given spender. If allowance is not enough to transfer a given value,
+   * initiates an approval transaction for 2^256 units. Approving maximum possible amount to make `approve` tx
+   * one time only — subsequent calls won't requre approve anymore.
+   * @param spender Account to approve transfer for
+   * @param value Minimal amount of allowance a spender should have
+   * @returns Promise resolved when allowance is enough for the transfer
+   */
   private maybeApprove(spender: string, value: number) {
     return this.hasEnoughAllowance(spender, value).then(hasEnoughAllowance => {
       if (hasEnoughAllowance) return;

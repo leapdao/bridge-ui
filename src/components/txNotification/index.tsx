@@ -8,13 +8,7 @@
 import * as React from 'react';
 import * as PropTypes from 'prop-types';
 import { observer, inject } from 'mobx-react';
-
-import 'antd/lib/spin/style';
-import * as Spin from 'antd/lib/spin';
-import 'antd/lib/icon/style';
-import * as Icon from 'antd/lib/icon';
-import 'antd/lib/notification/style';
-import * as notification from 'antd/lib/notification';
+import { Spin, Icon, notification } from 'antd';
 
 import { TxStatus } from './types';
 

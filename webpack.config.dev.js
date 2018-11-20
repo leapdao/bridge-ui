@@ -4,6 +4,7 @@ const webpack = require('webpack');
 const path = require('path');
 const autoprefixer = require('autoprefixer');
 const HtmlPlugin = require('html-webpack-plugin');
+const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
@@ -85,6 +86,7 @@ module.exports = {
     ],
   },
   plugins: [
+    new ForkTSCheckerWebpackPlugin(),
     new webpack.EnvironmentPlugin(['NETWORK_ID', 'PLASMA_NODE']),
     new HtmlPlugin({
       template: 'src/index.html',
