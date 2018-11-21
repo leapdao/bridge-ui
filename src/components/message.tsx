@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import { Layout, Card } from 'antd';
 
 const Message = ({ children, hideBg = false }) => {
@@ -30,11 +29,6 @@ const Message = ({ children, hideBg = false }) => {
       </Layout.Content>
     </Layout>
   );
-};
-
-Message.propTypes = {
-  children: PropTypes.any,
-  hideBg: PropTypes.bool,
 };
 
 export default Message;

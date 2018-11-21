@@ -6,7 +6,6 @@
  */
 
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 import { observer, inject } from 'mobx-react';
 import { Spin, Icon, notification } from 'antd';
 
@@ -42,7 +41,7 @@ const statusDetails = {
 };
 
 const TxNotification: React.SFC<{
-  transactions: any;
+  transactions?: any;
 }> = ({ transactions }) => {
   transactions.map.observe(txChange => {
     if (txChange.type === 'delete') {
@@ -70,10 +69,6 @@ const TxNotification: React.SFC<{
     antd.notification.open(msg);
   });
   return null;
-};
-
-TxNotification.propTypes = {
-  transactions: PropTypes.object,
 };
 
 export default inject('transactions')(observer(TxNotification));

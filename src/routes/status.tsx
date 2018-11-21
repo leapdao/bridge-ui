@@ -5,14 +5,11 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
-import { observer, inject } from 'mobx-react';
+import * as React from 'react';
+import { observer } from 'mobx-react';
 import AppLayout from '../components/appLayout';
 import Monitor from '../components/monitor';
 
-@inject(stores => ({
-  account: stores.account,
-}))
 @observer
 export default class Status extends React.Component {
   render() {
@@ -35,5 +32,3 @@ export default class Status extends React.Component {
     );
   }
 }
-
-Status.propTypes = {};

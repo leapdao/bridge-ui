@@ -5,25 +5,26 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
-import ReactDOM from 'react-dom';
+import * as React from 'react';
+import { Fragment } from 'react';
+import * as ReactDOM from 'react-dom';
 import { Route } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'mobx-react';
 
 import { DEFAULT_NETWORK } from './utils';
 
-import Tokens from './stores/tokens.ts';
-import Bridge from './stores/bridge.ts';
-import Account from './stores/account.ts';
-import Network from './stores/network.ts';
-import ExplorerStore from './stores/explorer.ts';
-import Unspents from './stores/unspents.ts';
-import NodeStore from './stores/node.ts';
-import Web3Store from './stores/web3.ts';
+import Tokens from './stores/tokens';
+import Bridge from './stores/bridge';
+import Account from './stores/account';
+import Network from './stores/network';
+import ExplorerStore from './stores/explorer';
+import Unspents from './stores/unspents';
+import NodeStore from './stores/node';
+import Web3Store from './stores/web3';
 
-import Transactions from './components/txNotification/transactions.ts';
-import TxNotification from './components/txNotification/index.tsx';
+import Transactions from './components/txNotification/transactions';
+import TxNotification from './components/txNotification';
 
 import Explorer from './routes/explorer';
 import Faucet from './routes/faucet';

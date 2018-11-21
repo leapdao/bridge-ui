@@ -1,26 +1,34 @@
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { Output } from 'leap-core';
-import PropTypes from 'prop-types';
 import { computed } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Form, Select, Input } from 'antd';
 import autobind from 'autobind-decorator';
+import Tokens from '../stores/tokens';
+
+interface AmountInputProps {
+  color: number;
+  tokens?: Tokens;
+  plasma?: boolean;
+  onChange: (newValue: string | number) => void;
+  onBlur?: (e: React.FocusEvent) => void;
+  onColorChange?: (color: number) => void;
+  value: string | number;
+  width?: number;
+}
+
+type HTMLProps = React.HtmlHTMLAttributes<HTMLInputElement>;
+type HTMLPropsWithoutColor = Pick<HTMLProps, Exclude<keyof HTMLProps, 'color'>>;
 
 @inject('tokens')
 @observer
-export default class AmountInput extends React.Component {
-  static propTypes = {
-    color: PropTypes.number.isRequired,
-    tokens: PropTypes.object,
-    plasma: PropTypes.bool,
-    onColorChange: PropTypes.func,
-    onChange: PropTypes.func,
-    onBlur: PropTypes.func,
-    width: PropTypes.number,
-    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  };
-
-  componentWillReceiveProps({ color: nextColor, onChange }) {
+export default class AmountInput extends React.Component<
+  AmountInputProps & HTMLPropsWithoutColor,
+  any
+> {
+  componentWillReceiveProps(nextProps) {
+    const { color: nextColor, onChange } = nextProps;
     const { color } = this.props;
     if (color !== nextColor) {
       if (
@@ -84,7 +92,7 @@ export default class AmountInput extends React.Component {
         onChange={this.handleColorChange}
       >
         {tokens.list.map(token => (
-          <Select.Option key={token} value={token.color}>
+          <Select.Option key={String(token.color)} value={token.color}>
             {token.symbol}
           </Select.Option>
         ))}
@@ -108,7 +116,7 @@ export default class AmountInput extends React.Component {
                 notFoundContent="No tokens"
                 allowClear
               >
-                {(balance || []).map(id => (
+                {((balance as string[]) || []).map(id => (
                   <Select.Option key={id} value={id}>
                     {id}
                   </Select.Option>
@@ -123,7 +131,7 @@ export default class AmountInput extends React.Component {
         {!this.token.isNft && (
           <Form.Item>
             <Input
-              {...this.props}
+              {...this.props as any}
               value={value}
               onChange={this.handleChange}
               onBlur={this.handleBlur}

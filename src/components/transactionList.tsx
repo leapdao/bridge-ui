@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import { Table } from 'antd';
 import { Type } from 'leap-core';
 import { Link } from 'react-router-dom';
@@ -65,10 +64,6 @@ const TransactionList = ({ txs }) => {
   ];
 
   return <Table dataSource={transactions} columns={columns} />;
-};
-
-TransactionList.propTypes = {
-  txs: PropTypes.any,
 };
 
 export default TransactionList;

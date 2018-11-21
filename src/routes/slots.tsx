@@ -5,17 +5,22 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
-import ethUtil from 'ethereumjs-util';
+import * as ethUtil from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
 import TokenValue from '../components/tokenValue';
 import AppLayout from '../components/appLayout';
+import Bridge from '../stores/bridge';
+import Account from '../stores/account';
+import Network from '../stores/network';
+import { match } from 'react-router';
+import Tokens from '../stores/tokens';
 
 const addrCmp = (a1, a2) =>
   ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
@@ -25,66 +30,71 @@ const cellStyle = {
   verticalAlign: 'top',
   padding: 10,
   borderRight: '1px solid #ccc',
-};
+} as any;
 
 const formCellStyle = Object.assign(
   {
     borderTop: '1px solid #ccc',
   },
   cellStyle
-);
+) as any;
 
 const thCellStyle = Object.assign(
   {
     whiteSpace: 'nowrap',
   },
   cellStyle
-);
+) as any;
 
-@inject(stores => ({
-  psc: stores.tokens.list && stores.tokens.list[0],
-  bridge: stores.bridge,
-  account: stores.account,
-  network: stores.network,
-}))
+interface SlotsProps {
+  bridge: Bridge;
+  account: Account;
+  network: Network;
+  tokens: Tokens;
+  match: match<{ bridgeAddr: string }>;
+}
+
+@inject('tokens', 'bridge', 'account', 'network')
 @observer
-export default class Slots extends React.Component {
-  constructor(props) {
-    super(props);
+export default class Slots extends React.Component<SlotsProps, any> {
+  @observable
+  private stakes = {};
 
-    this.handleSignerChange = this.handleChange.bind(this, 'signerAddr');
-    this.handleTenderPubKeyChange = this.handleChange.bind(
-      this,
-      'tenderPubKey'
-    );
+  @observable
+  private signerAddr = window.localStorage.getItem('signerAddr');
+
+  @observable
+  private tenderPubKey = window.localStorage.getItem('tenderPubKey');
+
+  private get psc() {
+    return this.props.tokens.list && this.props.tokens.list[0];
   }
 
-  setStake(i, stake) {
+  private setStake(i, stake) {
     this.stakes[i] = isNaN(Number(stake)) ? undefined : stake;
   }
 
-  @observable
-  stakes = {};
-
-  @observable
-  signerAddr = window.localStorage.getItem('signerAddr');
-
-  @observable
-  tenderPubKey = window.localStorage.getItem('tenderPubKey');
-
-  handleChange(key, e) {
+  private handleChange(key, e) {
     const value = e.target.value.trim();
     window.localStorage.setItem(key, value);
     this[key] = value;
   }
 
-  handleBet(slotId) {
-    const { psc, bridge } = this.props;
+  private handleSignerChange(e: React.ChangeEvent) {
+    this.handleChange('signerAddr', e);
+  }
+
+  private handleTenderPubKeyChange(e: React.ChangeEvent) {
+    this.handleChange('tenderPubKey', e);
+  }
+
+  private handleBet(slotId) {
+    const { bridge } = this.props;
     const { signerAddr, tenderPubKey } = this;
-    const stake = psc.toCents(this.stakes[slotId]);
+    const stake = this.psc.toCents(this.stakes[slotId]);
 
     bridge
-      .bet(psc, slotId, stake, signerAddr, tenderPubKey)
+      .bet(this.psc, slotId, stake, signerAddr, tenderPubKey)
       .then(({ futureReceipt }) => {
         futureReceipt.once('transactionHash', betTxHash => {
           console.log('bet', betTxHash); // eslint-disable-line
@@ -93,7 +103,12 @@ export default class Slots extends React.Component {
       });
   }
 
-  renderRow(title, key, newKey, renderer) {
+  renderRow(
+    title: string,
+    key: string,
+    newKey?: string,
+    renderer?: (value: any) => any
+  ) {
     const { bridge } = this.props;
     return (
       <tr key={key}>
@@ -128,7 +143,7 @@ export default class Slots extends React.Component {
 
   renderSlots() {
     const { signerAddr, stakes, tenderPubKey } = this;
-    const { account, network, psc, bridge } = this.props;
+    const { account, network, bridge } = this.props;
 
     return (
       <table style={{ borderCollapse: 'collapse' }}>
@@ -183,37 +198,35 @@ export default class Slots extends React.Component {
             <TokenValue value={val} color={0} />
           ))}
           {this.renderRow('Act. epoch', 'activationEpoch')}
-          {psc &&
-            psc.ready && (
-              <tr>
-                <th style={formCellStyle} />
-                {bridge.slots.map((slot, i) => {
-                  const minStake = Math.max(slot.stake, slot.newStake) * 1.05;
-                  const minValue = psc.toTokens(minStake);
-                  const ownStake = addrCmp(slot.owner, account.address || '')
-                    ? minValue
-                    : 0;
+          {this.psc && this.psc.ready && (
+            <tr>
+              <th style={formCellStyle} />
+              {bridge.slots.map((slot, i) => {
+                const minStake = Math.max(slot.stake, slot.newStake) * 1.05;
+                const minValue = this.psc.toTokens(minStake);
+                const ownStake = addrCmp(slot.owner, account.address || '')
+                  ? minValue
+                  : 0;
 
-                  return (
-                    <td key={i} style={formCellStyle}>
-                      {network &&
-                        network.canSubmit && (
-                          <StakeForm
-                            value={stakes[i]}
-                            onChange={value => this.setStake(i, value)}
-                            symbol={psc.symbol}
-                            disabled={!signerAddr}
-                            onSubmit={() => this.handleBet(i)}
-                            minValue={minValue}
-                            ownStake={ownStake}
-                            maxValue={psc.decimalsBalance}
-                          />
-                        )}
-                    </td>
-                  );
-                })}
-              </tr>
-            )}
+                return (
+                  <td key={i} style={formCellStyle}>
+                    {network && network.canSubmit && (
+                      <StakeForm
+                        value={stakes[i]}
+                        onChange={value => this.setStake(i, value)}
+                        symbol={this.psc.symbol}
+                        disabled={!signerAddr}
+                        onSubmit={() => this.handleBet(i)}
+                        minValue={minValue}
+                        ownStake={ownStake}
+                        maxValue={this.psc.decimalsBalance}
+                      />
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          )}
         </tbody>
       </table>
     );
@@ -285,11 +298,3 @@ export default class Slots extends React.Component {
     );
   }
 }
-
-Slots.propTypes = {
-  account: PropTypes.object,
-  network: PropTypes.object,
-  psc: PropTypes.object,
-  bridge: PropTypes.object,
-  match: PropTypes.object,
-};

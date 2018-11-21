@@ -1,16 +1,24 @@
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import ethUtil from 'ethereumjs-util';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 import { Input, Button, Form } from 'antd';
 import autobind from 'autobind-decorator';
 import AmountInput from './amountInput';
+import Tokens from '../stores/tokens';
+
+interface TransferFormProps {
+  tokens?: Tokens;
+  color: number;
+  disabled: boolean;
+  onSubmit: (address: string, value: string | number) => Promise<any>;
+}
 
 @inject('tokens')
 @observer
-class TransferForm extends React.Component {
-  get token() {
+class TransferForm extends React.Component<TransferFormProps, any> {
+  public get token() {
     const { tokens, color } = this.props;
     return tokens && tokens.tokenForColor(color);
   }
@@ -23,7 +31,7 @@ class TransferForm extends React.Component {
     if (!this.token.isNft) {
       const maxValue =
         this.token.plasmaBalance &&
-        this.token.toTokens(this.token.plasmaBalance);
+        this.token.toTokens(this.token.plasmaBalance as number);
       if (maxValue && Number(this.value) > maxValue) {
         return `Should <= ${maxValue}`;
       }
@@ -126,13 +134,12 @@ class TransferForm extends React.Component {
           value={this.value}
           placeholder="Amount to transfer"
         />
-        {this.showErrors &&
-          this.valueError && (
-            <Fragment>
-              <br />
-              <span style={{ color: 'red' }}>{this.valueError}</span>
-            </Fragment>
-          )}
+        {this.showErrors && this.valueError && (
+          <Fragment>
+            <br />
+            <span style={{ color: 'red' }}>{this.valueError}</span>
+          </Fragment>
+        )}
         <Form.Item>
           <Input
             value={this.receiver}
@@ -140,13 +147,12 @@ class TransferForm extends React.Component {
             onChange={this.handleReceiverChange}
             placeholder="Receiver address"
           />
-          {this.showErrors &&
-            this.receiverError && (
-              <Fragment>
-                <br />
-                <span style={{ color: 'red' }}>{this.receiverError}</span>
-              </Fragment>
-            )}
+          {this.showErrors && this.receiverError && (
+            <Fragment>
+              <br />
+              <span style={{ color: 'red' }}>{this.receiverError}</span>
+            </Fragment>
+          )}
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" disabled={this.disabled}>
@@ -157,12 +163,5 @@ class TransferForm extends React.Component {
     );
   }
 }
-
-TransferForm.propTypes = {
-  onSubmit: PropTypes.func,
-  disabled: PropTypes.bool,
-  tokens: PropTypes.object,
-  color: PropTypes.number.isRequired,
-};
 
 export default TransferForm;

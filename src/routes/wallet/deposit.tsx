@@ -5,19 +5,30 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { computed, observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 import { Form, Button } from 'antd';
 import autobind from 'autobind-decorator';
 
 import TokenValue from '../../components/tokenValue';
 import AmountInput from '../../components/amountInput';
+import Tokens from '../../stores/tokens';
+import Network from '../../stores/network';
+import Bridge from '../../stores/bridge';
+
+interface DepositProps {
+  tokens?: Tokens;
+  network?: Network;
+  bridge?: Bridge;
+  color: number;
+  onColorChange: (color: number) => void;
+}
 
 @inject('tokens', 'bridge', 'network')
 @observer
-export default class Deposit extends React.Component {
+export default class Deposit extends React.Component<DepositProps, any> {
   @computed
   get selectedToken() {
     const { tokens, color } = this.props;
@@ -25,7 +36,7 @@ export default class Deposit extends React.Component {
   }
 
   @observable
-  value = 0;
+  value: number | string = 0;
 
   @autobind
   handleSubmit(e) {
@@ -33,7 +44,7 @@ export default class Deposit extends React.Component {
     const { bridge } = this.props;
     const value = this.selectedToken.isNft
       ? this.value
-      : this.selectedToken.toCents(this.value);
+      : this.selectedToken.toCents(Number(this.value));
     bridge.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
@@ -129,11 +140,3 @@ export default class Deposit extends React.Component {
     );
   }
 }
-
-Deposit.propTypes = {
-  tokens: PropTypes.object,
-  bridge: PropTypes.object,
-  network: PropTypes.object,
-  onColorChange: PropTypes.func,
-  color: PropTypes.number,
-};

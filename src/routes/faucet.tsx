@@ -5,26 +5,29 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observable, action } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 import { Form, Input, Button, Divider, Alert } from 'antd';
 import autobind from 'autobind-decorator';
 import AppLayout from '../components/appLayout';
 
 import requestApi from '../utils/api';
+import Account from '../stores/account';
 
 const URL = 'https://sarrsmlpsg.execute-api.eu-west-1.amazonaws.com/v0';
 const api = requestApi(URL);
 
 const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
 
-@inject(stores => ({
-  account: stores.account,
-}))
+interface FaucetProps {
+  account: Account;
+}
+
+@inject('account')
 @observer
-export default class Faucet extends React.Component {
+export default class Faucet extends React.Component<FaucetProps, any> {
   @observable
   value = '';
   @observable
@@ -111,7 +114,3 @@ export default class Faucet extends React.Component {
     );
   }
 }
-
-Faucet.propTypes = {
-  account: PropTypes.object,
-};

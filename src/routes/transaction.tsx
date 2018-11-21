@@ -1,15 +1,26 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observable } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Type } from 'leap-core';
 import { Card, List, Alert, Spin } from 'antd';
+import { match } from 'react-router';
 import { Link } from 'react-router-dom';
 
 import TokenValue from '../components/tokenValue';
 import { swapObject } from '../utils';
+import Explorer from '../stores/explorer';
 
 const TYPES = swapObject(Type);
+
+interface MatchParams {
+  hash: string;
+}
+
+interface TransactionRouteProps {
+  explorer: Explorer;
+  match: match<MatchParams>;
+}
 
 const InputItem = observer(({ input }) => {
   return (
@@ -21,7 +32,7 @@ const InputItem = observer(({ input }) => {
 
 @inject('explorer')
 @observer
-class Transaction extends React.Component {
+class Transaction extends React.Component<TransactionRouteProps, any> {
   constructor(props) {
     super(props);
     this.fetch(props.match.params.hash);
@@ -143,10 +154,5 @@ class Transaction extends React.Component {
     );
   }
 }
-
-Transaction.propTypes = {
-  match: PropTypes.object,
-  explorer: PropTypes.object,
-};
 
 export default Transaction;

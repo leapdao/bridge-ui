@@ -5,27 +5,37 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 import { Button, Table } from 'antd';
 import ethUtil from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
 import { shortenHex } from '../../utils';
+import Tokens from '../../stores/tokens';
+import Unspents from '../../stores/unspents';
+import Bridge from '../../stores/bridge';
+
+interface ExitProps {
+  tokens?: Tokens;
+  unspents?: Unspents;
+  bridge?: Bridge;
+  color: number;
+}
 
 @inject('tokens', 'bridge', 'network', 'unspents')
 @observer
-export default class Exit extends React.Component {
+export default class Exit extends React.Component<ExitProps, any> {
   @computed
-  get selectedToken() {
+  private get selectedToken() {
     const { tokens, color } = this.props;
     return tokens.tokenForColor(color);
   }
 
-  render() {
+  public render() {
     const { unspents, bridge } = this.props;
 
     const utxoList =
@@ -108,11 +118,3 @@ export default class Exit extends React.Component {
     );
   }
 }
-
-Exit.propTypes = {
-  color: PropTypes.number,
-  unspents: PropTypes.object,
-  tokens: PropTypes.object,
-  bridge: PropTypes.object,
-  network: PropTypes.object,
-};

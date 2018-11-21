@@ -7,7 +7,7 @@ const HtmlPlugin = require('html-webpack-plugin');
 const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.tsx',
   mode: 'development',
   output: {
     publicPath: '/',
@@ -15,7 +15,7 @@ module.exports = {
     filename: 'index.[hash].js',
   },
   resolve: {
-    extensions: ['.js', '.ts'],
+    extensions: ['.js', '.ts', '.tsx'],
   },
   module: {
     rules: [

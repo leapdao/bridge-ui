@@ -1,14 +1,28 @@
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observer } from 'mobx-react';
 import { observable, computed } from 'mobx';
-import PropTypes from 'prop-types';
 import { Input, Button } from 'antd';
 import autobind from 'autobind-decorator';
 
 const fieldValue = v => String(v >= 0 ? v : '');
 
+interface StakeFormProps {
+  value: number | string;
+  minValue: number;
+  maxValue: number;
+  ownStake: number;
+  disabled: boolean;
+  symbol: string;
+  onChange: (newValue: number) => void;
+  onSubmit: () => void;
+}
+
 @observer
-class StakeForm extends React.Component {
+class StakeForm extends React.Component<StakeFormProps, any> {
+  static defaultProps = {
+    minValue: 0,
+  };
   componentWillReceiveProps(nextProps) {
     if (nextProps.value !== this.props.value) {
       this.value = fieldValue(nextProps.value);
@@ -33,7 +47,7 @@ class StakeForm extends React.Component {
   }
 
   @observable
-  value = fieldValue(this.props.value);
+  value: number | string = fieldValue(this.props.value);
 
   @autobind
   handleUpdate() {
@@ -79,20 +93,5 @@ class StakeForm extends React.Component {
     );
   }
 }
-
-StakeForm.propTypes = {
-  value: PropTypes.number,
-  minValue: PropTypes.number,
-  maxValue: PropTypes.number,
-  ownStake: PropTypes.number,
-  onChange: PropTypes.func.isRequired,
-  onSubmit: PropTypes.func.isRequired,
-  disabled: PropTypes.bool,
-  symbol: PropTypes.string.isRequired,
-};
-
-StakeForm.defaultProps = {
-  minValue: 0,
-};
 
 export default StakeForm;
