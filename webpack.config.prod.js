@@ -6,7 +6,7 @@ const autoprefixer = require('autoprefixer');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
-const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+// const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const threadLoader = {
   loader: 'thread-loader',
@@ -59,7 +59,7 @@ module.exports = {
         include: path.resolve(__dirname, 'src'),
       },
       {
-        test: /\.(css|less)$/,
+        test: /\.(less)$/,
         loader: ExtractTextPlugin.extract(
           Object.assign(
             {
@@ -112,6 +112,53 @@ module.exports = {
         ),
       },
       {
+        test: /\.(css)$/,
+        loader: ExtractTextPlugin.extract(
+          Object.assign(
+            {
+              fallback: {
+                loader: require.resolve('style-loader'),
+                options: {
+                  hmr: false,
+                },
+              },
+              use: [
+                {
+                  loader: require.resolve('css-loader'),
+                  options: {
+                    importLoaders: 1,
+                    minimize: true,
+                    sourceMap: false,
+                  },
+                },
+                {
+                  loader: require.resolve('postcss-loader'),
+                  options: {
+                    ident: 'postcss',
+                    plugins: () => [
+                      require('cssnano')({
+                        preset: 'default',
+                      }),
+                      require('postcss-flexbugs-fixes'), // eslint-disable-line
+                      autoprefixer({
+                        browsers: [
+                          '>1%',
+                          'last 4 versions',
+                          'Firefox ESR',
+                          'not ie < 9', // React doesn't support IE8 anyway
+                        ],
+                        flexbox: 'no-2009',
+                      }),
+                    ],
+                  },
+                },
+              ],
+            },
+            {}
+          )
+        ),
+      },
+      {
         test: /\.(png|svg|jpg|gif)$/,
         use: ['file-loader'],
       },
@@ -148,6 +195,6 @@ module.exports = {
     new HtmlPlugin({
       template: 'src/index.html',
     }),
-    new ForkTSCheckerWebpackPlugin(),
+    // new ForkTSCheckerWebpackPlugin(),
   ],
 };

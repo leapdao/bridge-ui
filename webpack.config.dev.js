@@ -38,7 +38,43 @@ module.exports = {
         include: path.resolve(__dirname, 'src'),
       },
       {
-        test: /\.(css|less)$/,
+        test: /\.(css)$/,
+        use: [
+          {
+            loader: require.resolve('style-loader'),
+            options: {
+              hmr: false,
+            },
+          },
+          {
+            loader: require.resolve('css-loader'),
+            options: {
+              importLoaders: 1,
+              sourceMap: true,
+            },
+          },
+          {
+            loader: require.resolve('postcss-loader'),
+            options: {
+              ident: 'postcss',
+              plugins: () => [
+                require('postcss-flexbugs-fixes'), // eslint-disable-line
+                autoprefixer({
+                  browsers: [
+                    '>1%',
+                    'last 4 versions',
+                    'Firefox ESR',
+                    'not ie < 9', // React doesn't support IE8 anyway
+                  ],
+                  flexbox: 'no-2009',
+                }),
+              ],
+            },
+          },
+        ],
+      },
+      {
+        test: /\.(less)$/,
         use: [
           {
             loader: require.resolve('style-loader'),
