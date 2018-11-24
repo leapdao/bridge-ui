@@ -183,37 +183,35 @@ export default class Slots extends React.Component {
             <TokenValue value={val} color={0} />
           ))}
           {this.renderRow('Act. epoch', 'activationEpoch')}
-          {psc &&
-            psc.ready && (
-              <tr>
-                <th style={formCellStyle} />
-                {bridge.slots.map((slot, i) => {
-                  const minStake = Math.max(slot.stake, slot.newStake) * 1.05;
-                  const minValue = psc.toTokens(minStake);
-                  const ownStake = addrCmp(slot.owner, account.address || '')
-                    ? minValue
-                    : 0;
+          {psc && psc.ready && (
+            <tr>
+              <th style={formCellStyle} />
+              {bridge.slots.map((slot, i) => {
+                const minStake = Math.max(slot.stake, slot.newStake) * 1.05;
+                const minValue = psc.toTokens(minStake);
+                const ownStake = addrCmp(slot.owner, account.address || '')
+                  ? minValue
+                  : 0;
 
-                  return (
-                    <td key={i} style={formCellStyle}>
-                      {network &&
-                        network.canSubmit && (
-                          <StakeForm
-                            value={stakes[i]}
-                            onChange={value => this.setStake(i, value)}
-                            symbol={psc.symbol}
-                            disabled={!signerAddr}
-                            onSubmit={() => this.handleBet(i)}
-                            minValue={minValue}
-                            ownStake={ownStake}
-                            maxValue={psc.decimalsBalance}
-                          />
-                        )}
-                    </td>
-                  );
-                })}
-              </tr>
-            )}
+                return (
+                  <td key={i} style={formCellStyle}>
+                    {network && network.canSubmit && (
+                      <StakeForm
+                        value={stakes[i]}
+                        onChange={value => this.setStake(i, value)}
+                        symbol={psc.symbol}
+                        disabled={!signerAddr}
+                        onSubmit={() => this.handleBet(i)}
+                        minValue={minValue}
+                        ownStake={ownStake}
+                        maxValue={psc.decimalsBalance}
+                      />
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          )}
         </tbody>
       </table>
     );
@@ -228,6 +226,8 @@ export default class Slots extends React.Component {
     return (
       <AppLayout section="slots" bridgeAddr={match.params.bridgeAddr}>
         <h1>Slots auction</h1>
+
+        <Web3SubmitWarning />
         <Form layout="inline">
           <Form.Item>
             <Input
@@ -279,8 +279,6 @@ export default class Slots extends React.Component {
             {slotsTable}
           </div>
         </div>
-
-        <Web3SubmitWarning />
       </AppLayout>
     );
   }
