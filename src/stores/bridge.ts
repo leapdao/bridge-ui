@@ -64,9 +64,11 @@ const readSlots = (bridge: Contract) => {
 export default class Bridge extends ContractStore {
   @observable
   public slots: IObservableArray<Slot> = observable.array([]);
+
   @observable
   public lastCompleteEpoch: number;
 
+  @observable
   public defaultAddress: string;
 
   constructor(
@@ -76,6 +78,10 @@ export default class Bridge extends ContractStore {
     address?: string
   ) {
     super(bridgeAbi, address, transactions, web3);
+
+    web3.plasma.getConfig().then(({ bridgeAddr }) => {
+      this.defaultAddress = bridgeAddr;
+    });  
 
     reaction(() => {
       return this.contract;
