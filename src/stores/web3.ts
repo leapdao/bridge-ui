@@ -45,9 +45,15 @@ export default class Web3Store {
 
     this.injectedAvailable = !!(ethereum || web3);
     if (metamask) {
-      metamask.isApproved().then(approved => {
-        this.updateInjected(approved ? ethereum : null, approved);
-      });
+      setTimeout(() =>{
+        if (metamask.isEnabled()) {
+          this.updateInjected(ethereum);
+        } else {
+          metamask.isApproved().then(approved => {
+            this.updateInjected(approved ? ethereum : null, approved);
+          });
+        }
+      }, 500);
     } else if (web3) {
       this.updateInjected(web3.currentProvider);
     }
