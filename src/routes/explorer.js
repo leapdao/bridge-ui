@@ -29,11 +29,6 @@ import Address from './address';
 }))
 @observer
 export default class Explorer extends React.Component {
-  constructor(props) {
-    super(props);
-    props.bridge.address = props.bridge.defaultAddress;
-  }
-
   @observable
   value = '';
 

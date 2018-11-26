@@ -6,6 +6,7 @@
  */
 
 import React, { Fragment } from 'react';
+import { reaction } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
@@ -39,6 +40,13 @@ class AppLayout extends React.Component {
   constructor(props) {
     super(props);
     props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
+
+    reaction(
+      () => props.bridge.defaultAddress,
+      () => {
+        props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
+      }
+    );
   }
 
   componentDidUpdate(prevProps) {
@@ -51,7 +59,11 @@ class AppLayout extends React.Component {
   render() {
     const { psc, account, web3, section, bridge, bridgeAddr } = this.props;
 
-    if (!account.ready) {
+    if (web3.plasmaReady === false) {
+      return <Message>No connection to Leap node</Message>;
+    }
+
+    if (!account.ready || web3.plasmaReady === undefined) {
       return (
         <Message hideBg>
           <Spin size="large" />
@@ -103,34 +115,30 @@ class AppLayout extends React.Component {
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
-              {psc &&
-                psc.balance &&
-                psc.ready && (
-                  <Fragment>
-                    Balance:{' '}
-                    <strong>
-                      <TokenValue value={psc.balance} color={psc.color} />
-                    </strong>
-                  </Fragment>
-                )}
-              {web3 &&
-                web3.injectedAvailable &&
-                !web3.injected && (
-                  <Button
-                    onClick={() => {
-                      web3.enable();
-                    }}
+              {psc && psc.balance && psc.ready && (
+                <Fragment>
+                  Balance:{' '}
+                  <strong>
+                    <TokenValue value={psc.balance} color={psc.color} />
+                  </strong>
+                </Fragment>
+              )}
+              {web3 && web3.injectedAvailable && !web3.injected && (
+                <Button
+                  onClick={() => {
+                    web3.enable();
+                  }}
+                >
+                  <span
+                    role="img"
+                    aria-label="fox"
+                    style={{ bottom: -1, position: 'relative' }}
                   >
-                    <span
-                      role="img"
-                      aria-label="fox"
-                      style={{ bottom: -1, position: 'relative' }}
-                    >
-                      🦊
-                    </span>{' '}
-                    Connect MetaMask
-                  </Button>
-                )}
+                    🦊
+                  </span>{' '}
+                  Connect MetaMask
+                </Button>
+              )}
             </span>
             <MediaQuery maxWidth={1048}>
               <Dropdown

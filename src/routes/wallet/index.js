@@ -20,11 +20,6 @@ import AppLayout from '../../components/appLayout';
 @inject('tokens', 'bridge')
 @observer
 export default class Wallet extends React.Component {
-  constructor(props) {
-    super(props);
-    props.bridge.address = props.bridge.defaultAddress;
-  }
-
   @computed
   get selectedToken() {
     const { tokens } = this.props;
@@ -74,5 +69,4 @@ export default class Wallet extends React.Component {
 
 Wallet.propTypes = {
   tokens: PropTypes.object,
-  bridge: PropTypes.object,
 };

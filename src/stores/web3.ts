@@ -16,6 +16,9 @@ export default class Web3Store {
   @observable.ref
   public plasma: ExtendedWeb3;
 
+  @observable
+  public plasmaReady;
+
   @observable.ref
   public local: Web3Type;
 
@@ -34,6 +37,14 @@ export default class Web3Store {
     this.plasma = helpers.extendWeb3(
       new Web3(new Web3.providers.HttpProvider(plasmaProvider))
     );
+    this.plasma.eth.net.getId()
+      .then(_ => {
+        this.plasmaReady = true;
+      })
+      .catch(e => {
+        console.error('Leap node error', e);
+        this.plasmaReady = false;
+      });
 
     const localNetwork = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
     this.local = new Web3(
