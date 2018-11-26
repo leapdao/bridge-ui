@@ -46,9 +46,11 @@ export default class Wallet extends React.Component {
 
     if (tokens.list.length === 0) {
       return (
-        <div style={{ textAlign: 'center', margin: 50, fontSize: 18 }}>
-          You need to register some token first
-        </div>
+        <AppLayout section="wallet">
+          <div style={{ textAlign: 'center', margin: 50, fontSize: 18 }}>
+            You need to register some token first
+          </div>
+        </AppLayout>
       );
     }
 
