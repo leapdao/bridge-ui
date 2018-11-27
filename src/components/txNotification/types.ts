@@ -1,17 +1,18 @@
-import { PromiEvent, TransactionReceipt } from "web3/types";
+import { TransactionReceipt } from 'web3/types';
+import PromiEvent from 'web3/promiEvent';
 
 export enum TxStatus {
   CREATED,
   INFLIGHT,
   SUCCEED,
   FAILED,
-  CANCELLED
-} 
+  CANCELLED,
+}
 
 export declare interface DetailedInflightTxReceipt {
-  key: string,
-  futureReceipt: PromiEvent<TransactionReceipt>,
-  message?: string,
-  description?: string,
-  status?: TxStatus
+  key: string;
+  futureReceipt: PromiEvent<TransactionReceipt>;
+  message?: string;
+  description?: string;
+  status?: TxStatus;
 }
