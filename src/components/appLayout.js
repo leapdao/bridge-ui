@@ -63,7 +63,7 @@ class AppLayout extends React.Component {
       return <Message>No connection to Leap node</Message>;
     }
 
-    if (!account.ready || web3.plasmaReady === undefined) {
+    if (!account.ready) {
       return (
         <Message hideBg>
           <Spin size="large" />

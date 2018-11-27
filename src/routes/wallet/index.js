@@ -17,7 +17,7 @@ import Transfer from './transfer';
 import Exit from './exit';
 import AppLayout from '../../components/appLayout';
 
-@inject('tokens', 'bridge')
+@inject('tokens', 'account')
 @observer
 export default class Wallet extends React.Component {
   @computed
@@ -30,22 +30,28 @@ export default class Wallet extends React.Component {
   color = 0;
 
   render() {
-    const { tokens } = this.props;
+    const { account, tokens } = this.props;
 
-    if (!tokens.ready) {
-      return null;
+    if (!account.address) {
+      return (
+        <AppLayout section="wallet">
+          <Web3SubmitWarning />
+        </AppLayout>
+      );
+    }
+
+    if (!tokens.ready || !this.selectedToken || !this.selectedToken.ready) {
+      return <AppLayout section="wallet" />;
     }
 
     if (tokens.list.length === 0) {
       return (
-        <div style={{ textAlign: 'center', margin: 50, fontSize: 18 }}>
-          You need to register some token first
-        </div>
+        <AppLayout section="wallet">
+          <div style={{ textAlign: 'center', margin: 50, fontSize: 18 }}>
+            You need to register some token first
+          </div>
+        </AppLayout>
       );
-    }
-
-    if (!this.selectedToken || !this.selectedToken.ready) {
-      return null;
     }
 
     return (
@@ -69,4 +75,5 @@ export default class Wallet extends React.Component {
 
 Wallet.propTypes = {
   tokens: PropTypes.object,
+  account: PropTypes.object,
 };

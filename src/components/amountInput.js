@@ -93,7 +93,7 @@ export default class AmountInput extends React.Component {
   }
 
   render() {
-    const { onColorChange, value, width = 250, plasma } = this.props;
+    const { onColorChange, value, width = 250, plasma, ...rest } = this.props;
     const balance = plasma ? this.token.plasmaBalance : this.token.balance;
 
     return (
@@ -123,7 +123,7 @@ export default class AmountInput extends React.Component {
         {!this.token.isNft && (
           <Form.Item>
             <Input
-              {...this.props}
+              {...rest}
               value={value}
               onChange={this.handleChange}
               onBlur={this.handleBlur}

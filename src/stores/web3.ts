@@ -29,7 +29,7 @@ export default class Web3Store {
   public approved = false;
 
   @observable
-  public ready = false;
+  public injectedReady = false;
 
   constructor() {
     const plasmaProvider =
@@ -37,7 +37,8 @@ export default class Web3Store {
     this.plasma = helpers.extendWeb3(
       new Web3(new Web3.providers.HttpProvider(plasmaProvider))
     );
-    this.plasma.eth.net.getId()
+    this.plasma.eth.net
+      .getId()
       .then(_ => {
         this.plasmaReady = true;
       })
@@ -56,7 +57,7 @@ export default class Web3Store {
 
     this.injectedAvailable = !!(ethereum || web3);
     if (metamask) {
-      setTimeout(() =>{
+      setTimeout(() => {
         if (metamask.isEnabled()) {
           this.updateInjected(ethereum);
         } else {
@@ -67,12 +68,14 @@ export default class Web3Store {
       }, 500);
     } else if (web3) {
       this.updateInjected(web3.currentProvider);
+    } else {
+      this.updateInjected(null, false);
     }
   }
 
   @action
   private updateInjected(provider, approved = true) {
-    this.ready = true;
+    this.injectedReady = true;
     this.approved = approved;
     if (provider) {
       this.injected = new Web3(provider);
