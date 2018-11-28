@@ -24,6 +24,7 @@ import ExplorerStore from './stores/explorer';
 import Unspents from './stores/unspents';
 import NodeStore from './stores/node';
 import Web3Store from './stores/web3';
+import GovernanceContract from './stores/governanceContract';
 
 import Transactions from './components/txNotification/transactions';
 import TxNotification from './components/txNotification';
@@ -34,6 +35,10 @@ import Wallet from './routes/wallet';
 import Slots from './routes/slots';
 import RegisterToken from './routes/registerToken';
 import Status from './routes/status';
+import Governance from './routes/governance';
+
+// TODO: get the bridge owner once we have ownable contracts (#68)
+const governanceAddr = process.env.GOVERNANCE_ADDR; 
 
 const web3 = new Web3Store();
 const transactions = new Transactions();
@@ -42,6 +47,7 @@ const node = new NodeStore(web3);
 const bridge = new Bridge(account, transactions, web3);
 const tokens = new Tokens(account, bridge, transactions, node, web3);
 const explorer = new ExplorerStore(node, web3, tokens);
+const governanceContract = new GovernanceContract(governanceAddr, transactions, web3);
 const network = new Network(
   account,
   web3,
@@ -62,10 +68,12 @@ ReactDOM.render(
         unspents,
         node,
         web3,
+        governanceContract,
       }}
     >
       <Fragment>
         <TxNotification />
+        <Route path="/governance" component={Governance} />
         <Route path="/" exact component={Slots} />
         <Route path="/:bridgeAddr(0x[0-9a-fA-f]{40})" exact component={Slots} />
         <Route path="/registerToken" exact component={RegisterToken} />

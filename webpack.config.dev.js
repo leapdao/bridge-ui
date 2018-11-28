@@ -123,7 +123,11 @@ module.exports = {
   },
   plugins: [
     new ForkTSCheckerWebpackPlugin(),
-    new webpack.EnvironmentPlugin(['NETWORK_ID', 'PLASMA_NODE']),
+    new webpack.EnvironmentPlugin([
+      'NETWORK_ID',
+      'PLASMA_NODE',
+      'GOVERNANCE_ADDR',
+    ]),
     new HtmlPlugin({
       template: 'src/index.html',
     }),
