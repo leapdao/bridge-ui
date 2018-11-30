@@ -6,13 +6,22 @@
  */
 
 class RequestError extends Error {
+  public status: any;
+
   constructor(message, status) {
     super(message);
     this.status = status;
   }
 }
 
-export default apiUrl => (method, path, params, options = {}) => {
+type Method = 'get' | 'post' | 'delete' | 'put';
+
+export default apiUrl => (
+  method: Method,
+  path: string,
+  params: {},
+  options: { [key: string]: any }
+) => {
   options.method = method;
   options.headers = Object.assign(
     {
