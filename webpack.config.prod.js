@@ -6,7 +6,7 @@ const autoprefixer = require('autoprefixer');
 const UglifyJsPlugin = require('uglifyjs-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlPlugin = require('html-webpack-plugin');
-// const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 const threadLoader = {
   loader: 'thread-loader',
@@ -195,6 +195,6 @@ module.exports = {
     new HtmlPlugin({
       template: 'src/index.html',
     }),
-    // new ForkTSCheckerWebpackPlugin(),
+    new ForkTSCheckerWebpackPlugin(),
   ],
 };

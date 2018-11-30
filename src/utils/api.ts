@@ -20,7 +20,7 @@ export default apiUrl => (
   method: Method,
   path: string,
   params: {},
-  options: { [key: string]: any }
+  options?: { [key: string]: any }
 ) => {
   options.method = method;
   options.headers = Object.assign(
