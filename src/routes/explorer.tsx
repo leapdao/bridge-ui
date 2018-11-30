@@ -5,35 +5,47 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
-import { Route } from 'react-router';
+import { Route, match } from 'react-router';
 import { Link } from 'react-router-dom';
 import { observable } from 'mobx';
-import PropTypes from 'prop-types';
 
 import { Form, Input, Button, Divider, Alert } from 'antd';
 
 import AppLayout from '../components/appLayout';
 import { NETWORKS } from '../utils';
+import ExplorerStore from '../stores/explorer';
+import Bridge from '../stores/bridge';
+import Network from '../stores/network';
+import Tokens from '../stores/tokens';
 
 import Block from './block';
 import Transaction from './transaction';
 import Address from './address';
 
-@inject(({ tokens, network, explorer, bridge }) => ({
-  psc: tokens.list && tokens.list[0],
-  network,
-  explorer,
-  bridge,
-}))
-@observer
-export default class Explorer extends React.Component {
-  @observable
-  value = '';
+interface ExplorerProps {
+  explorer: ExplorerStore;
+  bridge: Bridge;
+  network: Network;
+  tokens: Tokens;
+  match: match<any>;
+  history: any;
+}
 
-  render() {
-    const { explorer, bridge, network, psc, match } = this.props;
+@inject('tokens', 'network', 'explorer', 'bridge')
+@observer
+export default class Explorer extends React.Component<ExplorerProps, any> {
+  @observable
+  private value = '';
+
+  private get psc() {
+    return this.props.tokens.list && this.props.tokens.list[0];
+  }
+
+  public render() {
+    const { explorer, bridge, network, match } = this.props;
 
     return (
       <AppLayout section="explorer">
@@ -90,12 +102,12 @@ export default class Explorer extends React.Component {
           <dd>{NETWORKS[network.network].name || network.network}</dd>
           <dt>Bridge contract address</dt>
           <dd>{bridge.address}</dd>
-          {psc && (
+          {this.psc && (
             <Fragment>
               <dt>Token contract address</dt>
               <dd>
-                <Link to={`/explorer/address/${psc.address}`}>
-                  {psc.address}
+                <Link to={`/explorer/address/${this.psc.address}`}>
+                  {this.psc.address}
                 </Link>
               </dd>
             </Fragment>
@@ -105,12 +117,3 @@ export default class Explorer extends React.Component {
     );
   }
 }
-
-Explorer.propTypes = {
-  explorer: PropTypes.object,
-  match: PropTypes.object.isRequired,
-  history: PropTypes.object.isRequired,
-  network: PropTypes.object,
-  psc: PropTypes.object,
-  bridge: PropTypes.object,
-};

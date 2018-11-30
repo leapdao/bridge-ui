@@ -5,10 +5,9 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React from 'react';
+import * as React from 'react';
 import { observable, computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 
 import Web3SubmitWarning from '../../components/web3SubmitWarning';
 
@@ -16,18 +15,25 @@ import Deposit from './deposit';
 import Transfer from './transfer';
 import Exit from './exit';
 import AppLayout from '../../components/appLayout';
+import Tokens from '../../stores/tokens';
+import Account from '../../stores/account';
+
+interface WalletProps {
+  tokens: Tokens;
+  account: Account;
+}
 
 @inject('tokens', 'account')
 @observer
-export default class Wallet extends React.Component {
+export default class Wallet extends React.Component<WalletProps, any> {
   @computed
-  get selectedToken() {
+  private get selectedToken() {
     const { tokens } = this.props;
     return tokens && tokens.tokenForColor(this.color);
   }
 
   @observable
-  color = 0;
+  private color = 0;
 
   render() {
     const { account, tokens } = this.props;
@@ -72,8 +78,3 @@ export default class Wallet extends React.Component {
     );
   }
 }
-
-Wallet.propTypes = {
-  tokens: PropTypes.object,
-  account: PropTypes.object,
-};

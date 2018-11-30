@@ -1,15 +1,26 @@
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observable, reaction } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Card, Alert, Spin } from 'antd';
 
 import TransctionList from '../components/transactionList';
 import TokenValue from '../components/tokenValue';
+import Explorer from '../stores/explorer';
+import Tokens from '../stores/tokens';
+import { match } from 'react-router';
+
+interface AddressRouteProps {
+  explorer: Explorer;
+  tokens: Tokens;
+  match: match<{
+    addr: string;
+  }>;
+}
 
 @inject('explorer', 'tokens')
 @observer
-class Address extends React.Component {
+class Address extends React.Component<AddressRouteProps, any> {
   constructor(props) {
     super(props);
     if (props.tokens.ready) {
@@ -100,11 +111,5 @@ class Address extends React.Component {
     );
   }
 }
-
-Address.propTypes = {
-  match: PropTypes.object,
-  explorer: PropTypes.object,
-  tokens: PropTypes.object,
-};
 
 export default Address;

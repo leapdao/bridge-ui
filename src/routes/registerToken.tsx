@@ -5,17 +5,21 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import PropTypes from 'prop-types';
 import { List, Form, Input, Button, Icon } from 'antd';
 
 import { isValidAddress } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import AppLayout from '../components/appLayout';
+import Bridge from '../stores/bridge';
+import Network from '../stores/network';
+import Tokens from '../stores/tokens';
+import { match } from 'react-router';
 
 const Item = observer(({ item }) => (
   <List.Item key={item.address}>
@@ -39,15 +43,23 @@ const Item = observer(({ item }) => (
   </List.Item>
 ));
 
-@inject(stores => ({
-  tokens: stores.tokens,
-  bridge: stores.bridge,
-  network: stores.network,
-}))
+interface RegisterTokenProps {
+  bridge: Bridge;
+  network: Network;
+  tokens: Tokens;
+  match: match<{
+    bridgeAddr: string;
+  }>;
+}
+
+@inject('tokens', 'bridge', 'network')
 @observer
-export default class RegisterToken extends React.Component {
+export default class RegisterToken extends React.Component<
+  RegisterTokenProps,
+  any
+> {
   @observable
-  tokenAddr = '';
+  private tokenAddr = '';
 
   @autobind
   handleSubmit(e) {
@@ -111,10 +123,3 @@ export default class RegisterToken extends React.Component {
     );
   }
 }
-
-RegisterToken.propTypes = {
-  tokens: PropTypes.object,
-  network: PropTypes.object,
-  bridge: PropTypes.object,
-  match: PropTypes.object,
-};

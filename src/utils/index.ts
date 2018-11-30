@@ -20,13 +20,13 @@ export const isNFT = color => color >= NFT_COLOR_BASE;
 
 export const DEFAULT_PLASMA_NODE = '1';
 
-export { range } from './range.ts';
-export { txSuccess } from './txSuccess.ts';
+export { range } from './range';
+export { txSuccess } from './txSuccess';
 
 export const shortenHex = hex =>
   hex && [hex.slice(0, 8), '...', hex.slice(hex.length - 6)].join('');
 
-export const swapObject = object => {
+export const swapObject = (object: { [key: string]: any }) => {
   return Object.entries(object).reduce(
     (result, [key, value]) => Object.assign(result, { [value]: key }),
     {}

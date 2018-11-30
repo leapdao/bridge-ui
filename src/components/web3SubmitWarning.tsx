@@ -1,12 +1,21 @@
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { inject, observer } from 'mobx-react';
-import PropTypes from 'prop-types';
 import { Alert, Button } from 'antd';
 import { NETWORKS } from '../utils';
+import Network from '../stores/network';
+import Web3Store from '../stores/web3';
+import Account from '../stores/account';
+
+interface Web3SubmitWarningProps {
+  network?: Network;
+  account?: Account;
+  web3?: Web3Store;
+}
 
 @inject('network', 'account', 'web3')
 @observer
-class Web3SubmitWarning extends React.Component {
+class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
   render() {
     const { network, account, web3 } = this.props;
 
@@ -65,11 +74,5 @@ class Web3SubmitWarning extends React.Component {
     return null;
   }
 }
-
-Web3SubmitWarning.propTypes = {
-  network: PropTypes.object,
-  account: PropTypes.object,
-  web3: PropTypes.object,
-};
 
 export default Web3SubmitWarning;

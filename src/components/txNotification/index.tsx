@@ -6,52 +6,37 @@
  */
 
 import * as React from 'react';
-import * as PropTypes from 'prop-types';
 import { observer, inject } from 'mobx-react';
-import 'antd/lib/spin/style';
-import * as Spin from 'antd/lib/spin';
-import 'antd/lib/icon/style';
-import * as Icon from 'antd/lib/icon';
-import 'antd/lib/notification/style';
-import * as notification from 'antd/lib/notification';
+import { Spin, Icon, notification } from 'antd';
 
 import { TxStatus } from './types';
-
-/*
- * Because of bad typings in antd
- */
-const antd = {
-  Icon: Icon as any,
-  Spin: Spin as any,
-  notification: notification as any,
-};
 
 const statusDetails = {
   [TxStatus.CREATED]: {
     text: 'Waiting for signature..',
-    icon: <antd.Icon type="key" />,
+    icon: <Icon type="key" />,
   },
-  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: <antd.Spin /> },
+  [TxStatus.INFLIGHT]: { text: 'Mining..', icon: <Spin /> },
   [TxStatus.SUCCEED]: {
     text: 'Success',
-    icon: <antd.Icon type="check-circle" style={{ color: 'green' }} />,
+    icon: <Icon type="check-circle" style={{ color: 'green' }} />,
   },
   [TxStatus.FAILED]: {
     text: 'Transaction failed',
-    icon: <antd.Icon type="close-circle" style={{ color: 'red' }} />,
+    icon: <Icon type="close-circle" style={{ color: 'red' }} />,
   },
   [TxStatus.CANCELLED]: {
     text: 'Cancelled',
-    icon: <antd.Icon type="close-circle-o" style={{ color: 'red' }} />,
+    icon: <Icon type="close-circle-o" style={{ color: 'red' }} />,
   },
 };
 
 const TxNotification: React.SFC<{
-  transactions: any;
+  transactions?: any;
 }> = ({ transactions }) => {
   transactions.map.observe(txChange => {
     if (txChange.type === 'delete') {
-      antd.notification.close(txChange.name);
+      notification.close(txChange.name);
       return;
     }
 
@@ -72,13 +57,9 @@ const TxNotification: React.SFC<{
       description: description,
     };
 
-    antd.notification.open(msg);
+    notification.open(msg);
   });
   return null;
-};
-
-TxNotification.propTypes = {
-  transactions: PropTypes.object,
 };
 
 export default inject('transactions')(observer(TxNotification));

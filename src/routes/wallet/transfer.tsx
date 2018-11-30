@@ -5,23 +5,31 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Fragment } from 'react';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 
 import TransferForm from '../../components/transferForm';
+import Tokens from '../../stores/tokens';
+import Network from '../../stores/network';
+
+interface TransferProps {
+  tokens?: Tokens;
+  network?: Network;
+  color: number;
+}
 
 @inject('tokens', 'network')
 @observer
-export default class Transfer extends React.Component {
+export default class Transfer extends React.Component<TransferProps, any> {
   @computed
-  get selectedToken() {
+  private get selectedToken() {
     const { tokens, color } = this.props;
     return tokens && tokens.tokenForColor(color);
   }
 
-  render() {
+  public render() {
     const { network } = this.props;
 
     return (
@@ -34,7 +42,7 @@ export default class Transfer extends React.Component {
               addr,
               this.selectedToken.isNft
                 ? amount
-                : this.selectedToken.toCents(amount)
+                : this.selectedToken.toCents(Number(amount))
             )
           }
           disabled={!network || !network.canSubmit}
@@ -43,9 +51,3 @@ export default class Transfer extends React.Component {
     );
   }
 }
-
-Transfer.propTypes = {
-  color: PropTypes.number,
-  tokens: PropTypes.object,
-  network: PropTypes.object,
-};

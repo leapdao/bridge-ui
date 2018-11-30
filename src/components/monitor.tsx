@@ -1,5 +1,4 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import { List } from 'antd';
 
 function callMethod(node, method, params = []) {
@@ -38,16 +37,26 @@ const nodeIcons = {
 
 const getStatus = info => info && info.status;
 
-export default class Monitor extends React.Component {
-  static propTypes = {
-    nodes: PropTypes.arrayOf(
-      PropTypes.shape({
-        url: PropTypes.string.isRequired,
-        label: PropTypes.string.isRequired,
-      })
-    ).isRequired,
-  };
+interface MonitorProps {
+  nodes: Array<{
+    url: string;
+    label: string;
+  }>;
+}
 
+interface MonitorState {
+  nodesInfo: {
+    [key: string]: {
+      status: string;
+      blockNumber: number;
+    };
+  };
+}
+
+export default class Monitor extends React.Component<
+  MonitorProps,
+  MonitorState
+> {
   constructor(props) {
     super(props);
     this.state = {
@@ -89,8 +98,10 @@ export default class Monitor extends React.Component {
     const { nodesInfo } = this.state;
 
     return (
-      <List className="monitor">
-        {nodes.map(node => (
+      <List
+        className="monitor"
+        dataSource={nodes}
+        renderItem={node => (
           <List.Item key={node.url}>
             <span className="monitor-node">
               <strong>{node.label}:</strong> {node.url}
@@ -107,8 +118,8 @@ export default class Monitor extends React.Component {
               <span>&nbsp;(height {nodesInfo[node.url].blockNumber})</span>
             )}
           </List.Item>
-        ))}
-      </List>
+        )}
+      />
     );
   }
 }

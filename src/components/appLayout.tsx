@@ -5,10 +5,10 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import React, { Fragment } from 'react';
+import * as React from 'react';
+import { Component, Fragment } from 'react';
 import { reaction } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
 import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
@@ -17,8 +17,12 @@ import Message from './message';
 import TokenValue from './tokenValue';
 
 import '../style.css';
+import Bridge from '../stores/bridge';
+import Tokens from '../stores/tokens';
+import Account from '../stores/account';
+import Web3Store from '../stores/web3';
 
-function getBridgeSuffix(bridge, currentAddr) {
+function getBridgeSuffix(bridge: Bridge, currentAddr: string) {
   if (
     currentAddr &&
     bridge.defaultAddress.toLowerCase() !== currentAddr.toLowerCase()
@@ -29,14 +33,18 @@ function getBridgeSuffix(bridge, currentAddr) {
   return '';
 }
 
-@inject(stores => ({
-  psc: stores.tokens.list && stores.tokens.list[0],
-  account: stores.account,
-  web3: stores.web3,
-  bridge: stores.bridge,
-}))
+interface AppLayoutProps {
+  bridgeAddr?: string;
+  bridge?: Bridge;
+  tokens?: Tokens;
+  account?: Account;
+  web3?: Web3Store;
+  section: string;
+}
+
+@inject('tokens', 'account', 'web3', 'bridge')
 @observer
-class AppLayout extends React.Component {
+class AppLayout extends Component<AppLayoutProps, any> {
   constructor(props) {
     super(props);
     props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
@@ -49,6 +57,10 @@ class AppLayout extends React.Component {
     );
   }
 
+  private get psc() {
+    return this.props.tokens.list && this.props.tokens.list[0];
+  }
+
   componentDidUpdate(prevProps) {
     if (prevProps.bridgeAddr !== this.props.bridgeAddr) {
       this.props.bridge.address =
@@ -57,7 +69,7 @@ class AppLayout extends React.Component {
   }
 
   render() {
-    const { psc, account, web3, section, bridge, bridgeAddr } = this.props;
+    const { account, web3, section, bridge, bridgeAddr } = this.props;
 
     if (web3.plasmaReady === false) {
       return <Message>No connection to Leap node</Message>;
@@ -115,11 +127,14 @@ class AppLayout extends React.Component {
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
-              {psc && psc.balance && psc.ready && (
+              {this.psc && this.psc.balance && this.psc.ready && (
                 <Fragment>
                   Balance:{' '}
                   <strong>
-                    <TokenValue value={psc.balance} color={psc.color} />
+                    <TokenValue
+                      value={this.psc.balance}
+                      color={this.psc.color}
+                    />
                   </strong>
                 </Fragment>
               )}
@@ -141,11 +156,7 @@ class AppLayout extends React.Component {
               )}
             </span>
             <MediaQuery maxWidth={1048}>
-              <Dropdown
-                overlay={menu(false)}
-                placement="bottomRight"
-                style={{ flexGrow: 1 }}
-              >
+              <Dropdown overlay={menu(false)} placement="bottomRight">
                 <a
                   className="ant-dropdown-link"
                   href="#"
@@ -175,19 +186,5 @@ class AppLayout extends React.Component {
     );
   }
 }
-
-AppLayout.propTypes = {
-  // settings stores as optional to get rid of 'undefined' warnings
-  // > Make sure to mark userStore as an optional property.
-  // > It should not (necessarily) be passed in by parent components at all!
-  // https://github.com/mobxjs/mobx-react#with-typescript
-  psc: PropTypes.object,
-  web3: PropTypes.object,
-  account: PropTypes.object,
-  children: PropTypes.any,
-  section: PropTypes.string,
-  bridgeAddr: PropTypes.string,
-  bridge: PropTypes.object,
-};
 
 export default AppLayout;

@@ -16,7 +16,7 @@ const threadLoader = {
 };
 
 module.exports = {
-  entry: './src/index.js',
+  entry: './src/index.tsx',
   mode: 'production',
   output: {
     publicPath: '/',
@@ -24,7 +24,7 @@ module.exports = {
     filename: 'index.[hash].js',
   },
   resolve: {
-    extensions: ['.js', '.ts'],
+    extensions: ['.js', '.ts', '.tsx'],
     alias: {
       'web3-eth-ens': require.resolve('./dummies/web3-eth-ens.js'),
       'web3-providers-ipc': require.resolve('./dummies/web3-providers.js'),
@@ -59,7 +59,7 @@ module.exports = {
         include: path.resolve(__dirname, 'src'),
       },
       {
-        test: /\.(css|less)$/,
+        test: /\.(less)$/,
         loader: ExtractTextPlugin.extract(
           Object.assign(
             {
@@ -103,6 +103,53 @@ module.exports = {
                   loader: require.resolve('less-loader'),
                   options: {
                     javascriptEnabled: true,
+                  },
+                },
+              ],
+            },
+            {}
+          )
+        ),
+      },
+      {
+        test: /\.(css)$/,
+        loader: ExtractTextPlugin.extract(
+          Object.assign(
+            {
+              fallback: {
+                loader: require.resolve('style-loader'),
+                options: {
+                  hmr: false,
+                },
+              },
+              use: [
+                {
+                  loader: require.resolve('css-loader'),
+                  options: {
+                    importLoaders: 1,
+                    minimize: true,
+                    sourceMap: false,
+                  },
+                },
+                {
+                  loader: require.resolve('postcss-loader'),
+                  options: {
+                    ident: 'postcss',
+                    plugins: () => [
+                      require('cssnano')({
+                        preset: 'default',
+                      }),
+                      require('postcss-flexbugs-fixes'), // eslint-disable-line
+                      autoprefixer({
+                        browsers: [
+                          '>1%',
+                          'last 4 versions',
+                          'Firefox ESR',
+                          'not ie < 9', // React doesn't support IE8 anyway
+                        ],
+                        flexbox: 'no-2009',
+                      }),
+                    ],
                   },
                 },
               ],

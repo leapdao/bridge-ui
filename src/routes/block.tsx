@@ -1,11 +1,14 @@
-import React from 'react';
-import PropTypes from 'prop-types';
+import * as React from 'react';
 import { observable, reaction } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Card, Button, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
 
 import TransctionList from '../components/transactionList';
+import NodeStore from '../stores/node';
+import Web3Store from '../stores/web3';
+import Explorer from '../stores/explorer';
+import { match } from 'react-router';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -17,9 +20,18 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
   hour12: false,
 });
 
+interface BlockRouteProps {
+  node: NodeStore;
+  web3: Web3Store;
+  explorer: Explorer;
+  match: match<{
+    hashOrNumber: string;
+  }>;
+}
+
 @inject('explorer', 'node', 'web3')
 @observer
-class Block extends React.Component {
+class Block extends React.Component<BlockRouteProps, any> {
   constructor(props) {
     super(props);
     this.fetch(props.match.params.hashOrNumber);
@@ -58,7 +70,7 @@ class Block extends React.Component {
   @observable
   success = false;
 
-  fetch(hashOrNumber) {
+  fetch(hashOrNumber?: string | number) {
     const { explorer, web3 } = this.props;
     this.fetching = true;
 
@@ -109,12 +121,5 @@ class Block extends React.Component {
     );
   }
 }
-
-Block.propTypes = {
-  match: PropTypes.object,
-  explorer: PropTypes.object,
-  node: PropTypes.object,
-  web3: PropTypes.object,
-};
 
 export default Block;

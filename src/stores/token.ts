@@ -136,7 +136,7 @@ export default class Token extends ContractStore {
     return tokenCentsValue / 10 ** this.decimals;
   }
 
-  public transfer(to: string, amount: number): Promise<any> {
+  public transfer(to: string, amount: number | string): Promise<any> {
     if (!this.web3.injected) {
       return Promise.reject('No metamask');
     }
@@ -159,7 +159,7 @@ export default class Token extends ContractStore {
         const inputs = helpers.calcInputs(
           unspent,
           this.account.address,
-          amount,
+          amount as number,
           this.color
         );
         const outputs = helpers.calcOutputs(
@@ -167,7 +167,7 @@ export default class Token extends ContractStore {
           inputs,
           this.account.address,
           to,
-          amount,
+          amount as number,
           this.color
         );
         return Tx.transfer(inputs, outputs);
