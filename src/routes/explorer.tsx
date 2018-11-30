@@ -37,11 +37,6 @@ interface ExplorerProps {
 @inject('tokens', 'network', 'explorer', 'bridge')
 @observer
 export default class Explorer extends React.Component<ExplorerProps, any> {
-  constructor(props) {
-    super(props);
-    props.bridge.address = props.bridge.defaultAddress;
-  }
-
   @observable
   private value = '';
 

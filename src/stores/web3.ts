@@ -16,6 +16,9 @@ export default class Web3Store {
   @observable.ref
   public plasma: ExtendedWeb3;
 
+  @observable
+  public plasmaReady;
+
   @observable.ref
   public local: Web3Type;
 
@@ -26,7 +29,7 @@ export default class Web3Store {
   public approved = false;
 
   @observable
-  public ready = false;
+  public injectedReady = false;
 
   constructor() {
     const plasmaProvider =
@@ -34,6 +37,15 @@ export default class Web3Store {
     this.plasma = helpers.extendWeb3(
       new Web3(new Web3.providers.HttpProvider(plasmaProvider))
     );
+    this.plasma.eth.net
+      .getId()
+      .then(_ => {
+        this.plasmaReady = true;
+      })
+      .catch(e => {
+        console.error('Leap node error', e);
+        this.plasmaReady = false;
+      });
 
     const localNetwork = NETWORKS[process.env.NETWORK_ID || DEFAULT_NETWORK];
     this.local = new Web3(
@@ -45,17 +57,25 @@ export default class Web3Store {
 
     this.injectedAvailable = !!(ethereum || web3);
     if (metamask) {
-      metamask.isApproved().then(approved => {
-        this.updateInjected(approved ? ethereum : null, approved);
-      });
+      setTimeout(() => {
+        if (metamask.isEnabled()) {
+          this.updateInjected(ethereum);
+        } else {
+          metamask.isApproved().then(approved => {
+            this.updateInjected(approved ? ethereum : null, approved);
+          });
+        }
+      }, 500);
     } else if (web3) {
       this.updateInjected(web3.currentProvider);
+    } else {
+      this.updateInjected(null, false);
     }
   }
 
   @action
   private updateInjected(provider, approved = true) {
-    this.ready = true;
+    this.injectedReady = true;
     this.approved = approved;
     if (provider) {
       this.injected = new Web3(provider);

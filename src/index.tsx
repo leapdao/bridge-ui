@@ -49,44 +49,37 @@ const network = new Network(
 );
 const unspents = new Unspents(bridge, account, node, web3);
 
-web3.plasma.getConfig().then(({ bridgeAddr }) => {
-  bridge.defaultAddress = bridgeAddr;
-  ReactDOM.render(
-    <BrowserRouter>
-      <Provider
-        {...{
-          account,
-          tokens,
-          bridge,
-          network,
-          transactions,
-          explorer,
-          unspents,
-          node,
-          web3,
-        }}
-      >
-        <Fragment>
-          <TxNotification />
-          <Route path="/" exact component={Slots} />
-          <Route
-            path="/:bridgeAddr(0x[0-9a-fA-f]{40})"
-            exact
-            component={Slots}
-          />
-          <Route path="/registerToken" exact component={RegisterToken} />
-          <Route
-            path="/registerToken/:bridgeAddr(0x[0-9a-fA-f]{40})"
-            exact
-            component={RegisterToken}
-          />
-          <Route path="/wallet" component={Wallet} />
-          <Route path="/explorer" component={Explorer} />
-          <Route path="/faucet" component={Faucet} />
-          <Route path="/status" component={Status} />
-        </Fragment>
-      </Provider>
-    </BrowserRouter>,
-    document.getElementById('app')
-  );
-});
+ReactDOM.render(
+  <BrowserRouter>
+    <Provider
+      {...{
+        account,
+        tokens,
+        bridge,
+        network,
+        transactions,
+        explorer,
+        unspents,
+        node,
+        web3,
+      }}
+    >
+      <Fragment>
+        <TxNotification />
+        <Route path="/" exact component={Slots} />
+        <Route path="/:bridgeAddr(0x[0-9a-fA-f]{40})" exact component={Slots} />
+        <Route path="/registerToken" exact component={RegisterToken} />
+        <Route
+          path="/registerToken/:bridgeAddr(0x[0-9a-fA-f]{40})"
+          exact
+          component={RegisterToken}
+        />
+        <Route path="/wallet" component={Wallet} />
+        <Route path="/explorer" component={Explorer} />
+        <Route path="/faucet" component={Faucet} />
+        <Route path="/status" component={Status} />
+      </Fragment>
+    </Provider>
+  </BrowserRouter>,
+  document.getElementById('app')
+);

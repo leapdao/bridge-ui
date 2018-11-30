@@ -241,6 +241,8 @@ export default class Slots extends React.Component<SlotsProps, any> {
     return (
       <AppLayout section="slots" bridgeAddr={match.params.bridgeAddr}>
         <h1>Slots auction</h1>
+
+        <Web3SubmitWarning />
         <Form layout="inline">
           <Form.Item>
             <Input
@@ -292,8 +294,6 @@ export default class Slots extends React.Component<SlotsProps, any> {
             {slotsTable}
           </div>
         </div>
-
-        <Web3SubmitWarning />
       </AppLayout>
     );
   }

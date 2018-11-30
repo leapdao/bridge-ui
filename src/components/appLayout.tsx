@@ -7,6 +7,7 @@
 
 import * as React from 'react';
 import { Component, Fragment } from 'react';
+import { reaction } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
@@ -47,6 +48,13 @@ class AppLayout extends Component<AppLayoutProps, any> {
   constructor(props) {
     super(props);
     props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
+
+    reaction(
+      () => props.bridge.defaultAddress,
+      () => {
+        props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
+      }
+    );
   }
 
   private get psc() {
@@ -62,6 +70,10 @@ class AppLayout extends Component<AppLayoutProps, any> {
 
   render() {
     const { account, web3, section, bridge, bridgeAddr } = this.props;
+
+    if (web3.plasmaReady === false) {
+      return <Message>No connection to Leap node</Message>;
+    }
 
     if (!account.ready) {
       return (

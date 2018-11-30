@@ -6,7 +6,8 @@
  */
 
 import { computed, observable } from 'mobx';
-import { Contract, TransactionReceipt } from 'web3/types';
+import { TransactionReceipt } from 'web3/types';
+import Contract from 'web3/eth/contract';
 import PromiEvent from 'web3/promiEvent';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';

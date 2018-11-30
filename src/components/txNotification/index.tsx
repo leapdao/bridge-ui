@@ -7,7 +7,12 @@
 
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { Spin, Icon, notification } from 'antd';
+import 'antd/lib/spin/style';
+import * as Spin from 'antd/lib/spin';
+import 'antd/lib/icon/style';
+import * as Icon from 'antd/lib/icon';
+import 'antd/lib/notification/style';
+import * as notification from 'antd/lib/notification';
 
 import { TxStatus } from './types';
 
