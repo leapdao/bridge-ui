@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import ethUtil from 'ethereumjs-util';
+import { isValidAddress } from 'ethereumjs-util';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Input, Button, Form } from 'antd';
@@ -49,7 +49,7 @@ class TransferForm extends React.Component<TransferFormProps, any> {
       return 'Required';
     }
 
-    if (!ethUtil.isValidAddress(this.receiver)) {
+    if (!isValidAddress(this.receiver)) {
       return 'Invalid address';
     }
 

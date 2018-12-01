@@ -9,7 +9,7 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import * as ethUtil from 'ethereumjs-util';
+import { toChecksumAddress } from 'ethereumjs-util';
 import { Form, Input, Divider } from 'antd';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
@@ -22,8 +22,7 @@ import Network from '../stores/network';
 import { match } from 'react-router';
 import Tokens from '../stores/tokens';
 
-const addrCmp = (a1, a2) =>
-  ethUtil.toChecksumAddress(a1) === ethUtil.toChecksumAddress(a2);
+const addrCmp = (a1, a2) => toChecksumAddress(a1) === toChecksumAddress(a2);
 
 const cellStyle = {
   textAlign: 'left',

@@ -11,7 +11,7 @@ import { Link } from 'react-router-dom';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Button, Table } from 'antd';
-import ethUtil from 'ethereumjs-util';
+import { bufferToHex } from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
 import { shortenHex } from '../../utils';
@@ -75,7 +75,7 @@ export default class Exit extends React.Component<ExitProps, any> {
               (a, b) => b.transaction.blockNumber - a.transaction.blockNumber
             )
             .map(u => {
-              const inputHash = ethUtil.bufferToHex(u.outpoint.hash);
+              const inputHash = bufferToHex(u.outpoint.hash);
               return {
                 key: u.outpoint.hex(),
                 value: <TokenValue {...u.output} />,
