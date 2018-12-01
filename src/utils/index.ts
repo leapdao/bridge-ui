@@ -4,6 +4,7 @@ export const NETWORKS = {
   4: { name: 'Rinkeby', provider: 'https://rinkeby.infura.io', etherscanBase: 'https://rinkeby.etherscan.io' },
   42: { name: 'Kovan', provider: 'https://kovan.infura.io', etherscanBase: 'https://kovan.etherscan.io' },
   4447: { name: 'Truffle', provider: 'http://localhost:9545', etherscanBase: 'https://etherscan.io' },
+  5777: { name: 'Ganache', provider: 'http://localhost:7545', etherscanBase: 'https://etherscan.io' },
 };
 
 export const PLASMA_NODES = {

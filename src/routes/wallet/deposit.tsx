@@ -16,17 +16,17 @@ import TokenValue from '../../components/tokenValue';
 import AmountInput from '../../components/amountInput';
 import Tokens from '../../stores/tokens';
 import Network from '../../stores/network';
-import Bridge from '../../stores/bridge';
+import ExitHandler from '../../stores/exitHandler';
 
 interface DepositProps {
   tokens?: Tokens;
   network?: Network;
-  bridge?: Bridge;
+  exitHandler?: ExitHandler;
   color: number;
   onColorChange: (color: number) => void;
 }
 
-@inject('tokens', 'bridge', 'network')
+@inject('tokens', 'exitHandler', 'network')
 @observer
 export default class Deposit extends React.Component<DepositProps, any> {
   @computed
@@ -41,11 +41,11 @@ export default class Deposit extends React.Component<DepositProps, any> {
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const { bridge } = this.props;
+    const { exitHandler } = this.props;
     const value = this.selectedToken.isNft
       ? this.value
       : this.selectedToken.toCents(Number(this.value));
-    bridge.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
+    exitHandler.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
         this.value = 0;

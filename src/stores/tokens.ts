@@ -11,7 +11,7 @@ import autobind from 'autobind-decorator';
 import { range, NFT_COLOR_BASE } from '../utils';
 import Account from './account';
 import Token from './token';
-import Bridge from './bridge';
+import ExitHandler from './exitHandler';
 import Transactions from '../components/txNotification/transactions';
 import { Output } from 'leap-core';
 import NodeStore from './node';
@@ -26,7 +26,7 @@ export default class Tokens {
 
   constructor(
     private account: Account,
-    private bridge: Bridge,
+    private exitHandler: ExitHandler,
     private txs: Transactions,
     private node: NodeStore,
     private web3: Web3Store
@@ -34,11 +34,11 @@ export default class Tokens {
     this.erc20TokenCount = 0;
     this.nftTokenCount = 0;
 
-    reaction(() => this.bridge.contract, this.init);
+    reaction(() => this.exitHandler.contract, this.init);
     reaction(
-      () => this.bridge.events,
+      () => this.exitHandler.events,
       () => {
-        this.bridge.events.on('NewToken', this.loadTokens.bind(this));
+        this.exitHandler.events.on('NewToken', this.loadTokens.bind(this));
       }
     );
   }
@@ -106,8 +106,9 @@ export default class Tokens {
   }
 
   private loadTokenColorRange(from: number, to: number): Promise<Token>[] {
+    console.log(this.exitHandler.contract);
     return (range(from, to) as number[]).map(color => {
-      return this.bridge.contract.methods
+      return this.exitHandler.contract.methods
         .tokens(color)
         .call()
         .then(({ 0: address }) => {
@@ -125,11 +126,11 @@ export default class Tokens {
 
   public loadTokens() {
     return Promise.all([
-      this.bridge.contract.methods
+      this.exitHandler.contract.methods
         .erc20TokenCount()
         .call()
         .then(r => Number(r)),
-      this.bridge.contract.methods
+      this.exitHandler.contract.methods
         .nftTokenCount()
         .call()
         .then(r => Number(r)),

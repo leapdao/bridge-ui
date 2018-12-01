@@ -17,16 +17,16 @@ import TokenValue from '../../components/tokenValue';
 import { shortenHex } from '../../utils';
 import Tokens from '../../stores/tokens';
 import Unspents from '../../stores/unspents';
-import Bridge from '../../stores/bridge';
+import ExitHandler from '../../stores/exitHandler';
 
 interface ExitProps {
   tokens?: Tokens;
   unspents?: Unspents;
-  bridge?: Bridge;
+  exitHandler?: ExitHandler;
   color: number;
 }
 
-@inject('tokens', 'bridge', 'network', 'unspents')
+@inject('tokens', 'exitHandler', 'network', 'unspents')
 @observer
 export default class Exit extends React.Component<ExitProps, any> {
   @computed
@@ -36,7 +36,7 @@ export default class Exit extends React.Component<ExitProps, any> {
   }
 
   public render() {
-    const { unspents, bridge } = this.props;
+    const { unspents, exitHandler } = this.props;
 
     const utxoList =
       unspents && unspents.listForColor(this.selectedToken.color);
@@ -111,8 +111,8 @@ export default class Exit extends React.Component<ExitProps, any> {
             })}
         />
 
-        <Button onClick={() => bridge.finalizeExits(this.selectedToken.color)}>
-          Finalize {this.selectedToken.symbol} exits
+        <Button onClick={() => exitHandler.finalizeExits(this.selectedToken.color)}>
+          Finalize {this.selectedToken.symbol} top exit
         </Button>
       </Fragment>
     );

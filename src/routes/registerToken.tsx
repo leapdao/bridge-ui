@@ -16,10 +16,9 @@ import { isValidAddress } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 import AppLayout from '../components/appLayout';
-import Bridge from '../stores/bridge';
+import ExitHandler from '../stores/exitHandler';
 import Network from '../stores/network';
 import Tokens from '../stores/tokens';
-import { match } from 'react-router';
 
 const Item = observer(({ item }) => (
   <List.Item key={item.address}>
@@ -44,15 +43,12 @@ const Item = observer(({ item }) => (
 ));
 
 interface RegisterTokenProps {
-  bridge: Bridge;
+  exitHandler: ExitHandler;
   network: Network;
   tokens: Tokens;
-  match: match<{
-    bridgeAddr: string;
-  }>;
 }
 
-@inject('tokens', 'bridge', 'network')
+@inject('tokens', 'exitHandler', 'network')
 @observer
 export default class RegisterToken extends React.Component<
   RegisterTokenProps,
@@ -64,9 +60,9 @@ export default class RegisterToken extends React.Component<
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const { bridge } = this.props;
+    const { exitHandler } = this.props;
 
-    bridge
+    exitHandler
       .registerToken(this.tokenAddr)
       .on('transactionHash', registerTxHash => {
         console.log('registerToken', registerTxHash); // eslint-disable-line
@@ -80,10 +76,10 @@ export default class RegisterToken extends React.Component<
   }
 
   render() {
-    const { network, tokens, match } = this.props;
+    const { network, tokens } = this.props;
 
     return (
-      <AppLayout section="registerToken" bridgeAddr={match.params.bridgeAddr}>
+      <AppLayout section="registerToken">
         <h1>Register a new ERC20/ERC721 token</h1>
 
         <Web3SubmitWarning />

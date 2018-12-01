@@ -16,7 +16,8 @@ import {
 import { helpers, Tx, Input, Output } from 'leap-core';
 import * as Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
-import BN from 'bn.js';
+// @ts-ignore
+import * as BN from 'bn.js';
 import { EventLog } from 'web3/types';
 import Contract from 'web3/eth/contract';
 import { erc20, erc721 } from '../utils/abis';

@@ -17,7 +17,8 @@ import { Provider } from 'mobx-react';
 import { DEFAULT_NETWORK } from './utils';
 
 import Tokens from './stores/tokens';
-import Bridge from './stores/bridge';
+import Operator from './stores/operator';
+import ExitHandler from './stores/exitHandler';
 import Account from './stores/account';
 import Network from './stores/network';
 import ExplorerStore from './stores/explorer';
@@ -44,8 +45,9 @@ const web3 = new Web3Store();
 const transactions = new Transactions();
 const account = new Account(web3);
 const node = new NodeStore(web3);
-const bridge = new Bridge(account, transactions, web3);
-const tokens = new Tokens(account, bridge, transactions, node, web3);
+const operator = new Operator(account, transactions, web3);
+const exitHandler = new ExitHandler(account, transactions, web3);
+const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(node, web3, tokens);
 const governanceContract = new GovernanceContract(governanceAddr, transactions, web3);
 const network = new Network(
@@ -53,7 +55,7 @@ const network = new Network(
   web3,
   process.env.NETWORK_ID || DEFAULT_NETWORK
 );
-const unspents = new Unspents(bridge, account, node, web3);
+const unspents = new Unspents(exitHandler, account, node, web3);
 
 ReactDOM.render(
   <BrowserRouter>
@@ -61,7 +63,8 @@ ReactDOM.render(
       {...{
         account,
         tokens,
-        bridge,
+        operator,
+        exitHandler,
         network,
         transactions,
         explorer,

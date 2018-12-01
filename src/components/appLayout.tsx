@@ -17,59 +17,31 @@ import Message from './message';
 import TokenValue from './tokenValue';
 
 import '../style.css';
-import Bridge from '../stores/bridge';
 import Tokens from '../stores/tokens';
 import Account from '../stores/account';
 import Web3Store from '../stores/web3';
 
-function getBridgeSuffix(bridge: Bridge, currentAddr: string) {
-  if (
-    currentAddr &&
-    bridge.defaultAddress.toLowerCase() !== currentAddr.toLowerCase()
-  ) {
-    return currentAddr;
-  }
-
-  return '';
-}
 
 interface AppLayoutProps {
-  bridgeAddr?: string;
-  bridge?: Bridge;
   tokens?: Tokens;
   account?: Account;
   web3?: Web3Store;
   section: string;
 }
 
-@inject('tokens', 'account', 'web3', 'bridge')
+@inject('tokens', 'account', 'web3')
 @observer
 class AppLayout extends Component<AppLayoutProps, any> {
   constructor(props) {
     super(props);
-    props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
-
-    reaction(
-      () => props.bridge.defaultAddress,
-      () => {
-        props.bridge.address = props.bridgeAddr || props.bridge.defaultAddress;
-      }
-    );
   }
 
   private get psc() {
     return this.props.tokens.list && this.props.tokens.list[0];
   }
 
-  componentDidUpdate(prevProps) {
-    if (prevProps.bridgeAddr !== this.props.bridgeAddr) {
-      this.props.bridge.address =
-        this.props.bridgeAddr || this.props.bridge.defaultAddress;
-    }
-  }
-
   render() {
-    const { account, web3, section, bridge, bridgeAddr } = this.props;
+    const { account, web3, section } = this.props;
 
     if (web3.plasmaReady === false) {
       return <Message>No connection to Leap node</Message>;
@@ -93,12 +65,12 @@ class AppLayout extends Component<AppLayoutProps, any> {
           <Link to="/governance">Governance</Link>
         </Menu.Item>
         <Menu.Item key="slots">
-          <Link to={`/${getBridgeSuffix(bridge, bridgeAddr)}`}>
+          <Link to={`/`}>
             Slots auction
           </Link>
         </Menu.Item>
         <Menu.Item key="registerToken">
-          <Link to={`/registerToken/${getBridgeSuffix(bridge, bridgeAddr)}`}>
+          <Link to={`/registerToken`}>
             Register token
           </Link>
         </Menu.Item>
