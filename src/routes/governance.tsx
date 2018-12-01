@@ -92,11 +92,13 @@ export default class Governance extends React.Component<GovernanceProps, any> {
       return value;
     }
 
+    const shortenedValue = `${value.substring(0, 8)}...${value.substring(36)}`;
+
     const etherscanLink = value => `${NETWORKS[this.props.network.network].etherscanBase}/address/${value}`;
 
     return (
       <a href={etherscanLink(value)}>
-        {value}
+        {shortenedValue}
       </a>
     );
   }
