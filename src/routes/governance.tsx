@@ -97,7 +97,7 @@ export default class Governance extends React.Component<GovernanceProps, any> {
     const etherscanLink = value => `${NETWORKS[this.props.network.network].etherscanBase}/address/${value}`;
 
     return (
-      <a href={etherscanLink(value)}>
+      <a href={etherscanLink(value)} title={value}>
         {shortenedValue}
       </a>
     );
