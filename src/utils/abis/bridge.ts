@@ -1,6 +1,34 @@
 export default [
   {
     constant: true,
+    inputs: [],
+    name: 'lastParentBlock',
+    outputs: [
+      {
+        name: '',
+        type: 'uint64',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'depositCount',
+    outputs: [
+      {
+        name: '',
+        type: 'uint32',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
     inputs: [
       {
         name: '',
@@ -48,6 +76,34 @@ export default [
       {
         name: 'newTendermint',
         type: 'bytes32',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'exitStake',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'parentBlockInterval',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
       },
     ],
     payable: false,
@@ -116,6 +172,43 @@ export default [
   {
     constant: true,
     inputs: [],
+    name: 'lastEpochBlockHeight',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'maxReward',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [],
+    name: 'renounceOwnership',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
     name: 'nftTokenCount',
     outputs: [
       {
@@ -135,6 +228,75 @@ export default [
       {
         name: '',
         type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'owner',
+    outputs: [
+      {
+        name: '',
+        type: 'address',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: '',
+        type: 'uint16',
+      },
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    name: 'nftExits',
+    outputs: [
+      {
+        name: 'utxoId',
+        type: 'bytes32',
+      },
+      {
+        name: 'exitableAt',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'exitDuration',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'GENESIS',
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
       },
     ],
     payable: false,
@@ -213,6 +375,39 @@ export default [
     inputs: [
       {
         name: '',
+        type: 'address',
+      },
+    ],
+    name: 'tokenColors',
+    outputs: [
+      {
+        name: '',
+        type: 'bool',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'transferOwnership',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: '',
         type: 'uint16',
       },
     ],
@@ -253,6 +448,14 @@ export default [
         name: 'owner',
         type: 'address',
       },
+      {
+        name: 'finalized',
+        type: 'bool',
+      },
+      {
+        name: 'stake',
+        type: 'uint256',
+      },
     ],
     payable: false,
     stateMutability: 'view',
@@ -274,6 +477,10 @@ export default [
       },
       {
         name: '_exitDuration',
+        type: 'uint256',
+      },
+      {
+        name: '_exitStake',
         type: 'uint256',
       },
     ],
@@ -522,6 +729,63 @@ export default [
     type: 'event',
   },
   {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'previousOwner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnershipRenounced',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'previousOwner',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        name: 'newOwner',
+        type: 'address',
+      },
+    ],
+    name: 'OwnershipTransferred',
+    type: 'event',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_exitStake',
+        type: 'uint256',
+      },
+    ],
+    name: 'setExitStake',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_epochLength',
+        type: 'uint256',
+      },
+    ],
+    name: 'setEpochLength',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     constant: true,
     inputs: [],
     name: 'tokenCount',
@@ -751,6 +1015,33 @@ export default [
       },
     ],
     name: 'startExit',
+    outputs: [
+      {
+        name: 'utxoId',
+        type: 'bytes32',
+      },
+    ],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_proof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_oindex',
+        type: 'uint256',
+      },
+      {
+        name: 'signedData',
+        type: 'bytes32[]',
+      },
+    ],
+    name: 'startBoughtExit',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',

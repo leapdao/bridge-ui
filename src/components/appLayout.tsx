@@ -89,6 +89,9 @@ class AppLayout extends Component<AppLayoutProps, any> {
         mode={horizontal ? 'horizontal' : 'vertical'}
         style={{ lineHeight: '64px', width: '100%' }}
       >
+        <Menu.Item key="governance">
+          <Link to="/governance">Governance</Link>
+        </Menu.Item>
         <Menu.Item key="slots">
           <Link to={`/${getBridgeSuffix(bridge, bridgeAddr)}`}>
             Slots auction
