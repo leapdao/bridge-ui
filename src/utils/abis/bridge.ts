@@ -2,94 +2,25 @@ export default [
   {
     constant: true,
     inputs: [],
+    name: 'genesisBlockNumber',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
     name: 'lastParentBlock',
     outputs: [
       {
         name: '',
         type: 'uint64',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'depositCount',
-    outputs: [
-      {
-        name: '',
-        type: 'uint32',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'slots',
-    outputs: [
-      {
-        name: 'eventCounter',
-        type: 'uint32',
-      },
-      {
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        name: 'stake',
-        type: 'uint64',
-      },
-      {
-        name: 'signer',
-        type: 'address',
-      },
-      {
-        name: 'tendermint',
-        type: 'bytes32',
-      },
-      {
-        name: 'activationEpoch',
-        type: 'uint32',
-      },
-      {
-        name: 'newOwner',
-        type: 'address',
-      },
-      {
-        name: 'newStake',
-        type: 'uint64',
-      },
-      {
-        name: 'newSigner',
-        type: 'address',
-      },
-      {
-        name: 'newTendermint',
-        type: 'bytes32',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'exitStake',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
       },
     ],
     payable: false,
@@ -113,70 +44,11 @@ export default [
   {
     constant: true,
     inputs: [],
-    name: 'lastCompleteEpoch',
+    name: 'operator',
     outputs: [
       {
         name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'epochLength',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'uint32',
-      },
-    ],
-    name: 'deposits',
-    outputs: [
-      {
-        name: 'height',
-        type: 'uint64',
-      },
-      {
-        name: 'color',
-        type: 'uint16',
-      },
-      {
-        name: 'owner',
         type: 'address',
-      },
-      {
-        name: 'amount',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'lastEpochBlockHeight',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
       },
     ],
     payable: false,
@@ -198,98 +70,6 @@ export default [
     type: 'function',
   },
   {
-    constant: false,
-    inputs: [],
-    name: 'renounceOwnership',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'nftTokenCount',
-    outputs: [
-      {
-        name: '',
-        type: 'uint16',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'averageGasPrice',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'owner',
-    outputs: [
-      {
-        name: '',
-        type: 'address',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'uint16',
-      },
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    name: 'nftExits',
-    outputs: [
-      {
-        name: 'utxoId',
-        type: 'bytes32',
-      },
-      {
-        name: 'exitableAt',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'exitDuration',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
     constant: true,
     inputs: [],
     name: 'GENESIS',
@@ -297,20 +77,6 @@ export default [
       {
         name: '',
         type: 'bytes32',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'erc20TokenCount',
-    outputs: [
-      {
-        name: '',
-        type: 'uint16',
       },
     ],
     payable: false,
@@ -340,16 +106,22 @@ export default [
         type: 'uint32',
       },
       {
-        name: 'slot',
-        type: 'uint8',
-      },
-      {
         name: 'timestamp',
         type: 'uint32',
       },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'exitHandler',
+    outputs: [
       {
-        name: 'reward',
-        type: 'uint64',
+        name: '',
+        type: 'address',
       },
     ],
     payable: false,
@@ -372,17 +144,12 @@ export default [
   },
   {
     constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'address',
-      },
-    ],
-    name: 'tokenColors',
+    inputs: [],
+    name: 'admin',
     outputs: [
       {
         name: '',
-        type: 'bool',
+        type: 'address',
       },
     ],
     payable: false,
@@ -390,134 +157,11 @@ export default [
     type: 'function',
   },
   {
-    constant: false,
-    inputs: [
-      {
-        name: '_newOwner',
-        type: 'address',
-      },
-    ],
-    name: 'transferOwnership',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'uint16',
-      },
-    ],
-    name: 'tokens',
-    outputs: [
-      {
-        name: 'addr',
-        type: 'address',
-      },
-      {
-        name: 'currentSize',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    name: 'exits',
-    outputs: [
-      {
-        name: 'amount',
-        type: 'uint256',
-      },
-      {
-        name: 'color',
-        type: 'uint16',
-      },
-      {
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        name: 'finalized',
-        type: 'bool',
-      },
-      {
-        name: 'stake',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [
-      {
-        name: '_epochLength',
-        type: 'uint256',
-      },
-      {
-        name: '_maxReward',
-        type: 'uint256',
-      },
-      {
-        name: '_parentBlockInterval',
-        type: 'uint256',
-      },
-      {
-        name: '_exitDuration',
-        type: 'uint256',
-      },
-      {
-        name: '_exitStake',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'constructor',
-  },
-  {
     anonymous: false,
     inputs: [
       {
         indexed: false,
-        name: 'epoch',
-        type: 'uint256',
-      },
-    ],
-    name: 'Epoch',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        name: 'epochLength',
-        type: 'uint256',
-      },
-    ],
-    name: 'EpochLength',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        name: 'blockNumber',
+        name: 'height',
         type: 'uint256',
       },
       {
@@ -533,239 +177,27 @@ export default [
     anonymous: false,
     inputs: [
       {
-        indexed: true,
-        name: 'depositId',
-        type: 'uint32',
-      },
-      {
-        indexed: true,
-        name: 'depositor',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        name: 'color',
-        type: 'uint256',
-      },
-      {
         indexed: false,
-        name: 'amount',
-        type: 'uint256',
-      },
-    ],
-    name: 'NewDeposit',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'txHash',
-        type: 'bytes32',
-      },
-      {
-        indexed: true,
-        name: 'outIndex',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        name: 'color',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        name: 'exitor',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        name: 'amount',
-        type: 'uint256',
-      },
-    ],
-    name: 'ExitStarted',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'signerAddr',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        name: 'slotId',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        name: 'tenderAddr',
-        type: 'bytes32',
-      },
-      {
-        indexed: false,
-        name: 'eventCounter',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        name: 'epoch',
-        type: 'uint256',
-      },
-    ],
-    name: 'ValidatorJoin',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'signerAddr',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        name: 'slotId',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        name: 'tenderAddr',
-        type: 'bytes32',
-      },
-      {
-        indexed: false,
-        name: 'newSigner',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        name: 'eventCounter',
-        type: 'uint256',
-      },
-      {
-        indexed: false,
-        name: 'epoch',
-        type: 'uint256',
-      },
-    ],
-    name: 'ValidatorLogout',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'signerAddr',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        name: 'slotId',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        name: 'tenderAddr',
-        type: 'bytes32',
-      },
-      {
-        indexed: false,
-        name: 'epoch',
-        type: 'uint256',
-      },
-    ],
-    name: 'ValidatorLeave',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'signerAddr',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        name: 'slotId',
-        type: 'uint256',
-      },
-      {
-        indexed: true,
-        name: 'tenderAddr',
-        type: 'bytes32',
-      },
-      {
-        indexed: false,
-        name: 'eventCounter',
-        type: 'uint256',
-      },
-    ],
-    name: 'ValidatorUpdate',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'tokenAddr',
-        type: 'address',
-      },
-      {
-        indexed: false,
-        name: 'color',
-        type: 'uint16',
-      },
-    ],
-    name: 'NewToken',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'previousOwner',
+        name: 'operator',
         type: 'address',
       },
     ],
-    name: 'OwnershipRenounced',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'previousOwner',
-        type: 'address',
-      },
-      {
-        indexed: true,
-        name: 'newOwner',
-        type: 'address',
-      },
-    ],
-    name: 'OwnershipTransferred',
+    name: 'NewOperator',
     type: 'event',
   },
   {
     constant: false,
     inputs: [
       {
-        name: '_exitStake',
+        name: '_parentBlockInterval',
+        type: 'uint256',
+      },
+      {
+        name: '_maxReward',
         type: 'uint256',
       },
     ],
-    name: 'setExitStake',
+    name: 'initialize',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
@@ -775,138 +207,11 @@ export default [
     constant: false,
     inputs: [
       {
-        name: '_epochLength',
-        type: 'uint256',
-      },
-    ],
-    name: 'setEpochLength',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'tokenCount',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_token',
+        name: '_operator',
         type: 'address',
       },
     ],
-    name: 'registerToken',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [
-      {
-        name: '_slotId',
-        type: 'uint256',
-      },
-    ],
-    name: 'getSlot',
-    outputs: [
-      {
-        name: '',
-        type: 'uint32',
-      },
-      {
-        name: '',
-        type: 'address',
-      },
-      {
-        name: '',
-        type: 'uint64',
-      },
-      {
-        name: '',
-        type: 'address',
-      },
-      {
-        name: '',
-        type: 'bytes32',
-      },
-      {
-        name: '',
-        type: 'uint32',
-      },
-      {
-        name: '',
-        type: 'address',
-      },
-      {
-        name: '',
-        type: 'uint64',
-      },
-      {
-        name: '',
-        type: 'address',
-      },
-      {
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'getTip',
-    outputs: [
-      {
-        name: '',
-        type: 'bytes32',
-      },
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_slotId',
-        type: 'uint256',
-      },
-      {
-        name: '_value',
-        type: 'uint256',
-      },
-      {
-        name: '_signerAddr',
-        type: 'address',
-      },
-      {
-        name: '_tenderAddr',
-        type: 'bytes32',
-      },
-    ],
-    name: 'bet',
+    name: 'setOperator',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
@@ -915,24 +220,6 @@ export default [
   {
     constant: false,
     inputs: [
-      {
-        name: '_slotId',
-        type: 'uint256',
-      },
-    ],
-    name: 'activate',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_slotId',
-        type: 'uint256',
-      },
       {
         name: '_prevHash',
         type: 'bytes32',
@@ -943,146 +230,12 @@ export default [
       },
     ],
     name: 'submitPeriod',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_txData',
-        type: 'bytes32[]',
-      },
-    ],
-    name: 'reportInvalidDeposit',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_proof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_prevProof',
-        type: 'bytes32[]',
-      },
-    ],
-    name: 'reportDoubleSpend',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_owner',
-        type: 'address',
-      },
-      {
-        name: '_amountOrTokenId',
-        type: 'uint256',
-      },
-      {
-        name: '_color',
-        type: 'uint16',
-      },
-    ],
-    name: 'deposit',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_proof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_oindex',
-        type: 'uint256',
-      },
-    ],
-    name: 'startExit',
     outputs: [
       {
-        name: 'utxoId',
-        type: 'bytes32',
-      },
-    ],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_proof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_oindex',
-        type: 'uint256',
-      },
-      {
-        name: 'signedData',
-        type: 'bytes32[]',
-      },
-    ],
-    name: 'startBoughtExit',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_proof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_prevProof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_oIndex',
-        type: 'uint256',
-      },
-      {
-        name: '_inputIndex',
+        name: 'newHeight',
         type: 'uint256',
       },
     ],
-    name: 'challengeExit',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_color',
-        type: 'uint16',
-      },
-    ],
-    name: 'finalizeExits',
-    outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
     type: 'function',
