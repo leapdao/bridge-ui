@@ -7276,8 +7276,10 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
-"leap-core@file:../parsec-lib":
-  version "0.19.2"
+leap-core@^0.19.4:
+  version "0.19.4"
+  resolved "https://registry.yarnpkg.com/leap-core/-/leap-core-0.19.4.tgz#284efa0d9b654a28831e08eedffaee2ba8db1e06"
+  integrity sha512-66Q4gix0SOamS1Rod7MbVamFwGn8ZlQKKvRPXh5cG6OAAsNINCuqjZjnruwNWUa4AZjXgn70o8DFCVhHpSmebg==
   dependencies:
     "@types/web3" "^1.0.12"
     babel-polyfill "^6.26.0"
