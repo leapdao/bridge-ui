@@ -1,3 +1,5 @@
+import { ABIDefinition } from 'web3/Eth/ABI';
+
 export default [
   {
     constant: true,
@@ -474,4 +476,4 @@ export default [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-];
+] as ABIDefinition[];
