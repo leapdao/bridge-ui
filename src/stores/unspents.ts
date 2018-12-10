@@ -19,7 +19,7 @@ import {
 import { Transaction } from 'web3/eth/types';
 import { bufferToHex } from 'ethereumjs-util';
 
-import Bridge from './bridge';
+import ExitHandler from './exitHandler';
 import Account from './account';
 import autobind from 'autobind-decorator';
 import { range } from '../utils/range';
@@ -59,7 +59,7 @@ export default class Unspents {
   private latestBlock: number;
 
   constructor(
-    private bridge: Bridge,
+    private exitHandler: ExitHandler,
     private account: Account,
     private node: NodeStore,
     private web3: Web3Store
@@ -67,10 +67,10 @@ export default class Unspents {
     reaction(() => this.account.address, this.clearUnspents);
     reaction(() => this.account.address, this.fetchUnspents);
     reaction(
-      () => bridge.events,
+      () => exitHandler.events,
       () => {
-        bridge.events.on('NewDeposit', this.fetchUnspents);
-        bridge.events.on('ExitStarted', this.fetchUnspents);
+        exitHandler.events.on('NewDeposit', this.fetchUnspents);
+        exitHandler.events.on('ExitStarted', this.fetchUnspents);
       }
     );
     reaction(() => this.node.latestBlock, this.fetchUnspents);
@@ -133,7 +133,7 @@ export default class Unspents {
     const startBlock = periodNumber * 32;
     const endBlock = periodNumber * 32 + 32;
     makePeriodFromRange(this.web3.plasma, startBlock, endBlock).then(period =>
-      this.bridge.startExit(
+      this.exitHandler.startExit(
         period.proof(Tx.fromRaw(raw)),
         unspent.outpoint.index
       )

@@ -17,7 +17,6 @@ import { Form, Input, Button, Divider, Alert } from 'antd';
 import AppLayout from '../components/appLayout';
 import { NETWORKS } from '../utils';
 import ExplorerStore from '../stores/explorer';
-import Bridge from '../stores/bridge';
 import Network from '../stores/network';
 import Tokens from '../stores/tokens';
 
@@ -27,14 +26,13 @@ import Address from './address';
 
 interface ExplorerProps {
   explorer: ExplorerStore;
-  bridge: Bridge;
   network: Network;
   tokens: Tokens;
   match: match<any>;
   history: any;
 }
 
-@inject('tokens', 'network', 'explorer', 'bridge')
+@inject('tokens', 'network', 'explorer')
 @observer
 export default class Explorer extends React.Component<ExplorerProps, any> {
   @observable
@@ -45,7 +43,7 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
   }
 
   public render() {
-    const { explorer, bridge, network, match } = this.props;
+    const { explorer, network, match } = this.props;
 
     return (
       <AppLayout section="explorer">
@@ -100,8 +98,6 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
         <dl className="info">
           <dt>Network</dt>
           <dd>{NETWORKS[network.network].name || network.network}</dd>
-          <dt>Bridge contract address</dt>
-          <dd>{bridge.address}</dd>
           {this.psc && (
             <Fragment>
               <dt>Token contract address</dt>
