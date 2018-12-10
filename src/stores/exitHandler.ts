@@ -5,24 +5,17 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, action, reaction, IObservableArray } from 'mobx';
-import autobind from 'autobind-decorator';
-import Contract from 'web3/eth/contract';
 import { exitHandler as exitHandlerAbi } from '../utils/abis';
 
 import Token from './token';
-import Slot from './slot';
 import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
 
-import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
 import Web3Store from './web3';
 
 export default class ExitHandler extends ContractStore {
-  @observable
-  public defaultAddress: string;
 
   constructor(
     private account: Account,

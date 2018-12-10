@@ -68,11 +68,7 @@ export default class Operator extends ContractStore {
   @observable
   public lastCompleteEpoch: number;
 
-  @observable
-  public defaultAddress: string;
-
   constructor(
-    private account: Account,
     transactions: Transactions,
     web3: Web3Store,
     address?: string

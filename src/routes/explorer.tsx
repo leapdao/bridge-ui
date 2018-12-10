@@ -23,16 +23,22 @@ import Tokens from '../stores/tokens';
 import Block from './block';
 import Transaction from './transaction';
 import Address from './address';
+import Operator from '../stores/operator';
+import ExitHandler from '../stores/exitHandler';
+import Bridge from '../stores/bridge';
 
 interface ExplorerProps {
   explorer: ExplorerStore;
+  bridge: Bridge;
+  operator: Operator;
+  exitHandler: ExitHandler;
   network: Network;
   tokens: Tokens;
   match: match<any>;
   history: any;
 }
 
-@inject('tokens', 'network', 'explorer')
+@inject('tokens', 'network', 'explorer', 'exitHandler', 'bridge', 'operator')
 @observer
 export default class Explorer extends React.Component<ExplorerProps, any> {
   @observable
@@ -43,7 +49,7 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
   }
 
   public render() {
-    const { explorer, network, match } = this.props;
+    const { explorer, network, match, operator, exitHandler, bridge } = this.props;
 
     return (
       <AppLayout section="explorer">
@@ -98,6 +104,12 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
         <dl className="info">
           <dt>Network</dt>
           <dd>{NETWORKS[network.network].name || network.network}</dd>
+          <dt>Bridge contract</dt>
+          <dd>{bridge.address}</dd>
+          <dt>Operator contract</dt>
+          <dd>{operator.address}</dd>
+          <dt>Exit contract</dt>
+          <dd>{exitHandler.address}</dd>
           {this.psc && (
             <Fragment>
               <dt>Token contract address</dt>
