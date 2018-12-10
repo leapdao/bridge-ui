@@ -19,6 +19,7 @@ import { DEFAULT_NETWORK } from './utils';
 import Tokens from './stores/tokens';
 import Operator from './stores/operator';
 import ExitHandler from './stores/exitHandler';
+import Bridge from './stores/bridge';
 import Account from './stores/account';
 import Network from './stores/network';
 import ExplorerStore from './stores/explorer';
@@ -45,7 +46,8 @@ const web3 = new Web3Store();
 const transactions = new Transactions();
 const account = new Account(web3);
 const node = new NodeStore(web3);
-const operator = new Operator(account, transactions, web3);
+const bridge = new Bridge(account, transactions, web3);
+const operator = new Operator(transactions, web3);
 const exitHandler = new ExitHandler(account, transactions, web3);
 const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(node, web3, tokens);
@@ -63,6 +65,7 @@ ReactDOM.render(
       {...{
         account,
         tokens,
+        bridge,
         operator,
         exitHandler,
         network,

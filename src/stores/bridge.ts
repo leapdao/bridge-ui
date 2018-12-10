@@ -68,9 +68,6 @@ export default class Bridge extends ContractStore {
   @observable
   public lastCompleteEpoch: number;
 
-  @observable
-  public defaultAddress: string;
-
   constructor(
     private account: Account,
     transactions: Transactions,
@@ -80,7 +77,7 @@ export default class Bridge extends ContractStore {
     super(bridgeAbi, address, transactions, web3);
 
     web3.plasma.getConfig().then(({ bridgeAddr }) => {
-      this.defaultAddress = bridgeAddr;
+      this.address = bridgeAddr;
     });
 
     reaction(() => {
