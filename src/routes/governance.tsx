@@ -12,7 +12,7 @@ import { Spin, List } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-import { NETWORKS } from '../utils';
+import { NETWORKS, shortenHex } from '../utils';
 
 import AppLayout from '../components/appLayout';
 import GovernanceContract from '../stores/governanceContract';
@@ -92,13 +92,11 @@ export default class Governance extends React.Component<GovernanceProps, any> {
       return value;
     }
 
-    const shortenedValue = `${value.substring(0, 8)}...${value.substring(36)}`;
-
     const etherscanLink = value => `${NETWORKS[this.props.network.network].etherscanBase}/address/${value}`;
 
     return (
       <a href={etherscanLink(value)} title={value} target="_blank" rel="noopener noreferrer">
-        {shortenedValue}
+        {shortenHex(value)}
       </a>
     );
   }
