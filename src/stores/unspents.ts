@@ -15,41 +15,44 @@ import {
   Output,
   Type,
   ExtendedWeb3,
+  LeapTransaction,
 } from 'leap-core';
-import { Transaction } from 'web3/eth/types';
 import { bufferToHex } from 'ethereumjs-util';
 
 import ExitHandler from './exitHandler';
 import Account from './account';
 import autobind from 'autobind-decorator';
-import { range } from '../utils/range';
+import { range, BLOCKS_PER_PERIOD } from '../utils';
 import NodeStore from './node';
 import Web3Store from './web3/';
 
-interface PlasmaTransaction extends Transaction {
-  raw: string;
-}
+type UnspentWithTx = Unspent & { transaction: LeapTransaction };
 
-type UnspentWithTx = Unspent & { transaction: PlasmaTransaction };
+const periodBlockRange = blockNumber =>
+  [
+    Math.floor(blockNumber / BLOCKS_PER_PERIOD) * BLOCKS_PER_PERIOD,
+    Math.ceil(blockNumber / BLOCKS_PER_PERIOD) * BLOCKS_PER_PERIOD,
+  ];
 
-function makePeriodFromRange(plasma: ExtendedWeb3, startBlock, endBlock) {
+const periodForBlockRange = (plasma: ExtendedWeb3, startBlock, endBlock) => {
   // ToDo: fix typing in lib
   return Promise.all(
     range(startBlock, endBlock - 1).map(n => plasma.eth.getBlock(n, true))
   ).then(blocks => {
-    return new Period(
-      null,
-      blocks.filter(a => !!a).map(({ number, timestamp, transactions }) => {
-        const block = new Block(number, {
-          timestamp,
-          txs: transactions.map((tx: PlasmaTransaction) => Tx.fromRaw(tx.raw)),
-        });
-
-        return block;
-      })
-    );
+    const blockList = blocks
+      .filter(a => !!a)
+      .map(({ number, timestamp, transactions }) => 
+        Block.from(number, timestamp, transactions as LeapTransaction[])
+      );
+    return new Period(null, blockList);
   });
 }
+
+const periodForTx = (plasma: ExtendedWeb3, tx: LeapTransaction) => {
+  const { blockNumber } = tx;
+  const [startBlock, endBlock] = periodBlockRange(blockNumber);
+  return periodForBlockRange(plasma, startBlock, endBlock);
+};
 
 export default class Unspents {
   @observable
@@ -79,10 +82,7 @@ export default class Unspents {
   @computed
   public get periodBlocksRange() {
     if (this.latestBlock) {
-      return [
-        Math.floor(this.latestBlock / 32) * 32,
-        Math.ceil(this.latestBlock / 32) * 32,
-      ];
+      return periodBlockRange(this.latestBlock);
     }
 
     return undefined;
@@ -96,46 +96,36 @@ export default class Unspents {
 
   @autobind
   private fetchUnspents() {
-    // ToDo: fix typing in lib
-    if (this.account.address) {
-      if (this.latestBlock !== this.node.latestBlock) {
-        this.latestBlock = this.node.latestBlock;
-        this.web3.plasma.instance
-          .getUnspent(this.account.address)
-          .then(unspent => {
-            return Promise.all(
-              unspent.map(u =>
-                this.web3.plasma.instance.eth.getTransaction(
-                  bufferToHex(u.outpoint.hash)
-                )
-              )
-            ).then(transactions => {
-              transactions.forEach((tx, i) => {
-                (unspent[
-                  i
-                ] as UnspentWithTx).transaction = tx as PlasmaTransaction;
-              });
-
-              return unspent as UnspentWithTx[];
-            });
-          })
-          .then(unspent => {
-            this.list = observable.array(unspent);
-          });
-      }
+    
+    if (!this.account.address || this.latestBlock === this.node.latestBlock) {
+      return;
     }
+
+    this.latestBlock = this.node.latestBlock;
+    this.web3.plasma.instance
+      .getUnspent(this.account.address)
+      .then((unspent: UnspentWithTx[]) => {
+        return Promise.all(
+          unspent.map((u : UnspentWithTx) =>
+            this.web3.plasma.instance.eth.getTransaction(
+              bufferToHex(u.outpoint.hash)
+            ).then((tx: LeapTransaction) => {
+              u.transaction = tx;
+              return u;
+            })
+          )
+        )
+      }).then((unspent: UnspentWithTx[]) => {
+        this.list = observable.array(unspent);
+      });
   }
 
   @autobind
   public exitUnspent(unspent: UnspentWithTx) {
-    const { blockNumber, raw } = unspent.transaction;
-    const periodNumber = Math.floor(blockNumber / 32);
-    const startBlock = periodNumber * 32;
-    const endBlock = periodNumber * 32 + 32;
-    makePeriodFromRange(this.web3.plasma.instance, startBlock, endBlock).then(period =>
+    periodForTx(this.web3.plasma.instance, unspent.transaction).then(period =>
       this.exitHandler.startExit(
-        period.proof(Tx.fromRaw(raw)),
-        unspent.outpoint.index
+        period.proof(Tx.fromRaw(unspent.transaction.raw)),
+        unspent.outpoint.index,
       )
     );
   }
