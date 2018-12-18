@@ -286,6 +286,10 @@ export default [
         type: 'bool',
       },
       {
+        name: 'priorityTimestamp',
+        type: 'uint32',
+      },
+      {
         name: 'stake',
         type: 'uint256',
       },
@@ -422,11 +426,19 @@ export default [
     constant: false,
     inputs: [
       {
+        name: '_youngestInputProof',
+        type: 'bytes32[]',
+      },
+      {
         name: '_proof',
         type: 'bytes32[]',
       },
       {
         name: '_outputIndex',
+        type: 'uint256',
+      },
+      {
+        name: '_inputIndex',
         type: 'uint256',
       },
     ],
@@ -471,6 +483,32 @@ export default [
       },
     ],
     name: 'challengeExit',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_youngerInputProof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_exitingTxProof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_outputIndex',
+        type: 'uint256',
+      },
+      {
+        name: '_inputIndex',
+        type: 'uint256',
+      },
+    ],
+    name: 'challengeYoungestInput',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
