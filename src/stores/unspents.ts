@@ -9,50 +9,24 @@ import { observable, reaction, computed } from 'mobx';
 import {
   Unspent,
   Tx,
-  Period,
-  Block,
   Input,
   Output,
   Type,
-  ExtendedWeb3,
   LeapTransaction,
+  helpers,
 } from 'leap-core';
 import { bufferToHex } from 'ethereumjs-util';
 
 import ExitHandler from './exitHandler';
 import Account from './account';
 import autobind from 'autobind-decorator';
-import { range, BLOCKS_PER_PERIOD } from '../utils';
 import NodeStore from './node';
 import Web3Store from './web3/';
 
+const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
+
 type UnspentWithTx = Unspent & { transaction: LeapTransaction };
 
-const periodBlockRange = blockNumber =>
-  [
-    Math.floor(blockNumber / BLOCKS_PER_PERIOD) * BLOCKS_PER_PERIOD,
-    Math.ceil(blockNumber / BLOCKS_PER_PERIOD) * BLOCKS_PER_PERIOD,
-  ];
-
-const periodForBlockRange = (plasma: ExtendedWeb3, startBlock, endBlock) => {
-  // ToDo: fix typing in lib
-  return Promise.all(
-    range(startBlock, endBlock - 1).map(n => plasma.eth.getBlock(n, true))
-  ).then(blocks => {
-    const blockList = blocks
-      .filter(a => !!a)
-      .map(({ number, timestamp, transactions }) => 
-        Block.from(number, timestamp, transactions as LeapTransaction[])
-      );
-    return new Period(null, blockList);
-  });
-}
-
-const periodForTx = (plasma: ExtendedWeb3, tx: LeapTransaction) => {
-  const { blockNumber } = tx;
-  const [startBlock, endBlock] = periodBlockRange(blockNumber);
-  return periodForBlockRange(plasma, startBlock, endBlock);
-};
 
 export default class Unspents {
   @observable
@@ -122,10 +96,20 @@ export default class Unspents {
 
   @autobind
   public exitUnspent(unspent: UnspentWithTx) {
-    periodForTx(this.web3.plasma.instance, unspent.transaction).then(period =>
+    const tx = Tx.fromRaw(unspent.transaction.raw);
+
+    getYoungestInputTx(this.web3.plasma.instance, tx).then(inputTx =>
+      Promise.all([
+        getProof(this.web3.plasma.instance, unspent.transaction),
+        getProof(this.web3.plasma.instance, inputTx.tx),
+        inputTx.index,
+      ])
+    ).then(([txProof, inputProof, inputIndex]) =>
       this.exitHandler.startExit(
-        period.proof(Tx.fromRaw(unspent.transaction.raw)),
+        inputProof,
+        txProof,
         unspent.outpoint.index,
+        inputIndex,
       )
     );
   }
