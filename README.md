@@ -31,13 +31,13 @@ NETWORK_ID=4 PLASMA_NODE=1 yarn start
 
 ## Build for deployment
 
-Provide proper network id, plasma node instance to use and governance contract address.
+Provide proper network id and plasma node instance to use.
 
 ```
-NETWORK_ID=4 PLASMA_NODE=1 GOVERNANCE_ADDR=0xeae90e8b0e4ddfa355558ee179a8b5c3eb73116b yarn run build
+NETWORK_ID=4 PLASMA_NODE_URL=http://node1.testnet.leapdao.org:8645 yarn run build
 ```
 
-## Build params (env variables)
+## Build params (env variables) 
 
 - `NETWORK_ID` — root network (1 — mainnet, 4 — rinkeby and so on)
 - `PLASMA_NODE` — plasma node id (0 — local, 1 — testnet 1, 2 — testnet 2)
