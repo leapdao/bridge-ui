@@ -39,9 +39,6 @@ import RegisterToken from './routes/registerToken';
 import Status from './routes/status';
 import Governance from './routes/governance';
 
-// TODO: get the bridge owner once we have ownable contracts (#68)
-const governanceAddr = process.env.GOVERNANCE_ADDR; 
-
 const web3 = new Web3Store();
 const transactions = new Transactions();
 const account = new Account(web3);
@@ -51,7 +48,7 @@ const operator = new Operator(transactions, web3);
 const exitHandler = new ExitHandler(account, transactions, web3);
 const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(node, web3, tokens);
-const governanceContract = new GovernanceContract(governanceAddr, transactions, web3);
+const governanceContract = new GovernanceContract(bridge, transactions, web3);
 const network = new Network(
   account,
   web3,
