@@ -12,45 +12,19 @@ import {
   governable as governableAbi 
 } from '../utils/abis';
 import ContractStore from './contractStore';
-import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
-import { reaction, observable, IObservableArray } from 'mobx';
 
 type ABIDefinitionBySig = Map<String, ABIDefinition>;
-
-type Proposal = {
-  num: number,
-  cancelled: boolean,
-  created: number,
-  effectiveDate: number,
-  msg: { abi: ABIDefinition, params: object } | { raw: string },
-};
 
 export default class GovernanceContract extends ContractStore {
   private funcBySignature: Map<String, ABIDefinition>;
 
-  @observable
-  public proposals: IObservableArray<Proposal>;
-
-  @observable
-  public noGovernance: boolean;
-
-  constructor(bridge: Bridge, transactions: Transactions, web3: Web3Store) {
-    super(governanceAbi, null, transactions, web3);
-
-    reaction(
-      () => bridge.contract,
-      () => {
-        bridge.contract.methods.admin().call().then((owner) => {
-          this.address = owner;
-          this.funcBySignature = this.calculateAbiSignatures();
-          this.fetch();
-        })
-      }
-    );
+  constructor(address: string, transactions: Transactions, web3: Web3Store) {
+    super(governanceAbi, address, transactions, web3);
+    this.funcBySignature = this.calculateAbiSignatures();
   }
 
-  private fetch() {
+  list() {
     return Promise.all([
       this.contract.methods.first().call(),
       this.contract.methods.size().call(),
@@ -69,12 +43,7 @@ export default class GovernanceContract extends ContractStore {
               msg: this.decodeMsgData(msgData)
             }));
         })  
-      ).then(proposals => {
-        this.proposals = observable.array(proposals);
-      });
-    }).catch(e => {
-      console.error('err', e);
-      this.noGovernance = true;
+      );
     });
   }
 

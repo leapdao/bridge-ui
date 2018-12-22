@@ -6,8 +6,9 @@
  */
 
 import * as React from 'react';
+import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import { List } from 'antd';
+import { Spin, List } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
@@ -68,8 +69,24 @@ export default class Governance extends React.Component<GovernanceProps, any> {
   
   constructor(props) {
     super(props);
+    this.fetch();
   }
+
+  @observable
+  proposals = [];
   
+  fetching = false;
+
+  fetch() {
+    const { governanceContract } = this.props;
+    this.fetching = true;
+
+    governanceContract.list().then(proposals => {
+      this.fetching = false;
+      this.proposals = proposals;
+    });
+  }
+
   private formatParam(abi, value) {
     if (abi.inputs[0].type !== 'address') {
       return value;
@@ -102,42 +119,38 @@ export default class Governance extends React.Component<GovernanceProps, any> {
   }
 
   render() { 
-    const { governanceContract } = this.props;
-    const { proposals, noGovernance } = governanceContract;
     return (
       <AppLayout section="governance">
         <Web3SubmitWarning />
 
-        {noGovernance && (<span>No governance set up</span>)}
+        <h1>Proposals</h1>
+        {this.fetching && (<Spin />)}
 
-        {proposals && proposals.length === 0 && (<span>No proposals yet</span>)}
+        {!this.proposals && (<span>No proposals yet</span>)}
 
-        {proposals && proposals.length > 0 && (
-          <Fragment>
-            <h1>Proposals</h1>
-            <List
-              itemLayout="vertical"
-              size="small"
-              dataSource={proposals}
-              renderItem={item => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={this.proposalDescription(item)}
-                    description={
-                      <div>
-                        <span>
-                          #{item.num} {this.proposalMethod(item)}
-                        </span>
-                        <span style={{ float: 'right' }}>
-                          {renderDate(item)}
-                        </span>
-                      </div>
-                    }
-                  />
-                </List.Item>            
-              )}
-            />
-          </Fragment>
+        {this.proposals && (
+          <List
+            itemLayout="vertical"
+            size="small"
+            dataSource={this.proposals}
+            renderItem={item => (
+              <List.Item>
+                <List.Item.Meta
+                  title={this.proposalDescription(item)}
+                  description={
+                    <div>
+                      <span>
+                        #{item.num} {this.proposalMethod(item)}
+                      </span>
+                      <span style={{ float: 'right' }}>
+                        {renderDate(item)}
+                      </span>
+                    </div>
+                  }
+                />
+              </List.Item>            
+            )}
+          />
         )}
       </AppLayout>
     );
