@@ -1,6 +1,11 @@
 import * as React from 'react';
 import { List } from 'antd';
 
+export type NamedNodeEntry = {
+  url: string;
+  label: string;
+};
+
 function callMethod(node, method, params = []) {
   return fetch(node, {
     method: 'post',
@@ -38,10 +43,7 @@ const nodeIcons = {
 const getStatus = info => info && info.status;
 
 interface MonitorProps {
-  nodes: Array<{
-    url: string;
-    label: string;
-  }>;
+  nodes: Array<NamedNodeEntry>;
 }
 
 interface MonitorState {
@@ -104,7 +106,7 @@ export default class Monitor extends React.Component<
         renderItem={node => (
           <List.Item key={node.url}>
             <span className="monitor-node">
-              <strong>{node.label}:</strong> {node.url}
+              {node.label && (<strong>{node.label}:</strong>)} {node.url}
             </span>
             <span
               className={`monitor-status monitor-status-${getStatus(

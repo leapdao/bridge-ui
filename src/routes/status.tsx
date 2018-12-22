@@ -8,25 +8,21 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import AppLayout from '../components/appLayout';
-import Monitor from '../components/monitor';
+import { NamedNodeEntry, default as Monitor } from '../components/monitor';
+import { PLASMA_NODES } from '../utils';
 
 @observer
 export default class Status extends React.Component {
   render() {
+    const nodes = Object
+      .values(PLASMA_NODES)
+      .splice(1)
+      .map(url => ({ url } as NamedNodeEntry));
     return (
       <AppLayout section="status">
         <h1>Nodes status</h1>
         <Monitor
-          nodes={[
-            {
-              url: 'https://testnet-1.leapdao.org',
-              label: 'Testnet #1',
-            },
-            {
-              url: 'https://testnet-2.leapdao.org',
-              label: 'Testnet #2',
-            },
-          ]}
+          nodes={nodes}
         />
       </AppLayout>
     );
