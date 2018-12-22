@@ -35,7 +35,7 @@ export default class Web3Store {
 
   constructor() {
     const plasmaProvider =
-      (CONFIG.nodes && CONFIG.nodes[0]) 
+      (CONFIG.nodes && CONFIG.nodes[0].url) 
       || PLASMA_NODES[process.env.PLASMA_NODE || DEFAULT_PLASMA_NODE];
 
     this.plasma = helpers.extendWeb3(

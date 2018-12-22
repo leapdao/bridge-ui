@@ -43,9 +43,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
   render() {
     const { account, web3, section } = this.props;
 
-    if (web3.plasmaReady === false) {
-      return <Message>No connection to Leap node</Message>;
-    }
+
 
     if (!account.ready) {
       return (

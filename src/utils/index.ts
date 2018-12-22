@@ -10,7 +10,9 @@ export const NETWORKS = {
 export const PLASMA_NODES = {
   0: 'http://localhost:8645',
   1: 'http://node1.testnet.leapdao.org:8645',
-  2: 'https://testnet-2.leapdao.org',
+  2: 'http://node2.testnet.leapdao.org:8645',
+  3: 'http://node3.testnet.leapdao.org:8645',
+  4: 'http://node4.testnet.leapdao.org:8645',
 };
 
 export const DEFAULT_NETWORK = '4';
