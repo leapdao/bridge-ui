@@ -10,7 +10,6 @@
     "stats": "rm -rf dist/ && webpack-cli --config webpack.config.prod.js --json > stats.json",
     "precommit": "lint-staged",
     "deploy:dev": "aws s3 sync ./dist s3://bridge-dev.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id E3UQO39J2ZIILR --paths '/*'",
-    "deploy:testnet": "aws s3 sync ./dist s3://testnet.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id ERDV80HEAIPI6 --paths '/*'",
     "deploy:mainnet": "echo \"No bucket for mainnet\" && echo 0"
   },
   "lint-staged": {
@@ -73,7 +72,6 @@
     "tslint": "^5.11.0",
     "typescript": "^3.0.1",
     "uglifyjs-webpack-plugin": "^1.3.0",
-    "val-loader": "^1.1.1",
     "webpack": "^4.17.1",
     "webpack-cli": "^3.1.0",
     "webpack-dev-server": "^3.1.6"

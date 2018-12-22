@@ -20,18 +20,6 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /utils\/config\.js$/,
-        use: [
-          {
-            loader: 'val-loader',
-            options: {
-              plasmaNodeUrl: process.env.PLASMA_NODE_URL,
-              rootNetworkId: process.env.NETWORK_ID,
-            },
-          },
-        ],
-      },
-      {
         test: /\.js$/,
         use: [
           'cache-loader',
