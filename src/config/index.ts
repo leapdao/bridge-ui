@@ -1,5 +1,17 @@
-export const env = require('./env');
+export const { CONFIG_NAME } = require('./env') || { CONFIG_NAME: 'localnet' };
 
-export const CONFIG_NAME = env.CONFIG_NAME || 'localnet';
+let config;
 
-export const CONFIG = require(`./${CONFIG_NAME}/config.json`);
+try {
+  config = require(`./${CONFIG_NAME}/config.json`);
+} catch (e) {
+  config = {
+    'name': 'localnet',
+    'rootNetworkId': '4',
+    'nodes': [
+      'http://localhost:8645'
+    ]
+  };
+}
+
+export const CONFIG = config;
