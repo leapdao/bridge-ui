@@ -15,6 +15,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'mobx-react';
 
 import { DEFAULT_NETWORK } from './utils';
+import { CONFIG_NAME } from './config';
 
 import Tokens from './stores/tokens';
 import Operator from './stores/operator';
@@ -38,6 +39,8 @@ import Slots from './routes/slots';
 import RegisterToken from './routes/registerToken';
 import Status from './routes/status';
 import Governance from './routes/governance';
+
+const Home = require('./config/' + CONFIG_NAME + '/home.tsx').default;
 
 const web3 = new Web3Store();
 const transactions = new Transactions();
@@ -76,8 +79,9 @@ ReactDOM.render(
     >
       <Fragment>
         <TxNotification />
+        <Route path="/" exact component={Home} />
         <Route path="/governance" component={Governance} />
-        <Route path="/" exact component={Slots} />
+        <Route path="/slots" component={Slots} />
         <Route path="/:bridgeAddr(0x[0-9a-fA-f]{40})" exact component={Slots} />
         <Route path="/registerToken" exact component={RegisterToken} />
         <Route
