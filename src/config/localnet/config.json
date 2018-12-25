@@ -1,0 +1,7 @@
+{
+  "name": "localnet",
+  "rootNetworkId": "4",
+  "nodes": [
+    "http://localhost:8645"
+  ]
+}

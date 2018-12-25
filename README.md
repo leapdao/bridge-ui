@@ -26,27 +26,27 @@ Mainnet: N/A
 ## Run locally
 
 ```
-NETWORK_ID=4 PLASMA_NODE=1 yarn start
-```
-
-## Build for deployment
-
-Provide proper network id and plasma node instance to use.
-
-```
-NETWORK_ID=4 PLASMA_NODE_URL=http://node1.testnet.leapdao.org:8645 yarn run build
+yarn start
 ```
 
 ## Build params (env variables) 
 
 - `NETWORK_ID` — root network (1 — mainnet, 4 — rinkeby and so on)
-- `PLASMA_NODE` — plasma node id (0 — local, 1 — testnet 1, 2 — testnet 2)
 - `PLASMA_NODE_URL` - url for plasma node JSON RPC
+- `CONFIG` - name of config preset. Possible values: `localnet` (default), `testnet`
 
-## Deploy to S3
+## Deployment
 
-Dev: `yarn run deploy:dev`
+Dev: 
+```
+NETWORK_ID=4 PLASMA_NODE_URL=http://node1.testnet.leapdao.org:8645 yarn build
+yarn deploy:dev
+```
 
-Testnet: `yarn run deploy:testnet`
+Testnet:
+```
+CONFIG=testnet yarn build
+yarn deploy:testnet
+```
 
 Mainnet: `yarn run deploy:mainnet`

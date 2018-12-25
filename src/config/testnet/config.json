@@ -1,0 +1,10 @@
+{
+  "name": "testnet",
+  "rootNetworkId": "4",
+  "nodes": [
+    "http://node1.testnet.leapdao.org:8645",
+    "http://node2.testnet.leapdao.org:8645",
+    "http://node3.testnet.leapdao.org:8645",
+    "http://node4.testnet.leapdao.org:8645"
+  ]
+}
