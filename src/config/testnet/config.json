@@ -1,5 +1,7 @@
 {
   "name": "testnet",
+  "title": "LeapDAO Testnet — The Raft release",
+  "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
   "rootNetworkId": "4",
   "nodes": [
     "http://node1.testnet.leapdao.org:8645",

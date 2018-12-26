@@ -1,3 +1,4 @@
+<% config = require('./config').CONFIG %>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,8 +9,20 @@
     <link rel="icon" sizes="180x180" href="<%= require('./apple-touch-icon.png') %>" />
     <link rel="icon" type="image/png" sizes="32x32" href="<%= require('./favicon-32x32.png') %>" />
     <link rel="icon" type="image/png" sizes="16x16" href="<%= require('./favicon-16x16.png') %>" />
-    <title>Bridge UI</title>
-    <meta property="og:site_name" content="LeapDAO Bridge UI" />
+    <title><%= config.title %></title>
+    <meta property="og:site_name" content="<%= config.title %>" />
+    <meta name="twitter:title" content="<%= config.title %>" />
+    <meta property="og:title" content="<%= config.title %>" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="http://leapdao.org/img/og.jpg" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:site" content="@leapdao" />
+    <meta name="twitter:image" content="http://leapdao.org/img/og.jpg" />
+
+    <meta name="description" content="<%= config.description %>" />
+    <meta name="twitter:description" content="<%= config.description %>" />
+    <meta property="og:description" content="<%= config.description %>" />
     <style>
       * {
         padding: 0;
