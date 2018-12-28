@@ -7,12 +7,12 @@
 
 import * as React from 'react';
 import { Component, Fragment } from 'react';
-import { reaction } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
 import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
 
+import AppLogo from './appLogo';
 import Message from './message';
 import TokenValue from './tokenValue';
 
@@ -65,7 +65,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
           <Link to="/governance">Governance</Link>
         </Menu.Item>
         <Menu.Item key="slots">
-          <Link to={`/`}>
+          <Link to={`/slots`}>
             Slots auction
           </Link>
         </Menu.Item>
@@ -99,6 +99,9 @@ class AppLayout extends Component<AppLayoutProps, any> {
             justifyContent: 'space-between',
           }}
         >
+          <Link to="/">
+            <AppLogo />
+          </Link>
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">

@@ -7,20 +7,14 @@
 
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import AppLayout from '../components/appLayout';
-import { default as Monitor } from '../components/monitor';
-
-import { CONFIG } from '../config';
+import AppLayout from '../../components/appLayout';
 
 @observer
-export default class Status extends React.Component {
+export default class Home extends React.Component {
   render() {
     return (
-      <AppLayout section="status">
-        <h1>Nodes status</h1>
-        <Monitor
-          nodes={CONFIG.nodes}
-        />
+      <AppLayout section="home">
+        &nbsp;
       </AppLayout>
     );
   }

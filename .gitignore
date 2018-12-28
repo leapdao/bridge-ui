@@ -3,3 +3,4 @@
 dist
 node_modules
 stats.json
+src/config/localnet/config.json

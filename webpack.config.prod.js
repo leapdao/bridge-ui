@@ -49,13 +49,12 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /utils\/config\.js$/,
+        test: /config\/env\.js$/,
         use: [
           {
             loader: 'val-loader',
             options: {
-              plasmaNodeUrl: process.env.PLASMA_NODE_URL,
-              rootNetworkId: process.env.NETWORK_ID,
+              CONFIG_NAME: process.env.CONFIG,
             },
           },
         ],
@@ -203,7 +202,7 @@ module.exports = {
     new ExtractTextPlugin({
       filename: 'main.[hash].css',
     }),
-    new webpack.EnvironmentPlugin(['NETWORK_ID', 'PLASMA_NODE']),
+    new webpack.EnvironmentPlugin(['NETWORK_ID', 'PLASMA_NODE', 'CONFIG']),
     new HtmlPlugin({
       template: 'src/index.html',
     }),

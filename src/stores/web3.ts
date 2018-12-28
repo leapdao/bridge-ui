@@ -2,7 +2,7 @@ import { observable, action } from 'mobx';
 import Web3Type from 'web3';
 import { helpers, ExtendedWeb3 } from 'leap-core';
 import Web3 from './web3_ts_workaround';
-const config = require('../utils/config');
+import { CONFIG } from '../config';
 
 import {
   PLASMA_NODES,
@@ -35,7 +35,7 @@ export default class Web3Store {
 
   constructor() {
     const plasmaProvider =
-      config.plasmaNodeUrl 
+      (CONFIG.nodes && CONFIG.nodes[0].url) 
       || PLASMA_NODES[process.env.PLASMA_NODE || DEFAULT_PLASMA_NODE];
 
     this.plasma = helpers.extendWeb3(
@@ -51,7 +51,7 @@ export default class Web3Store {
         this.plasmaReady = false;
       });
 
-    const localNetwork = NETWORKS[config.rootNetworkId || process.env.NETWORK_ID || DEFAULT_NETWORK];
+    const localNetwork = NETWORKS[CONFIG.rootNetworkId || process.env.NETWORK_ID || DEFAULT_NETWORK];
 
     this.local = new Web3(
       new Web3.providers.HttpProvider(localNetwork.provider)

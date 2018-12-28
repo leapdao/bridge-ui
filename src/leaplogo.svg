@@ -1,0 +1,22 @@
+<svg width="245" height="250" version="1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <defs>
+    <path d="M90 0c22 0 40 10 69 25 28 16 66 26 80 62 14 37 7 65-21 105-27 41-51 57-88 57-36 0-53-16-88-57-35-40-40-59-41-91-2-32 13-60 29-77C45 7 67 0 90 0z" id="a"/>
+    <filter x="-38%" y="-38%" width="176%" height="176%" filterUnits="objectBoundingBox" id="c">
+      <feGaussianBlur stdDeviation="30" in="SourceGraphic"/>
+    </filter>
+  </defs>
+  <g fill="none" fill-rule="evenodd">
+    <mask id="b" fill="#fff">
+      <use xlink:href="#a"/>
+    </mask>
+    <g mask="url(#b)" fill-rule="nonzero">
+      <g transform="translate(-63 -61)" filter="url(#c)">
+        <circle fill="#0FA" cx="120" cy="119" r="119"/>
+        <circle fill="#0FA" cx="251" cy="231" r="119"/>
+        <circle fill="#FF0" cx="145" cy="209" r="115"/>
+        <circle fill="#FF0" cx="209" cy="289" r="119"/>
+        <circle fill="#0FA" cx="335" cy="149" r="115"/>
+      </g>
+    </g>
+  </g>
+</svg>
