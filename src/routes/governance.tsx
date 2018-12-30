@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { observer, inject } from 'mobx-react';
-import { List } from 'antd';
+import { List, Collapse, Icon } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
@@ -19,48 +19,35 @@ import Network from '../stores/network';
 
 const { Fragment } = React;
 
-const renderDate = (proposal) => {
-  const { effectiveDate, cancelled } = proposal;
+const renderDate = ({ effectiveDate, cancelled }) => {
+  const iconStyle = {
+    display: 'block',
+    fontSize: '24px',
+    marginBottom: '5px',
+  };
   if (cancelled) {
-    return 'Cancelled';  
-  }
+    return (<Fragment>
+      <Icon type="issues-close" style={{ color: '#ff1616', ...iconStyle }}/>
+      <span>Cancelled</span>
+    </Fragment>)  
+  } 
   if (effectiveDate < Date.now()) {
-    return 'Ready to be finalized';
+    return (<Fragment>
+      <Icon type="issues-close" style={{ color: '#ff9216', ...iconStyle }}/>
+      <span>Finalizing</span>
+    </Fragment>)
   }
-  return (<Fragment>Effective in <TimeAgo date={effectiveDate} /></Fragment>);
+  return (<Fragment>
+    <Icon type="clock-circle" style={{ color: '#167bff', ...iconStyle }}/>
+    <span>Applies in</span>
+    <TimeAgo date={effectiveDate} style={{ display: 'block' }} />
+  </Fragment>);
 };
 
 interface GovernanceProps {
   governanceContract: GovernanceContract;
   network: Network;
 }
-
-const governanceParams = {
-  setOperator: {
-    name: 'Change the block submission logic with a new contract: ',
-  },
-  setMinGasPrice: {
-    name: 'Set minimum transaction gas price to ',
-  },
-  setEpochLength: {
-    name: 'Set epoch length to ',
-  },
-  setParentBlockInterval: {
-    name: 'Set parent block interval to ',
-  },
-  registerToken: {
-    name: 'Register a new token: ',
-  },
-  // TODO: once we have https://github.com/leapdao/bridge-ui/issues/68 implemented,
-  // use the subject from proposal to show which contract is going to be upgraded
-  transferLogic: {
-    name: 'Upgrade contract logic to ',
-  },
-  transferOwnership: {
-    name: 'Introduce new governance process at ',
-  }
-};
-
 
 @inject('governanceContract', 'network')
 @observer
@@ -84,22 +71,41 @@ export default class Governance extends React.Component<GovernanceProps, any> {
     );
   }
 
-  private proposalDescription(proposal) {
-    if (proposal.msg.raw) return proposal.msg.raw;
-    const governanceChange = governanceParams[proposal.msg.abi.name] || { name: this.proposalMethod(proposal) };
-    return (
-      <span>
-        {governanceChange.name}
-        {' '}
-        {this.formatParam(proposal.msg.abi, proposal.msg.params[0])}
-      </span>
-    );
-  }
-
-  private proposalMethod(proposal) {
-    if (proposal.msg.raw) return proposal.msg.raw;
-    return `${proposal.msg.abi.name}(${proposal.msg.params[0]})`;
-  }
+  private renderContent(proposal) {
+    return (<Fragment>
+        {proposal.currentValue && (
+          <div className="attribute">
+            <label>Current value:</label>
+            <span>{this.formatParam(proposal.msg.abi, proposal.currentValue)}</span>      
+          </div>
+        )}
+        <div className="attribute">
+          <label>New value:</label>
+          <span>{this.formatParam(proposal.msg.abi, proposal.newValue)}</span>
+        </div>
+      <Collapse bordered={false}>
+        <Collapse.Panel header="Details" key="1" className="details">
+        <div className="attribute">
+            <label>Proposal #:</label>
+            <span>{proposal.num}</span>
+          </div>
+          <div className="attribute">
+            <label>Contract:</label>
+            <span>{proposal.subject}</span>
+          </div>
+          <div className="attribute">
+            <label>Contract type:</label>
+            <span>{proposal.subjectType}</span>
+          </div>
+          <div className="attribute">
+            <label>Call:</label>
+            <span>{proposal.methodStr}</span>
+          </div>
+        </Collapse.Panel>
+      </Collapse>
+    </Fragment>
+    )
+  };
 
   render() { 
     const { governanceContract } = this.props;
@@ -120,20 +126,21 @@ export default class Governance extends React.Component<GovernanceProps, any> {
               size="small"
               dataSource={proposals}
               renderItem={item => (
-                <List.Item>
+                <List.Item 
+                  className='governanceProposal'
+                  extra={
+                    <div style={{
+                      minWidth: '190px',
+                      textAlign: 'center',
+                      padding: '16px',
+                    }}>
+                      {renderDate(item)}
+                    </div>
+                 }>
                   <List.Item.Meta
-                    title={this.proposalDescription(item)}
-                    description={
-                      <div>
-                        <span>
-                          #{item.num} {this.proposalMethod(item)}
-                        </span>
-                        <span style={{ float: 'right' }}>
-                          {renderDate(item)}
-                        </span>
-                      </div>
-                    }
+                    title={item.summaryStr}
                   />
+                  {this.renderContent(item)}
                 </List.Item>            
               )}
             />

@@ -66,3 +66,44 @@ h2:first-child {
 .monitor-node {
   margin-right: 10px;
 }
+
+/* Governance proposal item */
+
+.governanceProposal .details * {
+  color: rgba(0,0,0,.45);
+}
+
+.governanceProposal .ant-list-item-meta h4 {
+  margin-bottom: 0;
+}
+
+.governanceProposal .ant-list-item-meta {
+  margin-bottom: 5px;
+}
+
+.governanceProposal .attribute > label {
+  margin-right: 10px;
+  min-width: 100px;
+  text-align: right;
+  display: inline-block;
+}
+
+.governanceProposal .ant-collapse > .ant-collapse-item > .ant-collapse-header {
+  padding: 0 0 0 16px;
+  margin-top: 12px;
+  line-height: 12px;
+  color: rgba(0,0,0,.45);
+}
+
+.governanceProposal .ant-collapse > .ant-collapse-item > .ant-collapse-header .arrow {
+  left: 0;
+  line-height: 0;
+}
+
+.governanceProposal .ant-collapse-item {
+  border-bottom: 0;
+}
+
+.governanceProposal .ant-collapse-content > .ant-collapse-content-box {
+  padding: 0;
+}

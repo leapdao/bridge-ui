@@ -14,5 +14,5 @@ export { default as erc20 } from './erc20';
 export { default as erc721 } from './erc721';
 export { default as governance } from './governance';
 export { 
-  bridge, operator, exitHandler, governable
+  bridge, operator, exitHandler, governable, proxy,
 };
