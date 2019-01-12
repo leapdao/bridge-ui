@@ -12,7 +12,6 @@ import { operator as operatorAbi } from '../utils/abis';
 
 import Token from './token';
 import Slot from './slot';
-import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
 
