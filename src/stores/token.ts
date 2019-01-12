@@ -302,7 +302,7 @@ export default class Token extends ContractStore {
       if (hasEnoughAllowance) return;
 
       const tx = this.iContract.methods
-        .approve(spender, this.allowanceOrTokenId(value))
+        .approve(spender, String(this.allowanceOrTokenId(value)))
         .send({ from: this.account.address });
 
       this.watchTx(tx, 'approve', {

@@ -101,7 +101,7 @@ export default class Operator extends ContractStore {
     tendermint: string
   ): Promise<InflightTxReceipt> {
     const data = this.contract.methods
-      .bet(slotId, stake, signerAddr, `0x${tendermint}`)
+      .bet(slotId, String(stake), signerAddr, `0x${tendermint}`)
       .encodeABI();
 
     const inflightTxReceiptPromise = token.approveAndCall(

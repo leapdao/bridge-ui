@@ -36,7 +36,7 @@ export default class ExitHandler extends ContractStore {
     }
 
     const data = this.contract.methods
-      .deposit(this.account.address, amount, token.color)
+      .deposit(this.account.address, String(amount), token.color)
       .encodeABI();
 
     const inflightTxReceiptPromise = token.approveAndCall(
