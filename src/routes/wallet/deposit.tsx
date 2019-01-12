@@ -45,7 +45,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
     const value = this.selectedToken.isNft
       ? this.value
       : this.selectedToken.toCents(Number(this.value));
-    exitHandler.deposit(this.selectedToken, value).then(({ futureReceipt }) => {
+    exitHandler.deposit(this.selectedToken, String(value)).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
         this.value = 0;
