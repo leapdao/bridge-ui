@@ -3,6 +3,7 @@
   "title": "LeapDAO Testnet — The Raft release",
   "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
   "rootNetworkId": "4",
+  "consensus": "poa",
   "nodes": [
     "http://node1.testnet.leapdao.org:8645",
     "http://node2.testnet.leapdao.org:8645",

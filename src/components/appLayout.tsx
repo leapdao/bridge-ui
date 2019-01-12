@@ -12,6 +12,7 @@ import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
 import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
 
+import { CONFIG } from '../config';
 import AppLogo from './appLogo';
 import Message from './message';
 import TokenValue from './tokenValue';
@@ -64,7 +65,9 @@ class AppLayout extends Component<AppLayoutProps, any> {
         <Menu.Item key="governance">
           <Link to="/governance">Governance</Link>
         </Menu.Item>
-        <Menu.Item key="slots">
+        <Menu.Item key="slots" style={{ 
+          'display': (CONFIG.consensus !== 'poa' ? 'inline-block' : 'none')
+        }}>
           <Link to={`/slots`}>
             Slots auction
           </Link>

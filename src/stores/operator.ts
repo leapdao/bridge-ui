@@ -19,6 +19,18 @@ import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
 import Web3Store from './web3';
 
+const poaDefaults = { owner: '0x', stake: 0, newOwner: '0x', newStake: 0 };
+
+const mapSlot = (slotData): Slot => {
+  const slot = Object.assign({}, poaDefaults, slotData);
+  return new Slot({
+    ...slot,
+    stake: Number(slot.stake),
+    activationEpoch: Number(slot.activationEpoch),
+    newStake: Number(slot.newStake),
+  });
+};
+
 const readSlots = (operator: Contract) => {
   return operator.methods
     .epochLength()
@@ -30,34 +42,7 @@ const readSlots = (operator: Contract) => {
         )
       )
     )
-    .then(slots => {
-      return slots.map(
-        ({
-          0: eventCounter,
-          1: owner,
-          2: stake,
-          3: signer,
-          4: tendermint,
-          5: activationEpoch,
-          6: newOwner,
-          7: newStake,
-          8: newSigner,
-          9: newTendermint,
-        }) =>
-          new Slot({
-            eventCounter,
-            owner,
-            stake: Number(stake),
-            signer,
-            tendermint,
-            activationEpoch: Number(activationEpoch),
-            newOwner,
-            newStake: Number(newStake),
-            newSigner,
-            newTendermint,
-          })
-      );
-    });
+    .then(slots => slots.map(mapSlot));
 };
 
 export default class Operator extends ContractStore {
