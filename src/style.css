@@ -81,6 +81,10 @@ h2:first-child {
   margin-bottom: 5px;
 }
 
+.governanceProposal .attribute {
+  display: flex;
+}
+
 .governanceProposal .attribute > label {
   margin-right: 10px;
   min-width: 100px;

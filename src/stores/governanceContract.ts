@@ -7,9 +7,9 @@
 import { reaction, observable, IObservableArray } from 'mobx';
 
 import Web3Store from './web3';
-import { ABIDefinition } from 'web3/Eth/ABI';
+import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3/Eth/ABI';
 
-import { range } from '../utils';
+import { range, toArray } from '../utils';
 import { 
   governance as governanceAbi,
   governable as governableAbi,
@@ -24,7 +24,7 @@ type ABIDefinitionBySig = Map<String, ABIDefinition>;
 
 type DecodedMessage = { 
   abi?: ABIDefinition,
-  params?: object, 
+  params?: EthAbiDecodeParametersResultObject, 
   raw: string
 };
 
@@ -75,6 +75,13 @@ const governanceParams = {
     contract: 'proxy',
     getter: 'admin'
   },
+  setSlot: {
+    name: 'Set validating slot to PoA node',
+    contract: 'operator',
+    getter: (contract, params) => 
+      contract.methods.slots(params[0]).call()
+        .then(res => `${res.signer}, ${res.tendermint}`),
+  }
 };
 
 export default class GovernanceContract extends ContractStore {
@@ -112,14 +119,22 @@ export default class GovernanceContract extends ContractStore {
         const proxy = new this.web3.local.eth.Contract(governableAbi, proposal.subject);
         return proxy.methods[governanceChange.getter]().call();
       }
-      return this[governanceChange.contract].contract.methods[governanceChange.getter]().call();
+      if (typeof governanceChange.getter === 'function') {
+        return governanceChange.getter(this[governanceChange.contract].contract, proposal.msg.params);
+      } else {
+        return this[governanceChange.contract].contract.methods[governanceChange.getter]().call();
+      }
     }
     return Promise.resolve('');
   }
 
+  private proposalParamsStr(params: EthAbiDecodeParametersResultObject): string {
+    return toArray(params).join(', ');
+  }
+
   private proposalMethodStr(msg: DecodedMessage): string {
     if (!msg.abi) return msg.raw;
-    return `${msg.abi.name}(${msg.params[0]})`;
+    return `${msg.abi.name}(${this.proposalParamsStr(msg.params)})`;
   }
 
   private lookupContractType(subject): string {
@@ -153,14 +168,14 @@ export default class GovernanceContract extends ContractStore {
 
     if (!governanceChange) return Promise.resolve({
       ...proposal,
-      summaryStr: methodStr,
-      newValue: msg.params[0],
+      summaryStr: msg.abi.name,
+      newValue: this.proposalParamsStr(msg.params),
     });
 
-    return this.readCurrentValue(data, governanceChange).then(currentValue => ({
+    return this.readCurrentValue(proposal, governanceChange).then(currentValue => ({
       ...proposal,
       summaryStr: governanceChange.name,
-      newValue: msg.params[0],
+      newValue: this.proposalParamsStr(msg.params),
       currentValue,
     }));
   }

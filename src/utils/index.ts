@@ -24,6 +24,7 @@ export const isNFT = color => color >= NFT_COLOR_BASE;
 export const DEFAULT_PLASMA_NODE = '1';
 
 export { range } from './range';
+export { toArray } from './toArray';
 export { txSuccess } from './txSuccess';
 
 export const shortenHex = hex =>
