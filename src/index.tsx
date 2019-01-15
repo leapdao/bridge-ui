@@ -51,7 +51,7 @@ const operator = new Operator(transactions, web3);
 const exitHandler = new ExitHandler(account, transactions, web3);
 const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(node, web3, tokens);
-const governanceContract = new GovernanceContract(bridge, transactions, web3);
+const governanceContract = new GovernanceContract(bridge, operator, exitHandler, transactions, web3);
 const network = new Network(
   account,
   web3,
