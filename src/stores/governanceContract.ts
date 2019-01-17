@@ -7,7 +7,7 @@
 import { reaction, observable, IObservableArray } from 'mobx';
 
 import Web3Store from './web3';
-import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3/Eth/ABI';
+import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3-eth-abi';
 
 import { range, toArray } from '../utils';
 import { 

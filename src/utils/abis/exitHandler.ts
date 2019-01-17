@@ -1,4 +1,4 @@
-import { ABIDefinition } from 'web3/Eth/ABI';
+import { ABIDefinition } from 'web3-eth-abi';
 
 export default [
   {
