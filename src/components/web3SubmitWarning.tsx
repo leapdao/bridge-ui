@@ -2,9 +2,8 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { inject, observer } from 'mobx-react';
 import { Alert, Button } from 'antd';
-import { NETWORKS } from '../utils';
 import Network from '../stores/network';
-import Web3Store from '../stores/web3';
+import Web3Store from '../stores/web3/';
 import Account from '../stores/account';
 
 interface Web3SubmitWarningProps {
@@ -19,7 +18,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
   render() {
     const { network, account, web3 } = this.props;
 
-    if (!web3.injectedAvailable) {
+    if (!web3.injected.available) {
       return (
         <Alert
           type="warning"
@@ -29,7 +28,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
       );
     }
 
-    if (!web3.injected) {
+    if (!web3.injected.instance) {
       return (
         <Alert
           type="warning"
@@ -37,7 +36,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
           message={
             <Fragment>
               To be able to send transactions you need to{' '}
-              <Button onClick={() => web3.enable()}>
+              <Button onClick={() => web3.injected.enable()}>
                 connect MetaMask{' '}
                 <span role="img" aria-label="fox">
                   🦊
@@ -49,13 +48,13 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
       );
     }
 
-    if (network.mmNetwork && network.network !== network.mmNetwork) {
+    if (network.wrongNetwork) {
       return (
         <Alert
           type="warning"
           style={{ marginBottom: 10 }}
           message={`To be able to send transactions you need to switch MetaMask to ${
-            NETWORKS[network.network].name
+            network.name
           }`}
         />
       );

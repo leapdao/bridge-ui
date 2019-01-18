@@ -24,7 +24,7 @@ import Account from './account';
 import autobind from 'autobind-decorator';
 import { range } from '../utils/range';
 import NodeStore from './node';
-import Web3Store from './web3';
+import Web3Store from './web3/';
 
 interface PlasmaTransaction extends Transaction {
   raw: string;
@@ -100,12 +100,12 @@ export default class Unspents {
     if (this.account.address) {
       if (this.latestBlock !== this.node.latestBlock) {
         this.latestBlock = this.node.latestBlock;
-        this.web3.plasma
+        this.web3.plasma.instance
           .getUnspent(this.account.address)
           .then(unspent => {
             return Promise.all(
               unspent.map(u =>
-                this.web3.plasma.eth.getTransaction(
+                this.web3.plasma.instance.eth.getTransaction(
                   bufferToHex(u.outpoint.hash)
                 )
               )
@@ -132,7 +132,7 @@ export default class Unspents {
     const periodNumber = Math.floor(blockNumber / 32);
     const startBlock = periodNumber * 32;
     const endBlock = periodNumber * 32 + 32;
-    makePeriodFromRange(this.web3.plasma, startBlock, endBlock).then(period =>
+    makePeriodFromRange(this.web3.plasma.instance, startBlock, endBlock).then(period =>
       this.exitHandler.startExit(
         period.proof(Tx.fromRaw(raw)),
         unspent.outpoint.index
@@ -191,7 +191,7 @@ export default class Unspents {
     );
 
     consolidates.forEach(consolidate => {
-      this.web3.plasma.eth.sendSignedTransaction(consolidate.toRaw() as any);
+      this.web3.plasma.instance.eth.sendSignedTransaction(consolidate.toRaw() as any);
     });
   }
 }

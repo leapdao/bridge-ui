@@ -15,7 +15,7 @@ import ExitHandler from './exitHandler';
 import Transactions from '../components/txNotification/transactions';
 import { Output } from 'leap-core';
 import NodeStore from './node';
-import Web3Store from './web3';
+import Web3Store from './web3/';
 
 export default class Tokens {
   @observable

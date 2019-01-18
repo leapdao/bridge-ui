@@ -4,7 +4,6 @@ export const { CONFIG_NAME } = require('./env') || { CONFIG_NAME: 'localnet' };
 
 const defaultConfig = {
   'name': 'localnet',
-  'rootNetworkId': '4',
   'consensus': 'poa',
   'nodes': [
     'http://localhost:8645'

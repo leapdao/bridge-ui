@@ -14,7 +14,6 @@ import { Route } from 'react-router';
 import { BrowserRouter } from 'react-router-dom';
 import { Provider } from 'mobx-react';
 
-import { DEFAULT_NETWORK } from './utils';
 import { CONFIG_NAME } from './config';
 
 import Tokens from './stores/tokens';
@@ -26,7 +25,7 @@ import Network from './stores/network';
 import ExplorerStore from './stores/explorer';
 import Unspents from './stores/unspents';
 import NodeStore from './stores/node';
-import Web3Store from './stores/web3';
+import Web3Store from './stores/web3/';
 import GovernanceContract from './stores/governanceContract';
 
 import Transactions from './components/txNotification/transactions';
@@ -39,24 +38,31 @@ import Slots from './routes/slots';
 import RegisterToken from './routes/registerToken';
 import Status from './routes/status';
 import Governance from './routes/governance';
+import PlasmaConfig from './stores/plasmaConfig';
+import Web3Plasma from './stores/web3/plasma';
+import Web3Injected from './stores/web3/injected';
+import Web3Root from './stores/web3/root';
 
 const Home = require('./config/' + CONFIG_NAME + '/home.tsx').default;
 
-const web3 = new Web3Store();
+const web3Plasma = new Web3Plasma();
+const plasmaConfig = new PlasmaConfig(web3Plasma);
+const web3 = new Web3Store(
+  new Web3Root(plasmaConfig),
+  web3Plasma,
+  new Web3Injected()
+);
+
 const transactions = new Transactions();
 const account = new Account(web3);
 const node = new NodeStore(web3);
-const bridge = new Bridge(transactions, web3);
-const operator = new Operator(transactions, web3);
-const exitHandler = new ExitHandler(account, transactions, web3);
+const bridge = new Bridge(transactions, web3, plasmaConfig);
+const operator = new Operator(transactions, web3, plasmaConfig);
+const exitHandler = new ExitHandler(account, transactions, web3, plasmaConfig);
 const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(node, web3, tokens);
 const governanceContract = new GovernanceContract(bridge, operator, exitHandler, transactions, web3);
-const network = new Network(
-  account,
-  web3,
-  process.env.NETWORK_ID || DEFAULT_NETWORK
-);
+const network = new Network(account, web3, plasmaConfig);
 const unspents = new Unspents(exitHandler, account, node, web3);
 
 ReactDOM.render(
@@ -75,6 +81,7 @@ ReactDOM.render(
         node,
         web3,
         governanceContract,
+        plasmaConfig,
       }}
     >
       <Fragment>

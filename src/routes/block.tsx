@@ -6,7 +6,7 @@ import { Link } from 'react-router-dom';
 
 import TransctionList from '../components/transactionList';
 import NodeStore from '../stores/node';
-import Web3Store from '../stores/web3';
+import Web3Store from '../stores/web3/';
 import Explorer from '../stores/explorer';
 import { match } from 'react-router';
 
@@ -76,7 +76,7 @@ class Block extends React.Component<BlockRouteProps, any> {
 
     (hashOrNumber
       ? Promise.resolve(hashOrNumber)
-      : web3.plasma.eth.getBlockNumber()
+      : web3.plasma.instance.eth.getBlockNumber()
     ).then(param => {
       explorer.getBlock(param).then(block => {
         this.fetching = false;

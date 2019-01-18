@@ -11,7 +11,7 @@ import { List, Collapse, Icon } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-import { NETWORKS, shortenHex } from '../utils';
+import { shortenHex } from '../utils';
 
 import AppLayout from '../components/appLayout';
 import GovernanceContract from '../stores/governanceContract';
@@ -62,7 +62,12 @@ export default class Governance extends React.Component<GovernanceProps, any> {
       return value;
     }
 
-    const etherscanLink = value => `${NETWORKS[this.props.network.network].etherscanBase}/address/${value}`;
+    const { etherscanBase } = this.props.network;
+    if (!etherscanBase) {
+      return shortenHex(value);
+    }
+
+    const etherscanLink = value => `${etherscanBase}/address/${value}`;
 
     return (
       <a href={etherscanLink(value)} title={value} target="_blank" rel="noopener noreferrer">

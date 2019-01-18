@@ -6,7 +6,7 @@
  */
 import { reaction, observable, IObservableArray } from 'mobx';
 
-import Web3Store from './web3';
+import Web3Store from './web3/';
 import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3/Eth/ABI';
 
 import { range, toArray } from '../utils';
@@ -116,7 +116,7 @@ export default class GovernanceContract extends ContractStore {
   private readCurrentValue(proposal, governanceChange) {
     if (governanceChange.getter) {
       if (governanceChange.contract === 'proxy') {
-        const proxy = new this.web3.local.eth.Contract(governableAbi, proposal.subject);
+        const proxy = new this.web3.root.instance.eth.Contract(governableAbi, proposal.subject);
         return proxy.methods[governanceChange.getter]().call();
       }
       if (typeof governanceChange.getter === 'function') {
@@ -209,7 +209,7 @@ export default class GovernanceContract extends ContractStore {
     if (!abiDef) return { raw: msgData }; // unsupported method, probably ABI mismatch
     return {
       abi: abiDef,
-      params: this.web3.local.eth.abi.decodeParameters(abiDef.inputs, msgData.substring(10)),
+      params: this.web3.root.instance.eth.abi.decodeParameters(abiDef.inputs, msgData.substring(10)),
       raw: msgData,
     };
   }
@@ -219,8 +219,7 @@ export default class GovernanceContract extends ContractStore {
       .filter(m => m.type === 'function')
       .reduce<ABIDefinitionBySig>(
         (m: ABIDefinitionBySig, def: ABIDefinition) => {
-          const sig = this.web3.local.eth.abi.encodeFunctionSignature(def);
-          console.log(sig, def.name);
+          const sig = this.web3.root.instance.eth.abi.encodeFunctionSignature(def);
           m[sig] = def;
           return m;
         },
