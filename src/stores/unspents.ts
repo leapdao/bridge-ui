@@ -94,11 +94,29 @@ export default class Unspents {
       });
   }
 
+  private exitDeposit(unspentDeposit: UnspentWithTx) {
+    return getProof(
+      this.web3.plasma.instance, 
+      unspentDeposit.transaction
+    ).then(txProof =>
+      this.exitHandler.startExit(
+        [],
+        txProof,
+        unspentDeposit.outpoint.index,
+        0,
+      )
+    );
+  }
+
   @autobind
   public exitUnspent(unspent: UnspentWithTx) {
     const tx = Tx.fromRaw(unspent.transaction.raw);
 
-    getYoungestInputTx(this.web3.plasma.instance, tx).then(inputTx =>
+    if (tx.type === Type.DEPOSIT) {
+      return this.exitDeposit(unspent)
+    }
+
+    return getYoungestInputTx(this.web3.plasma.instance, tx).then(inputTx =>
       Promise.all([
         getProof(this.web3.plasma.instance, unspent.transaction),
         getProof(this.web3.plasma.instance, inputTx.tx),
