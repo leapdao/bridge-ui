@@ -4,7 +4,7 @@
 
 You can:
 
-- View and buy slots
+- View and buy slots (if PoS plasma contract is set)
 - Make deposit
 - Transfer plasma tokens
 - Exit UTXOs
@@ -16,6 +16,7 @@ You can:
 ## Links
 
 Dev: http://bridge-dev.leapdao.org/
+Dev: http://testnet.leapdao.org/
 
 Mainnet: N/A
 
@@ -29,19 +30,14 @@ Mainnet: N/A
 yarn start
 ```
 
+This will use config from `presets/localnet/config.json`
+
 ## Build params (env variables) 
 
-- `NETWORK_ID` — root network (1 — mainnet, 4 — rinkeby and so on)
 - `PLASMA_NODE_URL` - url for plasma node JSON RPC
 - `CONFIG` - name of config preset. Possible values: `localnet` (default), `testnet`
 
 ## Deployment
-
-Dev: 
-```
-NETWORK_ID=4 PLASMA_NODE_URL=http://node1.testnet.leapdao.org:8645 yarn build
-yarn deploy:dev
-```
 
 Testnet:
 ```

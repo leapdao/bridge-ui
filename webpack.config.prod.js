@@ -202,7 +202,7 @@ module.exports = {
     new ExtractTextPlugin({
       filename: 'main.[hash].css',
     }),
-    new webpack.EnvironmentPlugin(['NETWORK_ID', 'PLASMA_NODE', 'CONFIG']),
+    new webpack.EnvironmentPlugin(['PLASMA_NODE', 'CONFIG']),
     new HtmlPlugin({
       template: 'src/index.html',
     }),
