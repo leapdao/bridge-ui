@@ -106,7 +106,6 @@ export default class Tokens {
   }
 
   private loadTokenColorRange(from: number, to: number): Promise<Token>[] {
-    console.log(this.exitHandler.contract);
     return (range(from, to) as number[]).map(color => {
       return this.exitHandler.contract.methods
         .tokens(color)

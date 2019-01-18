@@ -71,8 +71,10 @@ export default class ExitHandler extends ContractStore {
     return tx;
   }
 
-  public startExit(proof: string[], outIndex: number) {
-    const tx = this.iContract.methods.startExit(proof, outIndex).send({
+  public startExit(
+    youngestInputProof: string[], proof: string[], outIndex: number, inputIndex: number
+  ) {
+    const tx = this.iContract.methods.startExit(youngestInputProof, proof, outIndex, inputIndex).send({
       from: this.account.address,
     });
 
