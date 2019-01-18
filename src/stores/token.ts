@@ -30,7 +30,7 @@ import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import { range } from '../utils/range';
 import NodeStore from './node';
-import Web3Store from './web3';
+import Web3Store from './web3/';
 
 const tokenInfo = (
   token: Contract,
@@ -138,12 +138,12 @@ export default class Token extends ContractStore {
   }
 
   public transfer(to: string, amount: number | string): Promise<any> {
-    if (!this.web3.injected) {
+    if (!this.web3.injected.instance) {
       return Promise.reject('No metamask');
     }
 
     const promiEvent = Web3PromiEvent();
-    this.web3.plasma
+    this.web3.plasma.instance
       .getUnspent(this.account.address)
       .then(unspent => {
         if (this.isNft) {
@@ -173,12 +173,12 @@ export default class Token extends ContractStore {
         );
         return Tx.transfer(inputs, outputs);
       })
-      .then(tx => tx.signWeb3(this.web3.injected))
+      .then(tx => tx.signWeb3(this.web3.injected.instance))
       .then(
         signedTx => {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());
           return {
-            futureReceipt: this.web3.plasma.eth.sendSignedTransaction(
+            futureReceipt: this.web3.plasma.instance.eth.sendSignedTransaction(
               signedTx.toRaw() as any
             ),
           };
@@ -215,7 +215,7 @@ export default class Token extends ContractStore {
     }
 
     return this.maybeApprove(to, value).then(() => {
-      const futureReceipt = this.web3.injected.eth.sendTransaction({
+      const futureReceipt = this.web3.injected.instance.eth.sendTransaction({
         from: this.account.address,
         to,
         data,

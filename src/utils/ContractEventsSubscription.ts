@@ -8,7 +8,7 @@ import { EventLog } from 'web3/types';
 import { BlockType } from 'web3/eth/types';
 import Contract from 'web3/eth/contract';
 import { EventEmitter } from 'events';
-import Web3 from 'web3';
+import Web3 from '../stores/web3/ts_workaround.js';
 
 export default class ContractEventsSubscription extends EventEmitter {
   private contract: Contract;

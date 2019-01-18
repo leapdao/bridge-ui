@@ -17,7 +17,8 @@ import Transactions from '../components/txNotification/transactions';
 
 import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
-import Web3Store from './web3';
+import Web3Store from './web3/';
+import PlasmaConfig from './plasmaConfig';
 
 const poaDefaults = { owner: '0x', stake: 0, newOwner: '0x', newStake: 0 };
 
@@ -55,13 +56,16 @@ export default class Operator extends ContractStore {
   constructor(
     transactions: Transactions,
     web3: Web3Store,
+    private readonly plasmaConfig: PlasmaConfig,
     address?: string
   ) {
     super(operatorAbi, address, transactions, web3);
 
-    web3.plasma.getConfig().then(({ operatorAddr }) => {
-      this.address = operatorAddr;
-    });
+    if (plasmaConfig.operatorAddr) {
+      this.setAddress();
+    } else {
+      reaction(() => plasmaConfig.operatorAddr, this.setAddress);
+    }
 
     reaction(() => {
       return this.contract;
@@ -72,6 +76,13 @@ export default class Operator extends ContractStore {
         this.events.on('allEvents', this.loadContractData.bind(this));
       }
     );
+  }
+
+  @autobind
+  @action
+  private setAddress() {
+    if (!this.plasmaConfig.operatorAddr) return;
+    this.address = this.plasmaConfig.operatorAddr;
   }
 
   @autobind

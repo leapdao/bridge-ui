@@ -15,7 +15,6 @@ import { observable } from 'mobx';
 import { Form, Input, Button, Divider, Alert } from 'antd';
 
 import AppLayout from '../components/appLayout';
-import { NETWORKS } from '../utils';
 import ExplorerStore from '../stores/explorer';
 import Network from '../stores/network';
 import Tokens from '../stores/tokens';
@@ -103,7 +102,7 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
         <h1>Chain info</h1>
         <dl className="info">
           <dt>Network</dt>
-          <dd>{NETWORKS[network.network].name || network.network}</dd>
+          <dd>{network.name}</dd>
           <dt>Bridge contract</dt>
           <dd>{bridge.address}</dd>
           <dt>Operator contract</dt>

@@ -12,7 +12,7 @@ import PromiEvent from 'web3/promiEvent';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import ContractEventsSubscription from '../utils/ContractEventsSubscription';
-import Web3Store from './web3';
+import Web3Store from './web3/';
 
 export default class ContractStore {
   @observable
@@ -43,7 +43,7 @@ export default class ContractStore {
     }
     this.activeEventSub = new ContractEventsSubscription(
       this.contract,
-      this.web3.local
+      this.web3.root.instance,
     );
     this.activeEventSub.start();
     return this.activeEventSub;
@@ -52,20 +52,20 @@ export default class ContractStore {
   @computed
   public get contract(): Contract {
     if (this.address) {
-      return new this.web3.local.eth.Contract(this.abi, this.address);
+      return new this.web3.root.instance.eth.Contract(this.abi, this.address);
     }
   }
 
   @computed
   public get iContract(): Contract | undefined {
-    if (this.web3.injected) {
-      return new this.web3.injected.eth.Contract(this.abi, this.address);
+    if (this.web3.injected.instance) {
+      return new this.web3.injected.instance.eth.Contract(this.abi, this.address);
     }
   }
 
   @computed
   public get plasmaContract(): Contract | undefined {
-    return new this.web3.plasma.eth.Contract(this.abi, this.address);
+    return new this.web3.plasma.instance.eth.Contract(this.abi, this.address);
   }
 
   public watchTx(

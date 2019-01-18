@@ -11,7 +11,7 @@ import { Block, Transaction } from 'web3/eth/types';
 import { range } from '../utils/range';
 import autobind from 'autobind-decorator';
 import NodeStore from './node';
-import Web3Store from './web3';
+import Web3Store from './web3/';
 import Tokens from './tokens';
 
 const LOCAL_STORAGE_KEY = 'EXPLORER_CACHE';
@@ -144,7 +144,7 @@ export default class Explorer {
     );
     const token = this.tokens.tokenForAddress(address);
     return Promise.all([
-      this.web3.plasma.eth.getBalance(address),
+      this.web3.plasma.instance.eth.getBalance(address),
       this.getBlockchain(),
     ]).then(([balance, blocks]) => {
       const txs = blocks.reduce(
@@ -175,7 +175,7 @@ export default class Explorer {
       return Promise.resolve(this.cache[hash]);
     }
 
-    return this.web3.plasma.eth.getTransaction(hash).then(tx => {
+    return this.web3.plasma.instance.eth.getTransaction(hash).then(tx => {
       if (tx) {
         const result = {
           ...tx,
@@ -195,7 +195,7 @@ export default class Explorer {
       return Promise.resolve(this.cache[hashOrNumber]);
     }
 
-    return this.web3.plasma.eth.getBlock(hashOrNumber, true).then(block => {
+    return this.web3.plasma.instance.eth.getBlock(hashOrNumber, true).then(block => {
       if (block) {
         block.transactions = block.transactions.map(tx => ({
           ...tx,
@@ -215,18 +215,18 @@ export default class Explorer {
   public search(hashOrNumber, history) {
     this.searching = true;
     this.success = true;
-    if (this.web3.plasma.utils.isAddress(hashOrNumber)) {
+    if (this.web3.plasma.instance.utils.isAddress(hashOrNumber)) {
       history.push(`/explorer/address/${hashOrNumber}`);
       this.searching = false;
       return Promise.resolve();
     } else {
-      return this.web3.plasma.eth
+      return this.web3.plasma.instance.eth
         .getTransaction(hashOrNumber)
         .then(tx => {
           if (tx) {
             history.push(`/explorer/tx/${hashOrNumber}`);
           } else {
-            return this.web3.plasma.eth.getBlock(hashOrNumber).then(block => {
+            return this.web3.plasma.instance.eth.getBlock(hashOrNumber).then(block => {
               if (block) {
                 history.push(`/explorer/block/${hashOrNumber}`);
               } else {

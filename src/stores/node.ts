@@ -1,6 +1,6 @@
 import { observable } from 'mobx';
 import autobind from 'autobind-decorator';
-import Web3Store from './web3';
+import Web3Store from './web3/';
 
 export default class NodeStore {
   @observable
@@ -13,7 +13,7 @@ export default class NodeStore {
 
   @autobind
   private loadLatestBlock() {
-    this.web3.plasma.eth.getBlockNumber().then((num: number) => {
+    this.web3.plasma.instance.eth.getBlockNumber().then((num: number) => {
       if (this.latestBlock !== num) {
         this.latestBlock = num;
       }

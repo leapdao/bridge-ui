@@ -20,7 +20,7 @@ import TokenValue from './tokenValue';
 import '../style.css';
 import Tokens from '../stores/tokens';
 import Account from '../stores/account';
-import Web3Store from '../stores/web3';
+import Web3Store from '../stores/web3/';
 
 
 interface AppLayoutProps {
@@ -44,7 +44,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
   render() {
     const { account, web3, section } = this.props;
 
-    if (web3.plasmaReady === false) {
+    if (web3.plasma.ready === false) {
       return <Message>No connection to Leap node</Message>;
     }
 
@@ -119,10 +119,10 @@ class AppLayout extends Component<AppLayoutProps, any> {
                   </strong>
                 </Fragment>
               )}
-              {web3 && web3.injectedAvailable && !web3.injected && (
+              {web3 && web3.injected.available && !web3.injected.instance && (
                 <Button
                   onClick={() => {
-                    web3.enable();
+                    web3.injected.enable();
                   }}
                 >
                   <span
