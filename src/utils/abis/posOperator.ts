@@ -100,25 +100,6 @@ export default [
   },
   {
     constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    name: 'periodData',
-    outputs: [
-      {
-        name: 'slot',
-        type: 'uint8',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
     inputs: [],
     name: 'bridge',
     outputs: [

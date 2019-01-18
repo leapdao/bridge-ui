@@ -3,6 +3,33 @@ import { ABIDefinition } from 'web3/eth/abi';
 export default [
   {
     constant: true,
+    inputs: [
+      {
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    name: 'verifications',
+    outputs: [
+      {
+        name: 'startTime',
+        type: 'uint32',
+      },
+      {
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        name: 'stake',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    constant: true,
     inputs: [],
     name: 'depositCount',
     outputs: [
@@ -13,7 +40,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -27,7 +54,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -40,7 +67,7 @@ export default [
     name: 'deposits',
     outputs: [
       {
-        name: 'height',
+        name: 'time',
         type: 'uint64',
       },
       {
@@ -58,7 +85,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -76,7 +103,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -90,7 +117,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -104,7 +131,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -118,7 +145,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -132,7 +159,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -146,7 +173,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -168,7 +195,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -187,7 +214,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -201,7 +228,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -220,7 +247,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -243,7 +270,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -257,7 +284,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -296,7 +323,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     anonymous: false,
@@ -309,7 +336,7 @@ export default [
       {
         indexed: true,
         name: 'outIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
       {
         indexed: true,
@@ -328,7 +355,19 @@ export default [
       },
     ],
     name: 'ExitStarted',
-    type: 'event',
+    type: 'event'
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'txHash',
+        type: 'bytes32',
+      },
+    ],
+    name: 'VerificationStarted',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -340,7 +379,7 @@ export default [
       },
     ],
     name: 'Debug',
-    type: 'event',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -367,7 +406,7 @@ export default [
       },
     ],
     name: 'NewDeposit',
-    type: 'event',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -384,7 +423,51 @@ export default [
       },
     ],
     name: 'NewToken',
-    type: 'event',
+    type: 'event'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_proof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_outputIndex',
+        type: 'uint8',
+      },
+    ],
+    name: 'startVerification',
+    outputs: [],
+    payable: true,
+    stateMutability: 'payable',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_doublespendProof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_consolidateProof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_inputIndex',
+        type: 'uint8',
+      },
+      {
+        name: '_consolidateInputIndex',
+        type: 'uint8',
+      },
+    ],
+    name: 'challengeConsolidateDoublespent',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
   },
   {
     constant: false,
@@ -406,7 +489,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -420,7 +503,21 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_exitDuration',
+        type: 'uint256',
+      },
+    ],
+    name: 'setExitDuration',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
   },
   {
     constant: false,
@@ -435,18 +532,32 @@ export default [
       },
       {
         name: '_outputIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
       {
         name: '_inputIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
     ],
     name: 'startExit',
     outputs: [],
     payable: true,
     stateMutability: 'payable',
-    type: 'function',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_depositId',
+        type: 'uint256',
+      },
+    ],
+    name: 'startDepositExit',
+    outputs: [],
+    payable: true,
+    stateMutability: 'payable',
+    type: 'function'
   },
   {
     constant: false,
@@ -460,7 +571,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -475,18 +586,18 @@ export default [
       },
       {
         name: '_outputIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
       {
         name: '_inputIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
     ],
     name: 'challengeExit',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -501,17 +612,17 @@ export default [
       },
       {
         name: '_outputIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
       {
         name: '_inputIndex',
-        type: 'uint256',
+        type: 'uint8',
       },
     ],
     name: 'challengeYoungestInput',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
 ] as ABIDefinition[];

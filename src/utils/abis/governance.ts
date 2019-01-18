@@ -28,7 +28,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -42,7 +42,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -56,30 +56,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_proposalId',
-        type: 'uint256',
-      },
-    ],
-    name: 'cancel',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [],
-    name: 'finalize',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -88,7 +65,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -102,7 +79,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -116,7 +93,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -130,25 +107,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_subject',
-        type: 'address',
-      },
-      {
-        name: '_msgData',
-        type: 'bytes',
-      },
-    ],
-    name: 'propose',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -162,7 +121,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     inputs: [
@@ -173,7 +132,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'constructor',
+    type: 'constructor'
   },
   {
     anonymous: false,
@@ -195,7 +154,7 @@ export default [
       },
     ],
     name: 'NewProposal',
-    type: 'event',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -217,7 +176,7 @@ export default [
       },
     ],
     name: 'Execution',
-    type: 'event',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -234,6 +193,83 @@ export default [
       },
     ],
     name: 'OwnershipTransferred',
-    type: 'event',
+    type: 'event'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_subject',
+        type: 'address',
+      },
+      {
+        name: '_msgData',
+        type: 'bytes',
+      },
+    ],
+    name: 'propose',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_proposalId',
+        type: 'uint256',
+      },
+    ],
+    name: 'cancel',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_token',
+        type: 'address',
+      },
+    ],
+    name: 'withdrawTax',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [],
+    name: 'finalize',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+      {
+        name: '',
+        type: 'address',
+      },
+      {
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    name: 'setSlot',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
   },
 ];

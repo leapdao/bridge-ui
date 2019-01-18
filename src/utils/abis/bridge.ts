@@ -13,7 +13,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -22,26 +22,12 @@ export default [
     outputs: [
       {
         name: '',
-        type: 'uint64',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'parentBlockInterval',
-    outputs: [
-      {
-        name: '',
         type: 'uint256',
       },
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -55,35 +41,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'maxReward',
-    outputs: [
-      {
-        name: '',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'GENESIS',
-    outputs: [
-      {
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -114,21 +72,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    constant: true,
-    inputs: [],
-    name: 'exitHandler',
-    outputs: [
-      {
-        name: '',
-        type: 'address',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -142,7 +86,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: true,
@@ -156,7 +100,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function',
+    type: 'function'
   },
   {
     anonymous: false,
@@ -173,7 +117,7 @@ export default [
       },
     ],
     name: 'NewHeight',
-    type: 'event',
+    type: 'event'
   },
   {
     anonymous: false,
@@ -185,7 +129,7 @@ export default [
       },
     ],
     name: 'NewOperator',
-    type: 'event',
+    type: 'event'
   },
   {
     constant: false,
@@ -194,16 +138,12 @@ export default [
         name: '_parentBlockInterval',
         type: 'uint256',
       },
-      {
-        name: '_maxReward',
-        type: 'uint256',
-      },
     ],
     name: 'initialize',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
   {
     constant: false,
@@ -217,7 +157,35 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'getParentBlockInterval',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function'
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_parentBlockInterval',
+        type: 'uint256',
+      },
+    ],
+    name: 'setParentBlockInterval',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function'
   },
   {
     constant: false,
@@ -240,6 +208,6 @@ export default [
     ],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function',
+    type: 'function'
   },
 ] as ABIDefinition[];
