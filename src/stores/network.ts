@@ -70,7 +70,7 @@ export default class Network {
     return (
       !!(window as any).web3 &&
       !!this.account.address &&
-      this.provider === this.mmNetwork
+      this.networkId === this.mmNetwork
     );
   }
 
