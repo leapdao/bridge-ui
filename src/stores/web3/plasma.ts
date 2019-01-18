@@ -3,8 +3,6 @@ import { helpers, ExtendedWeb3 } from 'leap-core';
 import Web3 from './ts_workaround.js';
 import { CONFIG } from '../../config';
 
-import { PLASMA_NODES, DEFAULT_PLASMA_NODE } from '../../utils';
-
 export default class Web3Plasma {
   @observable.ref
   public instance: ExtendedWeb3;
@@ -13,11 +11,8 @@ export default class Web3Plasma {
   public ready;
 
   constructor() {
-    const plasmaProvider =
-      (CONFIG.nodes && CONFIG.nodes[0].url) 
-      || PLASMA_NODES[process.env.PLASMA_NODE || DEFAULT_PLASMA_NODE];
+    const plasmaProvider = CONFIG.nodes && CONFIG.nodes[0].url;
 
-      console.log(Web3);
     this.instance = helpers.extendWeb3(
       new Web3(new Web3.providers.HttpProvider(plasmaProvider))
     );

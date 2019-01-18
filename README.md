@@ -34,7 +34,6 @@ This will use config from `presets/localnet/config.json`
 
 ## Build params (env variables) 
 
-- `PLASMA_NODE_URL` - url for plasma node JSON RPC
 - `CONFIG` - name of config preset. Possible values: `localnet` (default), `testnet`
 
 ## Deployment

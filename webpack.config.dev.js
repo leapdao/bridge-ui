@@ -134,7 +134,7 @@ module.exports = {
   },
   plugins: [
     new ForkTSCheckerWebpackPlugin(),
-    new webpack.EnvironmentPlugin(['PLASMA_NODE', 'CONFIG']),
+    new webpack.EnvironmentPlugin(['CONFIG']),
     new HtmlPlugin({
       template: 'src/index.html',
     }),

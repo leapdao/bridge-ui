@@ -1,16 +1,6 @@
-export const PLASMA_NODES = {
-  0: 'http://localhost:8645',
-  1: 'http://node1.testnet.leapdao.org:8645',
-  2: 'http://node2.testnet.leapdao.org:8645',
-  3: 'http://node3.testnet.leapdao.org:8645',
-  4: 'http://node4.testnet.leapdao.org:8645',
-};
-
 export const NFT_COLOR_BASE = 32769; // 2^15 + 1
 
 export const isNFT = color => color >= NFT_COLOR_BASE;
-
-export const DEFAULT_PLASMA_NODE = '1';
 
 export { range } from './range';
 export { toArray } from './toArray';
