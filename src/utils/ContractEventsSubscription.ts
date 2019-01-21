@@ -44,7 +44,6 @@ export default class ContractEventsSubscription extends EventEmitter {
 
   private fetchEvents() {
     this.getFromBlock().then((fromBlock: BlockType) => {
-      console.log('READ', fromBlock);
       const options = {
         fromBlock,
         toBlock: 'latest' as BlockType,
@@ -57,7 +56,6 @@ export default class ContractEventsSubscription extends EventEmitter {
           const latestBlockRead = Math.max(...events.map(e => e.blockNumber));
           this.fromBlock =
             latestBlockRead > 0 ? latestBlockRead + 1 : this.fromBlock;
-          console.log('STATE', this.fromBlock);
           // group events by name
           const eventGroups = this.groupByName(events);
 
