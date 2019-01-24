@@ -179,7 +179,7 @@ export default class Token extends ContractStore {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());
           return {
             futureReceipt: this.web3.plasma.instance.eth.sendSignedTransaction(
-              signedTx.toRaw() as any
+              signedTx.hex() as any
             ),
           };
         },

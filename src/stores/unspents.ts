@@ -183,7 +183,7 @@ export default class Unspents {
     );
 
     consolidates.forEach(consolidate => {
-      this.web3.plasma.instance.eth.sendSignedTransaction(consolidate.toRaw() as any);
+      this.web3.plasma.instance.eth.sendSignedTransaction(consolidate.hex() as any);
     });
   }
 }
