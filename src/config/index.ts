@@ -8,7 +8,7 @@ const defaultConfig = {
   'nodes': [
     'http://localhost:8645'
   ],
-  'tokenFormUrl': 'https://docs.google.com/forms/d/e/1FAIpQLSedGkkbHD6sdvdnnhJOg5bgLj0XsjU2caIsqyHQyzwmMjyZ9A/viewform?embedded=true'
+  'tokenFormUrl': 'https://docs.google.com/forms/d/e/1FAIpQLSdFAezroU_uxvWWQmMxs_DWAasl5UwC_nQXIy0CtOfmgDVE2w/viewform?embedded=true'
 };
 
 const readConfig = (name) => {
