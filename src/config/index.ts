@@ -7,12 +7,13 @@ const defaultConfig = {
   'consensus': 'poa',
   'nodes': [
     'http://localhost:8645'
-  ]
+  ],
+  'tokenFormUrl': 'https://docs.google.com/forms/d/e/1FAIpQLSdFAezroU_uxvWWQmMxs_DWAasl5UwC_nQXIy0CtOfmgDVE2w/viewform?embedded=true'
 };
 
 const readConfig = (name) => {
   try {
-    return require(`./${name}/config.json`);
+    return Object.assign({}, defaultConfig, require(`./${name}/config.json`));
   } catch (e) {
     return defaultConfig;
   }  
