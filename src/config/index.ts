@@ -7,7 +7,8 @@ const defaultConfig = {
   'consensus': 'poa',
   'nodes': [
     'http://localhost:8645'
-  ]
+  ],
+  'tokenFormUrl': 'https://docs.google.com/forms/d/e/1FAIpQLSedGkkbHD6sdvdnnhJOg5bgLj0XsjU2caIsqyHQyzwmMjyZ9A/viewform?embedded=true'
 };
 
 const readConfig = (name) => {
