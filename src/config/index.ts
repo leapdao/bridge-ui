@@ -13,7 +13,7 @@ const defaultConfig = {
 
 const readConfig = (name) => {
   try {
-    return require(`./${name}/config.json`);
+    return Object.assign({}, defaultConfig, require(`./${name}/config.json`));
   } catch (e) {
     return defaultConfig;
   }  
