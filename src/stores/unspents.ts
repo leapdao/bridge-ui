@@ -95,10 +95,14 @@ export default class Unspents {
   }
 
   private exitDeposit(unspentDeposit: UnspentWithTx) {
-    return getProof(
-      this.web3.plasma.instance, 
-      unspentDeposit.transaction
-    ).then(txProof =>
+    return this.web3.plasma.instance.getValidatorInfo().then(validatorInfo => {
+      return getProof(
+        this.web3.plasma.instance, 
+        unspentDeposit.transaction,
+        0, // TODO: get this some-how
+        validatorInfo.ethAddress
+      )
+    }).then(txProof =>
       this.exitHandler.startExit(
         [],
         txProof,
@@ -115,11 +119,13 @@ export default class Unspents {
     if (tx.type === Type.DEPOSIT) {
       return this.exitDeposit(unspent)
     }
-
-    return getYoungestInputTx(this.web3.plasma.instance, tx).then(inputTx =>
+    Promise.all([
+      getYoungestInputTx(this.web3.plasma.instance, tx),
+      this.web3.plasma.instance.getValidatorInfo(),
+    ]).then(([inputTx, validatorInfo]) =>
       Promise.all([
-        getProof(this.web3.plasma.instance, unspent.transaction),
-        getProof(this.web3.plasma.instance, inputTx.tx),
+        getProof(this.web3.plasma.instance, unspent.transaction, 0, validatorInfo.ethAddress),
+        getProof(this.web3.plasma.instance, inputTx.tx, 0, validatorInfo.ethAddress),
         inputTx.index,
       ])
     ).then(([txProof, inputProof, inputIndex]) =>
