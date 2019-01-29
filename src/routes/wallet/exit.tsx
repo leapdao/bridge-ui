@@ -95,7 +95,9 @@ export default class Exit extends React.Component<ExitProps, any> {
                       u.transaction.blockNumber && (
                       <Button
                         size="small"
-                        onClick={() => unspents.exitUnspent(u)}
+                        onClick={() => {
+                          unspents.fastExitUnspent(u)
+                        }}
                       >
                         Exit
                       </Button>

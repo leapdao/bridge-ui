@@ -14,6 +14,7 @@ import {
   Type,
   LeapTransaction,
   helpers,
+  Exit
 } from 'leap-core';
 import { bufferToHex } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
@@ -139,6 +140,46 @@ export default class Unspents {
         inputIndex,
       )
     );
+  }
+
+  @autobind
+  public fastExitUnspent(unspent: UnspentWithTx) {
+    const tx = Tx.fromRaw(unspent.transaction.raw);
+
+    const utxoId = unspent.outpoint.getUtxoId();
+    const amount = unspent.output.value as number;
+    const sigHashBuff = Exit.sigHashBuff(utxoId, amount);
+
+    return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff.toString('hex')).then(sig => {
+      const vBuff = Buffer.alloc(32);
+      vBuff.writeInt8(sig.v, 31);
+      return Buffer.concat([sigHashBuff, Buffer.from(sig.r), Buffer.from(sig.s), vBuff]);
+    }).then(signedData => 
+      Promise.all([
+        getYoungestInputTx(this.web3.plasma.instance, tx),
+        Exit.bufferToBytes32Array(signedData),
+      ])
+    ).then(([inputTx, signedData]) => 
+      Promise.all([
+        getProof(this.web3.plasma.instance, unspent.transaction),
+        getProof(this.web3.plasma.instance, inputTx.tx),
+        inputTx.index,
+        signedData
+      ])
+    ).then(([txProof, inputProof, inputIndex, signedData]) => 
+      //call api
+      console.log([txProof, inputProof, inputIndex, signedData])
+    );
+
+    // return getYoungestInputTx(this.web3.plasma.instance, tx).then(inputTx => {
+    //   return Promise.all([
+    //     getProof(this.web3.plasma.instance, unspent.transaction),
+    //     getProof(this.web3.plasma.instance, inputTx.tx),
+    //     inputTx.index,
+    //   ])
+    // }).then(([txProof, inputProof, inputIndex]) => {
+    //   console.log("YOOO");
+    // });
   }
 
   public listForColor(color: number) {
