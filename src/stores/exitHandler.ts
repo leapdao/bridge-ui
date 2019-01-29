@@ -41,7 +41,7 @@ export default class ExitHandler extends ContractStore {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
-
+    console.log(this.account.address, String(amount), token.color);
     const data = this.contract.methods
       .deposit(this.account.address, String(amount), token.color)
       .encodeABI();

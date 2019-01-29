@@ -23,6 +23,8 @@ import Network from '../stores/network';
 import { match } from 'react-router';
 import Tokens from '../stores/tokens';
 
+import { BigIntType, BigInt, biMax, multiply, divide, ZERO } from 'jsbi-utils';
+
 const addrCmp = (a1, a2) => toChecksumAddress(a1) === toChecksumAddress(a2);
 
 const cellStyle = {
@@ -204,24 +206,26 @@ export default class Slots extends React.Component<SlotsProps, any> {
             <tr>
               <th style={formCellStyle} />
               {operator.slots.map((slot, i) => {
-                const minStake = Math.max(slot.stake, slot.newStake) * 1.05;
-                const minValue = this.psc.toTokens(minStake);
+                const minStake = divide(
+                  multiply(biMax(slot.stake, slot.newStake), BigInt(105)),
+                  BigInt(100)
+                ); // * 1.05
                 const ownStake = addrCmp(slot.owner, account.address || '')
-                  ? minValue
-                  : 0;
+                  ? minStake
+                  : ZERO;
 
                 return (
                   <td key={i} style={formCellStyle}>
                     {network && network.canSubmit && (
                       <StakeForm
                         value={stakes[i]}
+                        token={this.psc}
                         onChange={value => this.setStake(i, value)}
-                        symbol={this.psc.symbol}
                         disabled={!signerAddr}
                         onSubmit={() => this.handleBet(i)}
-                        minValue={minValue}
+                        minValue={minStake}
                         ownStake={ownStake}
-                        maxValue={this.psc.decimalsBalance}
+                        maxValue={this.psc.balance as BigIntType}
                       />
                     )}
                   </td>

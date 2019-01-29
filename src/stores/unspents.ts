@@ -16,10 +16,11 @@ import {
   helpers,
 } from 'leap-core';
 import { bufferToHex } from 'ethereumjs-util';
+import autobind from 'autobind-decorator';
 
+import { add, bi, ZERO } from 'jsbi-utils';
 import ExitHandler from './exitHandler';
 import Account from './account';
-import autobind from 'autobind-decorator';
 import NodeStore from './node';
 import Web3Store from './web3/';
 
@@ -176,7 +177,7 @@ export default class Unspents {
           },
           [] as Input[]
         );
-        const value = chunk.reduce((v, u) => v + Number(u.output.value), 0);
+        const value = chunk.reduce((v, u) => add(v, bi(u.output.value)), ZERO);
         txs.push(
           Tx.consolidate(
             inputs,

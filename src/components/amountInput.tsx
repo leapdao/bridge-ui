@@ -1,11 +1,12 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import { Output } from 'leap-core';
 import { computed } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Form, Select, Input } from 'antd';
 import autobind from 'autobind-decorator';
 import Tokens from '../stores/tokens';
+import { isNFT, nftDisplayValue } from '../utils';
+import { BigIntType, bi } from 'jsbi-utils';
 
 interface AmountInputProps {
   color: number;
@@ -32,8 +33,7 @@ export default class AmountInput extends React.Component<
     const { color } = this.props;
     if (color !== nextColor) {
       if (
-        (Output.isNFT(nextColor) !== Output.isNFT(color) ||
-          Output.isNFT(nextColor)) &&
+        (isNFT(nextColor) !== isNFT(color) || isNFT(nextColor)) &&
         typeof onChange === 'function'
       ) {
         onChange('');
@@ -67,7 +67,8 @@ export default class AmountInput extends React.Component<
   handleBlur(e) {
     const { onChange, onBlur, value } = this.props;
     if (!this.token.isNft && typeof onChange === 'function') {
-      onChange(Number(value) || 0);
+      const numVal = Number(value) && Number(value) > 0;
+      onChange(numVal ? value : 0);
     }
 
     if (typeof onBlur === 'function') {
@@ -116,9 +117,9 @@ export default class AmountInput extends React.Component<
                 notFoundContent="No tokens"
                 allowClear
               >
-                {((balance as string[]) || []).map(id => (
-                  <Select.Option key={id} value={id}>
-                    {id}
+                {((balance as BigIntType[]) || []).map(id => (
+                  <Select.Option key={nftDisplayValue(id)} value={nftDisplayValue(id)}>
+                    {nftDisplayValue(id)}
                   </Select.Option>
                 ))}
               </Select>

@@ -16,8 +16,6 @@ import {
 import { helpers, Tx, Input, Output } from 'leap-core';
 import * as Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
-// @ts-ignore
-import * as BN from 'bn.js';
 import { EventLog } from 'web3/types';
 import Contract from 'web3/eth/contract';
 import { erc20, erc721 } from '../utils/abis';
@@ -31,6 +29,10 @@ import { InflightTxReceipt } from '../utils/types';
 import { range } from '../utils/range';
 import NodeStore from './node';
 import Web3Store from './web3/';
+
+import { BigIntType, equal, bi, exponentiate, toNumber, multiply, subtract, isBigInt, BigInt } from 'jsbi-utils';
+
+const Big = require('big.js');
 
 const tokenInfo = (
   token: Contract,
@@ -64,10 +66,10 @@ export default class Token extends ContractStore {
   public symbol: string;
   @observable
   public decimals: number;
-  @observable
-  public balance?: number | string[];
-  @observable
-  public plasmaBalance?: number | string[];
+  @observable.ref
+  public balance?: BigIntType | BigIntType[];
+  @observable.ref
+  public plasmaBalance?: BigIntType | BigIntType[];
 
   constructor(
     account: Account,
@@ -98,12 +100,12 @@ export default class Token extends ContractStore {
   }
 
   @computed
-  public get decimalsBalance() {
+  public get decimalsBalance(): number {
     if (this.isNft) {
-      return (this.balance as string[]).length;
+      return (this.balance as BigIntType[]).length;
     }
 
-    return this.balance && this.toTokens(this.balance as number);
+    return this.balance && this.toTokens(this.balance as BigIntType);
   }
 
   @computed
@@ -120,10 +122,13 @@ export default class Token extends ContractStore {
    * Returns given value unchanged if this token is NFT.
    * @param tokenValue Amount of tokens to convert to token cents or token Id for NFT token
    */
-  public toCents(tokenValue: number): number {
-    if (this.isNft) return tokenValue;
-
-    return tokenValue * 10 ** this.decimals;
+  public toCents(tokenValue: BigIntType | number | string): BigIntType {
+    if (this.isNft) return bi(tokenValue);
+    
+    if (!isBigInt(tokenValue)) { // likely decimal
+      return bi(Math.trunc(Number(tokenValue) * (10 ** this.decimals)));
+    }
+    return multiply(bi(tokenValue), bi(10 ** this.decimals));
   }
 
   /**
@@ -131,13 +136,13 @@ export default class Token extends ContractStore {
    * Returns given value unchanged if this token is NFT.
    * @param tokenValue Amount of token cents to convert to tokens or token Id for NFT token
    */
-  public toTokens(tokenCentsValue: number): number {
-    if (this.isNft) return tokenCentsValue;
-
-    return tokenCentsValue / 10 ** this.decimals;
+  public toTokens(tokenCentsValue: BigIntType) {
+    if (this.isNft) return toNumber(tokenCentsValue);
+    return Big(tokenCentsValue.toString() || 0).div(10 ** this.decimals).toFixed();
   }
 
-  public transfer(to: string, amount: number | string): Promise<any> {
+  public transfer(to: string, amount: BigIntType): Promise<any> {
+    console.log(to, amount);
     if (!this.web3.injected.instance) {
       return Promise.reject('No metamask');
     }
@@ -150,17 +155,17 @@ export default class Token extends ContractStore {
           const { outpoint } = unspent.find(
             ({ output }) =>
               Number(output.color) === Number(this.color) &&
-              output.value === amount
+              equal(bi(output.value), bi(amount))
           );
           const inputs = [new Input(outpoint)];
-          const outputs = [new Output(amount, to, this.color)];
+          const outputs = [new Output(amount as any, to, this.color)];
           return Tx.transfer(inputs, outputs);
         }
 
         const inputs = helpers.calcInputs(
           unspent,
           this.account.address,
-          amount as number,
+          amount as any,
           this.color
         );
         const outputs = helpers.calcOutputs(
@@ -168,7 +173,7 @@ export default class Token extends ContractStore {
           inputs,
           this.account.address,
           to,
-          amount as number,
+          amount as any,
           this.color
         );
         return Tx.transfer(inputs, outputs);
@@ -234,7 +239,7 @@ export default class Token extends ContractStore {
 
   @autobind
   @action
-  private updateBalance(balance: number | string[], plasma = false) {
+  private updateBalance(balance: BigIntType | BigIntType[], plasma = false) {
     if (plasma) {
       this.plasmaBalance = balance;
     } else {
@@ -251,20 +256,21 @@ export default class Token extends ContractStore {
     contract.methods
       .balanceOf(this.account.address)
       .call()
-      .then(balance => {
+      .then((balance): Promise<BigIntType | BigIntType[]> => {
         if (this.isNft) {
           return Promise.all(
             range(0, balance - 1).map(i =>
               contract.methods
                 .tokenOfOwnerByIndex(this.account.address, i)
-                .call()
+                .call().then(v => bi(v))
             )
-          ) as Promise<string[]>;
+          ) as Promise<BigIntType[]>;
         }
 
-        return balance;
+        return Promise.resolve(bi(balance));
       })
       .then(balance => {
+        console.log(balance.toString());
         this.updateBalance(balance, plasma);
       });
   }
@@ -272,7 +278,7 @@ export default class Token extends ContractStore {
   private allowanceOrTokenId(valueOrTokenId: number) {
     if (this.isNft) return valueOrTokenId;
 
-    return `0x${new BN(2, 10).pow(new BN(255, 10)).toString(16)}`;
+    return `0x${exponentiate(bi(2), bi(255)).toString(16)}`;
   }
 
   private hasEnoughAllowance(spender: string, value: number): Promise<Boolean> {

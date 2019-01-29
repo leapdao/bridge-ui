@@ -8,7 +8,7 @@
 import { observable, action, computed, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
-import { range, NFT_COLOR_BASE } from '../utils';
+import { range, NFT_COLOR_BASE, isNFT } from '../utils';
 import Account from './account';
 import Token from './token';
 import ExitHandler from './exitHandler';
@@ -91,7 +91,7 @@ export default class Tokens {
       return -1;
     }
 
-    return Output.isNFT(color)
+    return isNFT(color)
       ? this.erc20TokenCount + (color - NFT_COLOR_BASE)
       : color;
   }

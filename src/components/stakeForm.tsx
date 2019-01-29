@@ -4,17 +4,19 @@ import { observer } from 'mobx-react';
 import { observable, computed } from 'mobx';
 import { Input, Button } from 'antd';
 import autobind from 'autobind-decorator';
+import Token from '../stores/token';
+import { BigIntType, BigInt, bi, biMax, biEqual, greaterThan, lessThan, add, ZERO } from 'jsbi-utils';
 
-const fieldValue = v => String(v >= 0 ? v : '');
+const fieldValue = (v: BigIntType) => biMax(v, ZERO);
 
 interface StakeFormProps {
-  value: number | string;
-  minValue: number;
-  maxValue: number;
-  ownStake: number;
+  value: BigIntType;
+  minValue: BigIntType;
+  maxValue: BigIntType;
+  ownStake: BigIntType;
   disabled: boolean;
-  symbol: string;
-  onChange: (newValue: number) => void;
+  token: Token;
+  onChange: (newValue: BigIntType) => void;
   onSubmit: () => void;
 }
 
@@ -24,7 +26,7 @@ class StakeForm extends React.Component<StakeFormProps, any> {
     minValue: 0,
   };
   componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.props.value) {
+    if (!biEqual(nextProps.value, this.props.value)) {
       this.value = fieldValue(nextProps.value);
     }
   }
@@ -34,26 +36,26 @@ class StakeForm extends React.Component<StakeFormProps, any> {
     const { minValue, maxValue, disabled, ownStake } = this.props;
     const { value } = this;
 
-    if (value === 0 || value === '0') {
+    if (biEqual(value, 0)) {
       return false;
     }
 
     return (
       disabled ||
       !value ||
-      Number(value) > maxValue + ownStake ||
-      Number(value) < minValue
+      greaterThan(bi(value), add(bi(maxValue), bi(ownStake))) ||
+      lessThan(bi(value), bi(minValue))
     );
   }
 
   @observable
-  value: number | string = fieldValue(this.props.value);
+  value: BigIntType = fieldValue(this.props.value);
 
   @autobind
   handleUpdate() {
     const { minValue, onChange } = this.props;
-    const zero = this.value === 0 || this.value === '0';
-    onChange(zero ? 0 : Math.max(Number(minValue), Number(this.value)));
+    const zero = biEqual(this.value, 0);
+    onChange(zero ? ZERO : biMax(minValue, this.value));
   }
 
   @autobind
@@ -62,7 +64,7 @@ class StakeForm extends React.Component<StakeFormProps, any> {
   }
 
   render() {
-    const { symbol, minValue, onSubmit } = this.props;
+    const { token, minValue, onSubmit } = this.props;
 
     return (
       <Fragment>
@@ -75,15 +77,15 @@ class StakeForm extends React.Component<StakeFormProps, any> {
           }}
         >
           <Input
-            value={this.value || ''}
+            value={BigInt(this.value).toString() || ''}
             style={{ width: 150, font: 'inherit' }}
             onChange={this.handleChange}
             onBlur={this.handleUpdate}
-            addonAfter={symbol}
+            addonAfter={token.symbol}
           />
           &nbsp;
           <span style={{ fontSize: 11 }}>{`${
-            minValue > 0 ? `>= ${minValue}` : ''
+            greaterThan(bi(minValue), ZERO) ? `>= ${token.toTokens(minValue)}` : ''
           }`}</span>
         </div>
         <Button type="primary" disabled={this.disabled} onClick={onSubmit}>
