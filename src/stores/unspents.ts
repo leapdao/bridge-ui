@@ -98,14 +98,14 @@ export default class Unspents {
   }
 
   private exitDeposit(unspentDeposit: UnspentWithTx) {
-    return this.web3.plasma.instance.getValidatorInfo().then(validatorInfo => {
-      return getProof(
-        this.web3.plasma.instance, 
-        unspentDeposit.transaction,
-        0, // TODO: get this some-how
-        validatorInfo.ethAddress
-      )
-    }).then(txProof =>
+    const { signer } = this.operator.slots[0];
+    console.log(signer);
+    return getProof(
+      this.web3.plasma.instance, 
+      unspentDeposit.transaction,
+      0, // TODO: get this some-how
+      signer
+    ).then(txProof =>
       this.exitHandler.startExit(
         [],
         txProof,
@@ -123,6 +123,7 @@ export default class Unspents {
       return this.exitDeposit(unspent)
     }
     const { signer } = this.operator.slots[0];
+    console.log(signer);
     getYoungestInputTx(
       this.web3.plasma.instance, tx
     ).then((inputTx) => 
