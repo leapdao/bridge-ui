@@ -178,7 +178,7 @@ export default class Token extends ContractStore {
         );
         return Tx.transfer(inputs, outputs);
       })
-      .then(tx => tx.signWeb3(this.web3.injected.instance))
+      .then(tx => tx.signWeb3(this.web3.injected.instance as any))
       .then(
         signedTx => {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());

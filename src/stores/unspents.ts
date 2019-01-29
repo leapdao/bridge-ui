@@ -20,6 +20,7 @@ import autobind from 'autobind-decorator';
 
 import { add, bi, ZERO } from 'jsbi-utils';
 import ExitHandler from './exitHandler';
+import Operator from './operator';
 import Account from './account';
 import NodeStore from './node';
 import Web3Store from './web3/';
@@ -38,6 +39,7 @@ export default class Unspents {
 
   constructor(
     private exitHandler: ExitHandler,
+    private operator: Operator,
     private account: Account,
     private node: NodeStore,
     private web3: Web3Store
@@ -120,13 +122,13 @@ export default class Unspents {
     if (tx.type === Type.DEPOSIT) {
       return this.exitDeposit(unspent)
     }
-    Promise.all([
-      getYoungestInputTx(this.web3.plasma.instance, tx),
-      this.web3.plasma.instance.getValidatorInfo(),
-    ]).then(([inputTx, validatorInfo]) =>
+    const { signer } = this.operator.slots[0];
+    getYoungestInputTx(
+      this.web3.plasma.instance, tx
+    ).then((inputTx) => 
       Promise.all([
-        getProof(this.web3.plasma.instance, unspent.transaction, 0, validatorInfo.ethAddress),
-        getProof(this.web3.plasma.instance, inputTx.tx, 0, validatorInfo.ethAddress),
+        getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
+        getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
         inputTx.index,
       ])
     ).then(([txProof, inputProof, inputIndex]) =>

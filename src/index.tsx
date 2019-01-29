@@ -63,7 +63,7 @@ const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(web3, tokens);
 const governanceContract = new GovernanceContract(bridge, operator, exitHandler, transactions, web3);
 const network = new Network(account, web3, plasmaConfig);
-const unspents = new Unspents(exitHandler, account, node, web3);
+const unspents = new Unspents(exitHandler, operator, account, node, web3);
 
 ReactDOM.render(
   <BrowserRouter>

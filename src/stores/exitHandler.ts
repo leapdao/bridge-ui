@@ -5,6 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 import { reaction, action } from 'mobx';
+import { EventLog } from 'web3/types';
 import autobind from 'autobind-decorator';
 
 import { exitHandler as exitHandlerAbi } from '../utils/abis';
@@ -71,18 +72,26 @@ export default class ExitHandler extends ContractStore {
     return tx;
   }
 
+  public getExitStake() {
+    return this.iContract.methods.exitStake().call();
+  }
+
   public startExit(
     youngestInputProof: string[], proof: string[], outIndex: number, inputIndex: number
   ) {
-    const tx = this.iContract.methods.startExit(youngestInputProof, proof, outIndex, inputIndex).send({
-      from: this.account.address,
-    });
+    return this.getExitStake().then(exitStake => {
+      const tx = this.iContract.methods.startExit(youngestInputProof, proof, outIndex, inputIndex).send({
+        from: this.account.address,
+        value: String(exitStake),
+        gas: 1500000,
+      });
 
-    this.watchTx(tx, 'startExit', {
-      message: 'Exit',
-    });
+      this.watchTx(tx, 'startExit', {
+        message: 'Exit',
+      });
 
-    return tx;
+      return tx;
+    });
   }
 
   public finalizeExits(color: number) {
