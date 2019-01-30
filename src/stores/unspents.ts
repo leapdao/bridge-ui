@@ -147,8 +147,10 @@ export default class Unspents {
     const tx = Tx.fromRaw(unspent.transaction.raw);
 
     const utxoId = unspent.outpoint.getUtxoId();
-    const amount = unspent.output.value as number;
+    const amount = bi(unspent.output.value);
     const sigHashBuff = Exit.sigHashBuff(utxoId, amount);
+
+    const { signer } = this.operator.slots[0];
 
     return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff.toString('hex')).then(sig => {
       const vBuff = Buffer.alloc(32);
@@ -159,14 +161,16 @@ export default class Unspents {
         getYoungestInputTx(this.web3.plasma.instance, tx),
         Exit.bufferToBytes32Array(signedData),
       ])
-    ).then(([inputTx, signedData]) => 
-      Promise.all([
-        getProof(this.web3.plasma.instance, unspent.transaction),
-        getProof(this.web3.plasma.instance, inputTx.tx),
+    ).then(([inputTx, signedData]) => {
+      console.log(inputTx);
+      console.log(unspent.transaction);
+      return Promise.all([
+        getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
+        getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
         inputTx.index,
         signedData
       ])
-    ).then(([txProof, inputProof, inputIndex, signedData]) => 
+    }).then(([txProof, inputProof, inputIndex, signedData]) => 
       //call api
       console.log([txProof, inputProof, inputIndex, signedData])
     );

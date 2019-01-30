@@ -70,6 +70,7 @@ export default class Exit extends React.Component<ExitProps, any> {
             { title: 'Input', dataIndex: 'input', key: 'input' },
             { title: 'Height', dataIndex: 'height', key: 'height' },
             { title: 'Exit', dataIndex: 'exit', key: 'exit' },
+            { title: 'FastExit', dataIndex: 'fastExit', key: 'fastExit' },
           ]}
           dataSource={utxoList
             .sort(
@@ -96,7 +97,7 @@ export default class Exit extends React.Component<ExitProps, any> {
                       <Button
                         size="small"
                         onClick={() => {
-                          unspents.fastExitUnspent(u)
+                          unspents.exitUnspent(u)
                         }}
                       >
                         Exit
@@ -108,6 +109,18 @@ export default class Exit extends React.Component<ExitProps, any> {
                         Wait until height {unspents.periodBlocksRange[1]}
                       </span>
                     )}
+                  </Fragment>
+                ),
+                fastExit: (
+                  <Fragment>
+                    <Button
+                      size="small"
+                      onClick={() => {
+                        unspents.fastExitUnspent(u)
+                      }}
+                    >
+                      FastExit
+                    </Button>
                   </Fragment>
                 ),
               };
