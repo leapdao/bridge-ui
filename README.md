@@ -16,7 +16,8 @@ You can:
 ## Links
 
 Dev: http://bridge-dev.leapdao.org/
-Dev: http://testnet.leapdao.org/
+
+Testnet: http://testnet.leapdao.org/
 
 Mainnet: N/A
 
