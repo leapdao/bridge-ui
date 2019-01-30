@@ -11,6 +11,7 @@ import {
   Tx,
   Input,
   Output,
+  Outpoint,
   Type,
   LeapTransaction,
   helpers,
@@ -175,11 +176,8 @@ export default class Unspents {
 
   @autobind
   private finalizeFastExit(period) {
-    console.log('period received', period);
     if (pendingFastExits.length < 1) {
       return;
-    } else {
-      console.log(pendingFastExits);
     }
     const { signer } = this.operator.slots[0];
     const [{unspent, sig, rawTx, sigHashBuff}] = pendingFastExits;
@@ -196,13 +194,11 @@ export default class Unspents {
     ]).then(([txProof, inputProof, inputIndex, signedData]) => {
       pendingFastExits.shift();
       //call api
-      console.log([txProof, inputProof, inputIndex, signedData]);
-      console.log(CONFIG);
       this.postData(CONFIG.exitMarketMaker, {
         inputProof: inputProof,
         transferProof: txProof,
         inputIndex: inputIndex,
-        outputIndex: unspent.outpoint.index,
+        outputIndex: 0,    // output of spending tx that we want to exit
         signedData: signedData
       }).then(rsp => {
         console.log(rsp);
@@ -217,8 +213,6 @@ export default class Unspents {
 
     const token = this.tokens.tokenForColor(unspent.output.color);
 
-    this.myUnspentAtExitHandler();
-
     const amount = bi(unspent.output.value);
 
     let tx, sigHashBuff, rawTx;
@@ -228,9 +222,9 @@ export default class Unspents {
     .then(txObj => {
       rawTx = txObj;
       tx = Tx.fromRaw(txObj.raw);
-      const utxoId = tx.inputs[0].prevout.getUtxoId();
+      const utxoId = (new Outpoint(tx.hash(), 0)).getUtxoId();
       sigHashBuff = Exit.sigHashBuff(utxoId, amount);
-      return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff.toString('hex'));
+      return Tx.signMessageWithWeb3(this.web3.injected.instance, `0x${sigHashBuff.toString('hex')}`);
     }).then(sig => {
       // keep the sig around
       pendingFastExits.push({
@@ -240,27 +234,6 @@ export default class Unspents {
         sigHashBuff,
       });
     });
-  }
-
-  private myUnspentAtExitHandler() {
-    this.web3.plasma.instance
-      .getUnspent(this.exitHandler.address)
-      .then((unspent: UnspentWithTx[]) => {
-        return Promise.all(
-          unspent
-          .map((u : UnspentWithTx) =>
-            this.web3.plasma.instance.eth.getTransaction(
-              bufferToHex(u.outpoint.hash)
-            ).then((tx: LeapTransaction) => {
-              u.transaction = tx;
-              return u;
-            })
-          )
-        )
-      }).then(us => {
-        const myUs = us.filter(u => u.transaction.from == this.account.address)
-        console.log(myUs)
-      })
   }
 
   public listForColor(color: number) {
