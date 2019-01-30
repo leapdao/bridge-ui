@@ -10,7 +10,7 @@ import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import { Button, Table } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import { bufferToHex } from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
@@ -70,7 +70,6 @@ export default class Exit extends React.Component<ExitProps, any> {
             { title: 'Input', dataIndex: 'input', key: 'input' },
             { title: 'Height', dataIndex: 'height', key: 'height' },
             { title: 'Exit', dataIndex: 'exit', key: 'exit' },
-            { title: 'FastExit', dataIndex: 'fastExit', key: 'fastExit' },
           ]}
           dataSource={utxoList
             .sort(
@@ -92,37 +91,33 @@ export default class Exit extends React.Component<ExitProps, any> {
                 height: u.transaction.blockNumber,
                 exit: (
                   <Fragment>
-                    {unspents.periodBlocksRange[0] >
-                      u.transaction.blockNumber && (
+                    <Tooltip title={
+                          unspents.periodBlocksRange[0] <= u.transaction.blockNumber 
+                          ? 'Wait until height ' + unspents.periodBlocksRange[1]
+                          : ''
+                        }>
                       <Button
                         size="small"
+                        disabled={unspents.periodBlocksRange[0] <= u.transaction.blockNumber}
                         onClick={() => {
                           unspents.exitUnspent(u)
                         }}
                       >
-                        Exit
-                      </Button>
-                    )}
-                    {unspents.periodBlocksRange[0] <=
-                      u.transaction.blockNumber && (
-                      <span>
-                        Wait until height {unspents.periodBlocksRange[1]}
-                      </span>
-                    )}
-                  </Fragment>
-                ),
-                fastExit: (
-                  <Fragment>
+                        Normal
+                      </Button>   
+                    </Tooltip>                 
                     <Button
                       size="small"
+                      style={{ marginLeft: '10px' }}
                       onClick={() => {
                         unspents.fastExitUnspent(u)
                       }}
                     >
-                      FastExit
+                      Fast
                     </Button>
+
                   </Fragment>
-                ),
+                )
               };
             })}
         />
