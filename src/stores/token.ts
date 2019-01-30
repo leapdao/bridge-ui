@@ -142,7 +142,6 @@ export default class Token extends ContractStore {
   }
 
   public transfer(to: string, amount: BigIntType): Promise<any> {
-    console.log(to, amount);
     if (!this.web3.injected.instance) {
       return Promise.reject('No metamask');
     }
@@ -270,7 +269,6 @@ export default class Token extends ContractStore {
         return Promise.resolve(bi(balance));
       })
       .then(balance => {
-        console.log(balance.toString());
         this.updateBalance(balance, plasma);
       });
   }
