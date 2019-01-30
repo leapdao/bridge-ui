@@ -123,7 +123,7 @@ export default class Unspents {
       return this.exitDeposit(unspent)
     }
     const { signer } = this.operator.slots[0];
-    console.log(signer);
+
     getYoungestInputTx(
       this.web3.plasma.instance, tx
     ).then((inputTx) => 
