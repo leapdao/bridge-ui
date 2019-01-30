@@ -97,9 +97,7 @@ export default class Unspents {
       });
   }
 
-  private exitDeposit(unspentDeposit: UnspentWithTx) {
-    const { signer } = this.operator.slots[0];
-    console.log(signer);
+  private exitDeposit(unspentDeposit: UnspentWithTx, signer: string) {
     return getProof(
       this.web3.plasma.instance, 
       unspentDeposit.transaction,
@@ -119,10 +117,11 @@ export default class Unspents {
   public exitUnspent(unspent: UnspentWithTx) {
     const tx = Tx.fromRaw(unspent.transaction.raw);
 
-    if (tx.type === Type.DEPOSIT) {
-      return this.exitDeposit(unspent)
-    }
     const { signer } = this.operator.slots[0];
+
+    if (tx.type === Type.DEPOSIT) {
+      return this.exitDeposit(unspent, signer)
+    }
 
     getYoungestInputTx(
       this.web3.plasma.instance, tx
