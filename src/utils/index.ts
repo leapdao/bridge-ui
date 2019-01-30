@@ -1,10 +1,7 @@
-export const NFT_COLOR_BASE = 32769; // 2^15 + 1
-
-export const isNFT = color => color >= NFT_COLOR_BASE;
-
 export { range } from './range';
 export { toArray } from './toArray';
 export { txSuccess } from './txSuccess';
+export { nftDisplayValue, NFT_COLOR_BASE, isNFT } from './nft';
 
 export const shortenHex = hex =>
   hex && [hex.slice(0, 8), '...', hex.slice(hex.length - 6)].join('');

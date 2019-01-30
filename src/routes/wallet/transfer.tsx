@@ -14,6 +14,8 @@ import TransferForm from '../../components/transferForm';
 import Tokens from '../../stores/tokens';
 import Network from '../../stores/network';
 
+import { bi } from 'jsbi-utils';
+
 interface TransferProps {
   tokens?: Tokens;
   network?: Network;
@@ -41,8 +43,8 @@ export default class Transfer extends React.Component<TransferProps, any> {
             this.selectedToken.transfer(
               addr,
               this.selectedToken.isNft
-                ? amount
-                : this.selectedToken.toCents(Number(amount))
+                ? bi(amount)
+                : this.selectedToken.toCents(amount)
             )
           }
           disabled={!network || !network.canSubmit}

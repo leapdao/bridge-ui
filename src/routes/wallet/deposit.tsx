@@ -17,6 +17,7 @@ import AmountInput from '../../components/amountInput';
 import Tokens from '../../stores/tokens';
 import Network from '../../stores/network';
 import ExitHandler from '../../stores/exitHandler';
+import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
 
 interface DepositProps {
   tokens?: Tokens;
@@ -42,9 +43,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   handleSubmit(e) {
     e.preventDefault();
     const { exitHandler } = this.props;
-    const value = this.selectedToken.isNft
-      ? this.value
-      : this.selectedToken.toCents(Number(this.value));
+    const value = this.selectedToken.toCents(this.value);
     exitHandler.deposit(this.selectedToken, String(value)).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
@@ -53,25 +52,12 @@ export default class Deposit extends React.Component<DepositProps, any> {
     });
   }
 
-  @autobind
-  handleChange(e) {
-    this.value = e.target.value;
-  }
-
-  @autobind
-  handleBlur() {
-    if (!this.selectedToken.isNft) {
-      this.value = Number(this.value) || 0;
-    }
-  }
-
-  canSubmitValue(value) {
+  canSubmitValue(value: BigIntType) {
     const { network } = this.props;
-
     return (
-      network.canSubmit ||
-      value ||
-      (this.selectedToken.isNft || value <= this.selectedToken.balance)
+      network.canSubmit &&
+      value && greaterThan(bi(value), ZERO) &&
+      (this.selectedToken.isNft || lessThanOrEqual(bi(value), this.selectedToken.balance))
     );
   }
 
@@ -109,7 +95,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
             <Button
               htmlType="submit"
               type="primary"
-              disabled={!this.canSubmitValue(this.value)}
+              disabled={!this.canSubmitValue(this.selectedToken.toCents(this.value))}
             >
               Deposit
             </Button>

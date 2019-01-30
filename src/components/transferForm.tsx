@@ -7,6 +7,7 @@ import { Input, Button, Form } from 'antd';
 import autobind from 'autobind-decorator';
 import AmountInput from './amountInput';
 import Tokens from '../stores/tokens';
+import { BigIntType, lessThanOrEqual, greaterThan, biMax, ZERO } from 'jsbi-utils';
 
 interface TransferFormProps {
   tokens?: Tokens;
@@ -29,15 +30,9 @@ class TransferForm extends React.Component<TransferFormProps, any> {
     }
 
     if (!this.token.isNft) {
-      const maxValue =
-        this.token.plasmaBalance &&
-        this.token.toTokens(this.token.plasmaBalance as number);
-      if (maxValue && Number(this.value) > maxValue) {
-        return `Should <= ${maxValue}`;
-      }
-
-      if (Number(this.value) <= 0) {
-        return 'Should > 0';
+      const maxValue = this.token.plasmaBalance;
+      if (maxValue && greaterThan(this.token.toCents(this.value), maxValue as BigIntType)) {
+        return `Should <= ${this.token.toTokens(maxValue as BigIntType)}`;
       }
     }
 
@@ -96,13 +91,6 @@ class TransferForm extends React.Component<TransferFormProps, any> {
   }
 
   @autobind
-  handleBlur() {
-    if (!this.token.isNft) {
-      this.value = Math.max(0, Number(this.value));
-    }
-  }
-
-  @autobind
   handleChange(value) {
     this.value = value;
   }
@@ -129,7 +117,6 @@ class TransferForm extends React.Component<TransferFormProps, any> {
           plasma
           width={450}
           color={color}
-          onBlur={this.handleBlur}
           onChange={this.handleChange}
           value={this.value}
           placeholder="Amount to transfer"

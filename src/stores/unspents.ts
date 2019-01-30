@@ -16,10 +16,12 @@ import {
   helpers,
 } from 'leap-core';
 import { bufferToHex } from 'ethereumjs-util';
-
-import ExitHandler from './exitHandler';
-import Account from './account';
 import autobind from 'autobind-decorator';
+
+import { add, bi, ZERO } from 'jsbi-utils';
+import ExitHandler from './exitHandler';
+import Operator from './operator';
+import Account from './account';
 import NodeStore from './node';
 import Web3Store from './web3/';
 
@@ -37,6 +39,7 @@ export default class Unspents {
 
   constructor(
     private exitHandler: ExitHandler,
+    private operator: Operator,
     private account: Account,
     private node: NodeStore,
     private web3: Web3Store
@@ -94,15 +97,13 @@ export default class Unspents {
       });
   }
 
-  private exitDeposit(unspentDeposit: UnspentWithTx) {
-    return this.web3.plasma.instance.getValidatorInfo().then(validatorInfo => {
-      return getProof(
-        this.web3.plasma.instance, 
-        unspentDeposit.transaction,
-        0, // TODO: get this some-how
-        validatorInfo.ethAddress
-      )
-    }).then(txProof =>
+  private exitDeposit(unspentDeposit: UnspentWithTx, signer: string) {
+    return getProof(
+      this.web3.plasma.instance, 
+      unspentDeposit.transaction,
+      0, // TODO: get this some-how
+      signer
+    ).then(txProof =>
       this.exitHandler.startExit(
         [],
         txProof,
@@ -116,16 +117,18 @@ export default class Unspents {
   public exitUnspent(unspent: UnspentWithTx) {
     const tx = Tx.fromRaw(unspent.transaction.raw);
 
+    const { signer } = this.operator.slots[0];
+
     if (tx.type === Type.DEPOSIT) {
-      return this.exitDeposit(unspent)
+      return this.exitDeposit(unspent, signer)
     }
-    Promise.all([
-      getYoungestInputTx(this.web3.plasma.instance, tx),
-      this.web3.plasma.instance.getValidatorInfo(),
-    ]).then(([inputTx, validatorInfo]) =>
+
+    getYoungestInputTx(
+      this.web3.plasma.instance, tx
+    ).then((inputTx) => 
       Promise.all([
-        getProof(this.web3.plasma.instance, unspent.transaction, 0, validatorInfo.ethAddress),
-        getProof(this.web3.plasma.instance, inputTx.tx, 0, validatorInfo.ethAddress),
+        getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
+        getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
         inputTx.index,
       ])
     ).then(([txProof, inputProof, inputIndex]) =>
@@ -176,7 +179,7 @@ export default class Unspents {
           },
           [] as Input[]
         );
-        const value = chunk.reduce((v, u) => v + Number(u.output.value), 0);
+        const value = chunk.reduce((v, u) => add(v, bi(u.output.value)), ZERO);
         txs.push(
           Tx.consolidate(
             inputs,

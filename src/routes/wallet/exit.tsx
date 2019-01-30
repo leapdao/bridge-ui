@@ -15,6 +15,7 @@ import { bufferToHex } from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
 import { shortenHex } from '../../utils';
+import { BigInt } from 'jsbi-utils';
 import Tokens from '../../stores/tokens';
 import Unspents from '../../stores/unspents';
 import ExitHandler from '../../stores/exitHandler';
@@ -78,7 +79,7 @@ export default class Exit extends React.Component<ExitProps, any> {
               const inputHash = bufferToHex(u.outpoint.hash);
               return {
                 key: u.outpoint.hex(),
-                value: <TokenValue {...u.output} />,
+                value: <TokenValue { ...{ color: u.output.color, value: BigInt(u.output.value) } } />,
                 input: (
                   <Fragment>
                     <Link to={`/explorer/tx/${inputHash}`}>
