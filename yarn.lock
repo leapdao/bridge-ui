@@ -7359,10 +7359,10 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
-leap-core@^0.24.0:
-  version "0.24.0"
-  resolved "https://registry.yarnpkg.com/leap-core/-/leap-core-0.24.0.tgz#3804425ca867d55533e39c4b31757da24f2c8877"
-  integrity sha512-3ihDz6m0j4XqNXf16RXt0Pte+c9QvedGSGxNl4YRzHWrP8i8gtZ956crpfVDyS7lpMl9bkkqgRx5btZMOuGNjw==
+leap-core@^0.25.0:
+  version "0.25.0"
+  resolved "https://registry.yarnpkg.com/leap-core/-/leap-core-0.25.0.tgz#229f4023ddd5de9fb01edd09dde00c0de2f8d8cb"
+  integrity sha512-VVDNRNGWwAVg6NerOTV8fqe/p94ZvBsGkez2UfZ1QaUSaEon0f9Pil8ZfldWjpaVrF+us/SFet3HFKmrXrav8w==
   dependencies:
     "@types/web3" "^1.0.18"
     babel-polyfill "^6.26.0"
