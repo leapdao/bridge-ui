@@ -10,5 +10,5 @@
     "http://node4.testnet.leapdao.org:8645"
   ],
   "tokenFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSdFAezroU_uxvWWQmMxs_DWAasl5UwC_nQXIy0CtOfmgDVE2w/viewform?embedded=true",
-  "exit-market-maker": "https://cok43k06u1.execute-api.eu-west-1.amazonaws.com/v0"
+  "exitMarketMaker": "https://cok43k06u1.execute-api.eu-west-1.amazonaws.com/v0/sellExit"
 }

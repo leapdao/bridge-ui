@@ -6,6 +6,7 @@
  */
 
 import { observable, reaction, computed } from 'mobx';
+import axios from 'axios';
 import {
   Unspent,
   Tx,
@@ -19,12 +20,14 @@ import {
 import { bufferToHex } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
 
+import { CONFIG } from '../config';
 import { add, bi, ZERO } from 'jsbi-utils';
 import ExitHandler from './exitHandler';
 import Operator from './operator';
 import Account from './account';
 import NodeStore from './node';
 import Web3Store from './web3/';
+import Tokens from './tokens';
 
 const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
 
@@ -43,7 +46,8 @@ export default class Unspents {
     private operator: Operator,
     private account: Account,
     private node: NodeStore,
-    private web3: Web3Store
+    private web3: Web3Store,
+    private tokens: Tokens
   ) {
     reaction(() => this.account.address, this.clearUnspents);
     reaction(() => this.account.address, this.fetchUnspents);
@@ -152,38 +156,78 @@ export default class Unspents {
 
     const { signer } = this.operator.slots[0];
 
-    return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff.toString('hex')).then(sig => {
-      const vBuff = Buffer.alloc(32);
-      vBuff.writeInt8(sig.v, 31);
-      return Buffer.concat([sigHashBuff, Buffer.from(sig.r), Buffer.from(sig.s), vBuff]);
-    }).then(signedData => 
-      Promise.all([
-        getYoungestInputTx(this.web3.plasma.instance, tx),
-        Exit.bufferToBytes32Array(signedData),
-      ])
-    ).then(([inputTx, signedData]) => {
-      console.log(inputTx);
-      console.log(unspent.transaction);
-      return Promise.all([
-        getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
-        getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
-        inputTx.index,
-        signedData
-      ])
-    }).then(([txProof, inputProof, inputIndex, signedData]) => 
-      //call api
-      console.log([txProof, inputProof, inputIndex, signedData])
-    );
+    const token = this.tokens.tokenForColor(unspent.output.color);
 
-    // return getYoungestInputTx(this.web3.plasma.instance, tx).then(inputTx => {
-    //   return Promise.all([
-    //     getProof(this.web3.plasma.instance, unspent.transaction),
-    //     getProof(this.web3.plasma.instance, inputTx.tx),
-    //     inputTx.index,
+    this.myUnspentAtExitHandler();
+
+    return token.transfer(this.exitHandler.address, bi(unspent.output.value)).then(data => {
+      
+    })
+
+
+    // return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff.toString('hex')).then(sig => {
+    //   const vBuff = Buffer.alloc(32);
+    //   vBuff.writeInt8(sig.v, 31);
+    //   return Buffer.concat([sigHashBuff, Buffer.from(sig.r), Buffer.from(sig.s), vBuff]);
+    // }).then(signedData => 
+    //   Promise.all([
+    //     getYoungestInputTx(this.web3.plasma.instance, tx),
+    //     Exit.bufferToBytes32Array(signedData),
     //   ])
-    // }).then(([txProof, inputProof, inputIndex]) => {
-    //   console.log("YOOO");
+    // ).then(([inputTx, signedData]) => {
+    //   console.log(inputTx);
+    //   return Promise.all([
+    //     getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
+    //     getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
+    //     inputTx.index,
+    //     signedData
+    //   ])
+    // }).then(([txProof, inputProof, inputIndex, signedData]) => {
+    //   //call api
+    //   console.log([txProof, inputProof, inputIndex, signedData]);
+    //   console.log(CONFIG);
+    //   axios.request({
+    //     url: CONFIG.exitMarketMaker,
+    //     data: {
+    //       inputProof: inputProof,
+    //       transferProof: txProof,
+    //       inputIndex: inputIndex,
+    //       outputIndex: unspent.outpoint.index,
+    //       signedData: signedData
+    //     },
+    //     headers: {
+    //       'Content-Type': 'application/json'
+    //     },
+    //     method: 'post'
+    //   })
+    //   .then(function (response) {
+    //     console.log(response);
+    //   })
+    //   .catch(function (error) {
+    //     console.log(error);
+    //   });
     // });
+  }
+
+  private myUnspentAtExitHandler() {
+    this.web3.plasma.instance
+      .getUnspent(this.exitHandler.address)
+      .then((unspent: UnspentWithTx[]) => {
+        return Promise.all(
+          unspent
+          .map((u : UnspentWithTx) =>
+            this.web3.plasma.instance.eth.getTransaction(
+              bufferToHex(u.outpoint.hash)
+            ).then((tx: LeapTransaction) => {
+              u.transaction = tx;
+              return u;
+            })
+          )
+        )
+      }).then(us => {
+        const myUs = us.filter(u => u.transaction.from == this.account.address)
+        console.log(myUs)
+      })
   }
 
   public listForColor(color: number) {
