@@ -124,11 +124,8 @@ export default class Token extends ContractStore {
    */
   public toCents(tokenValue: BigIntType | number | string): BigIntType {
     if (this.isNft) return bi(tokenValue);
-    
-    if (!isBigInt(tokenValue)) { // likely decimal
-      return bi(Math.trunc(Number(tokenValue) * (10 ** this.decimals)));
-    }
-    return multiply(bi(tokenValue), bi(10 ** this.decimals));
+
+    return bi(Big(String(tokenValue)).mul(10 ** this.decimals).round().toFixed());
   }
 
   /**
