@@ -5,30 +5,47 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, reaction, computed } from 'mobx';
+import { observable, reaction, computed, when } from 'mobx';
 import {
   Unspent,
   Tx,
   Input,
   Output,
+  Outpoint,
+  OutpointJSON,
   Type,
   LeapTransaction,
   helpers,
+  Exit,
+  UnspentJSON,
 } from 'leap-core';
-import { bufferToHex } from 'ethereumjs-util';
+import { bufferToHex, toBuffer } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
 
+import { CONFIG } from '../config';
 import { add, bi, ZERO } from 'jsbi-utils';
 import ExitHandler from './exitHandler';
+import Bridge from './bridge';
 import Operator from './operator';
 import Account from './account';
 import NodeStore from './node';
 import Web3Store from './web3/';
+import Tokens from './tokens';
 
 const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
 
-type UnspentWithTx = Unspent & { transaction: LeapTransaction };
+type UnspentWithTx = Unspent & { 
+  transaction: LeapTransaction,
+  pendingFastExit?: boolean,
+};
+type UnspentWithTxJSON = UnspentJSON & { transaction: LeapTransaction };
 
+const objectify = (unspent: UnspentWithTx): UnspentWithTx => {
+  if (!unspent.outpoint.toJSON) {
+    unspent.outpoint = Outpoint.fromJSON(unspent.outpoint as any as OutpointJSON);
+  }
+  return unspent;
+};
 
 export default class Unspents {
   @observable
@@ -37,12 +54,17 @@ export default class Unspents {
   @observable
   private latestBlock: number;
 
+  @observable
+  public pendingFastExits: {};
+
   constructor(
     private exitHandler: ExitHandler,
+    bridge: Bridge,
     private operator: Operator,
     private account: Account,
     private node: NodeStore,
-    private web3: Web3Store
+    private web3: Web3Store,
+    private tokens: Tokens
   ) {
     reaction(() => this.account.address, this.clearUnspents);
     reaction(() => this.account.address, this.fetchUnspents);
@@ -50,10 +72,52 @@ export default class Unspents {
       () => exitHandler.events,
       () => {
         exitHandler.events.on('NewDeposit', this.fetchUnspents);
-        exitHandler.events.on('ExitStarted', this.fetchUnspents);
+        exitHandler.events.on('ExitStarted', this.fetchUnspents); 
+      }
+    );
+    reaction(
+      () => bridge.events,
+      () => {
+        bridge.events.on('NewHeight', this.finalizeFastExits);
       }
     );
     reaction(() => this.node.latestBlock, this.fetchUnspents);
+    when(() => (this.latestBlock && !!this.operator.slots[0]), () => this.finalizeFastExits({}));
+    
+    this.loadPendingFastExits();
+  }
+
+  private unspentFromJson(unspentJSON: UnspentWithTxJSON): UnspentWithTx {
+    const unspent = Object.assign({}, unspentJSON) as any;
+    unspent.outpoint = Outpoint.fromJSON(unspentJSON.outpoint);
+    return unspent;
+  }
+
+  private unspentToJson(unspent: UnspentWithTx): UnspentWithTxJSON {
+    const json = Object.assign({}, unspent) as any;
+    json.outpoint = objectify(unspent).outpoint.toJSON();
+    return json;
+  }
+
+  private loadPendingFastExits() {
+    this.pendingFastExits = JSON.parse(
+      localStorage.getItem('pendingFastExits') || '{}'
+    );
+    this.pendingFastExits = Object.keys(this.pendingFastExits).reduce((res, key) => {
+      res[key] = this.pendingFastExits[key];
+      res[key].unspent = this.unspentFromJson(this.pendingFastExits[key].unspent);
+      return res;
+    }, {});
+  }
+
+  private storePendingFastExits() {
+    const exitsJson = Object.keys(this.pendingFastExits).reduce((res, key) => {
+      res[key] = this.pendingFastExits[key];
+      res[key].unspent = this.unspentToJson(res[key].unspent);
+      return res;
+    }, {});
+
+    localStorage.setItem('pendingFastExits', JSON.stringify(exitsJson));  
   }
 
   @computed
@@ -141,8 +205,113 @@ export default class Unspents {
     );
   }
 
+  private postData(url = '', data = {}) {
+    // Default options are marked with *
+      return fetch(url, {
+          method: "POST", // *GET, POST, PUT, DELETE, etc.
+          mode: "cors", // no-cors, cors, *same-origin
+          cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
+          headers: {
+              "Content-Type": "application/json",
+          },
+          redirect: "error", // manual, *follow, error
+          referrer: "no-referrer", // no-referrer, *client
+          body: JSON.stringify(data), // body data type must match "Content-Type" header
+      })
+      .then(response => response.json()); // parses response to JSON
+  }
+
+  @autobind
+  private finalizeFastExits(period) {
+    console.log('period received', period);
+    if (Object.keys(this.pendingFastExits).length < 1) return;
+    Object.values(this.pendingFastExits)
+      .filter((e:any) => e.effectiveBlock < this.periodBlocksRange[1] && e.sig !== '')
+      .forEach(this.finalizeFastExit.bind(this));
+  }
+
+  @autobind
+  private finalizeFastExit(exit) {
+    console.log('Finalizing fast exit', exit, this.operator.slots);
+    const { signer } = this.operator.slots[0];
+    const { unspent, sig, rawTx, sigHashBuff } = exit;
+    const vBuff = Buffer.alloc(32);
+    vBuff.writeInt8(sig.v, 31);
+    const signedData = Exit.bufferToBytes32Array(
+      Buffer.concat([toBuffer(sigHashBuff), Buffer.from(sig.r), Buffer.from(sig.s), vBuff])
+    );
+    return Promise.all([
+      getProof(this.web3.plasma.instance, rawTx, 0, signer),
+      getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
+      0,
+      signedData
+    ]).then(([txProof, inputProof, inputIndex, signedData]) => {
+      //call api
+      this.postData(CONFIG.exitMarketMaker, {
+        inputProof: inputProof,
+        transferProof: txProof,
+        inputIndex: inputIndex,
+        outputIndex: 0,    // output of spending tx that we want to exit
+        signedData: signedData
+      }).then(rsp => {
+        console.log(rsp);
+        delete this.pendingFastExits[bufferToHex(unspent.outpoint.hash)];
+        this.storePendingFastExits();
+      }).catch(err => {
+        console.log(err);
+      });
+    });
+  }
+
+  @autobind
+  public fastExitUnspent(unspent: UnspentWithTx) {
+    unspent = objectify(unspent);
+
+    const token = this.tokens.tokenForColor(unspent.output.color);
+
+    const amount = bi(unspent.output.value);
+
+    let tx, sigHashBuff, rawTx;
+
+    const unspentHash = bufferToHex(unspent.outpoint.hash);
+    return token.transfer(this.exitHandler.address, amount)
+    .then(data => data.futureReceipt)
+    .then(txObj => {
+      rawTx = txObj;
+      tx = Tx.fromRaw(txObj.raw);
+      const utxoId = (new Outpoint(tx.hash(), 0)).getUtxoId();
+      sigHashBuff = Exit.sigHashBuff(utxoId, amount);
+
+      // create pending exit after the first sig, so that we can continue
+      // the process if the user mistakingly rejects the second sig or closes the browser
+      this.pendingFastExits[unspentHash] = {
+        unspent,
+        sig: '',
+        rawTx,
+        effectiveBlock: periodBlockRange(rawTx.blockNumber)[1],
+        sigHashBuff: `0x${sigHashBuff.toString('hex')}`,
+      };
+      this.storePendingFastExits();
+      return this.signFastExit(unspent);
+    });
+  }
+
+  public signFastExit(unspent: UnspentWithTx) {
+    const unspentHash = bufferToHex(unspent.outpoint.hash);
+    const sigHashBuff = this.pendingFastExits[unspentHash].sigHashBuff;
+    return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff)
+      .then(sig => {
+        this.pendingFastExits[unspentHash].sig = sig;
+        this.storePendingFastExits();
+      });
+  }
+
   public listForColor(color: number) {
-    return this.list.filter(u => u.output.color === color);
+    return this.list.filter(u => u.output.color === color).concat(
+      Object.values(this.pendingFastExits)
+        .filter((v: any) => v.unspent.transaction.color === color)
+        .map((v: any) => ({ ...objectify(v.unspent), pendingFastExit: true }))
+    );
   }
 
   @autobind

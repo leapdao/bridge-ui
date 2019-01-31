@@ -10,7 +10,7 @@ import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { computed } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import { Button, Table } from 'antd';
+import { Button, Table, Tooltip } from 'antd';
 import { bufferToHex } from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
@@ -91,23 +91,65 @@ export default class Exit extends React.Component<ExitProps, any> {
                 height: u.transaction.blockNumber,
                 exit: (
                   <Fragment>
-                    {unspents.periodBlocksRange[0] >
-                      u.transaction.blockNumber && (
-                      <Button
-                        size="small"
-                        onClick={() => unspents.exitUnspent(u)}
-                      >
-                        Exit
-                      </Button>
+                    {u.pendingFastExit && (
+                      <Fragment>
+                        <Tooltip title={
+                          <Fragment>
+                            ⚡ Fast exit<br/><br/>
+                            {unspents.pendingFastExits[inputHash].sig === '' && 'Signature required'}
+                            {unspents.pendingFastExits[inputHash].sig !== '' && (
+                              <Fragment>
+                                Waiting for block {unspents.pendingFastExits[inputHash].effectiveBlock}{' '}
+                                to payout.
+                              </Fragment>
+                            )}
+                          </Fragment>
+                        }>
+                          <span>🕐 Exiting</span>
+                        </Tooltip>
+                        {unspents.pendingFastExits[inputHash].sig === '' && (
+                          <Button
+                          size="small"
+                          style={{ marginLeft: '10px' }}
+                          onClick={() => {
+                            unspents.signFastExit(u)
+                          }}
+                        >
+                          🔑 Sign
+                        </Button> 
+                        )}
+                      </Fragment>
                     )}
-                    {unspents.periodBlocksRange[0] <=
-                      u.transaction.blockNumber && (
-                      <span>
-                        Wait until height {unspents.periodBlocksRange[1]}
-                      </span>
+                    {!u.pendingFastExit && (
+                      <Fragment>
+                        <Tooltip title={
+                              unspents.periodBlocksRange[0] <= u.transaction.blockNumber 
+                              ? 'Exit can be started after height ' + unspents.periodBlocksRange[1]
+                              : ''
+                            }>
+                          <Button
+                            size="small"
+                            disabled={unspents.periodBlocksRange[0] <= u.transaction.blockNumber}
+                            onClick={() => {
+                              unspents.exitUnspent(u)
+                            }}
+                          >
+                            🐌Normal
+                          </Button>   
+                        </Tooltip>                 
+                        <Button
+                          size="small"
+                          style={{ marginLeft: '10px' }}
+                          onClick={() => {
+                            unspents.fastExitUnspent(u)
+                          }}
+                        >
+                          ⚡Fast
+                        </Button>
+                      </Fragment>
                     )}
                   </Fragment>
-                ),
+                )
               };
             })}
         />
