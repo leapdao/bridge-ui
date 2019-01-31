@@ -309,6 +309,7 @@ export default class Unspents {
   public listForColor(color: number) {
     return this.list.filter(u => u.output.color === color).concat(
       Object.values(this.pendingFastExits)
+        .filter((v: any) => v.unspent.transaction.color === color)
         .map((v: any) => ({ ...objectify(v.unspent), pendingFastExit: true }))
     );
   }
