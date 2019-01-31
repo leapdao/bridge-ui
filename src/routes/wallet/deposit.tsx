@@ -9,7 +9,7 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { computed, observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import { Form, Button } from 'antd';
+import { Form, Button, Table } from 'antd';
 import autobind from 'autobind-decorator';
 
 import TokenValue from '../../components/tokenValue';
@@ -18,16 +18,26 @@ import Tokens from '../../stores/tokens';
 import Network from '../../stores/network';
 import ExitHandler from '../../stores/exitHandler';
 import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
+import PlasmaConfig from '../../stores/plasmaConfig';
 
 interface DepositProps {
   tokens?: Tokens;
   network?: Network;
   exitHandler?: ExitHandler;
   color: number;
+  plasmaConfig?: PlasmaConfig;
   onColorChange: (color: number) => void;
 }
 
-@inject('tokens', 'exitHandler', 'network')
+type PendingDeposit = {
+  value: BigIntType,
+  color: number
+  txId: string,
+  blocks?: number,
+  height?: number,
+}
+
+@inject('tokens', 'exitHandler', 'network', 'plasmaConfig')
 @observer
 export default class Deposit extends React.Component<DepositProps, any> {
   @computed
@@ -39,14 +49,23 @@ export default class Deposit extends React.Component<DepositProps, any> {
   @observable
   value: number | string = 0;
 
+  @observable
+  public pendingDeposits: { [key:string]:PendingDeposit } = {};
+
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const { exitHandler } = this.props;
+    const { exitHandler, color } = this.props;
     const value = this.selectedToken.toCents(this.value);
     exitHandler.deposit(this.selectedToken, String(value)).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
         console.log('deposit', depositTxHash); // eslint-disable-line
+        this.pendingDeposits[depositTxHash] = {
+          value,
+          color,
+          txId: depositTxHash,
+          blocks: 0,
+        };
         this.value = 0;
       });
     });
@@ -62,7 +81,12 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   render() {
-    const { tokens, color, onColorChange } = this.props;
+    const { tokens, color, onColorChange, plasmaConfig } = this.props;
+
+    console.log(this.props);
+    const { rootEventDelay } = plasmaConfig;
+
+    console.log(rootEventDelay);
 
     return (
       <Fragment>
@@ -122,6 +146,22 @@ export default class Deposit extends React.Component<DepositProps, any> {
             />
           </dd>
         </dl>
+        <h2 style={{ alignItems: 'center', display: 'flex' }}>
+          Pending deposits
+        </h2>
+        <Table
+          style={{ marginTop: 15 }}
+          columns={[
+            { title: 'Value', dataIndex: 'value', key: 'value' },
+            { title: 'TxId', dataIndex: 'txId', key: 'txId' },
+            { title: 'Height', dataIndex: 'height', key: 'height' },
+            { title: 'Blocks to wait', dataIndex: 'blocks', key: 'blocks' },
+          ]}
+          dataSource={Object.values(this.pendingDeposits).map(pendingDep => ({
+            ...pendingDep,
+            blocks: `${pendingDep.blocks}/${rootEventDelay}`,
+          }))}/>
+
       </Fragment>
     );
   }
