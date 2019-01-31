@@ -191,8 +191,12 @@ export default class Unspents {
       [] as Array<Tx<Type.CONSOLIDATE>>
     );
 
-    consolidates.forEach(consolidate => {
-      this.web3.plasma.instance.eth.sendSignedTransaction(consolidate.hex() as any);
+    consolidates.forEach(tx => {
+      console.log(tx);
+      tx.signWeb3(this.web3.injected.instance as any)
+        .then(signedTx => 
+          this.web3.plasma.instance.eth.sendSignedTransaction(signedTx.hex() as any)
+        );
     });
   }
 }
