@@ -91,31 +91,63 @@ export default class Exit extends React.Component<ExitProps, any> {
                 height: u.transaction.blockNumber,
                 exit: (
                   <Fragment>
-                    <Tooltip title={
-                          unspents.periodBlocksRange[0] <= u.transaction.blockNumber 
-                          ? 'Wait until height ' + unspents.periodBlocksRange[1]
-                          : ''
+                    {u.pendingFastExit && (
+                      <Fragment>
+                        <Tooltip title={
+                          <Fragment>
+                            ⚡ Fast exit<br/><br/>
+                            {unspents.pendingFastExits[inputHash].sig === '' && 'Signature required'}
+                            {unspents.pendingFastExits[inputHash].sig !== '' && (
+                              <Fragment>
+                                Waiting for block {unspents.pendingFastExits[inputHash].effectiveBlock}{' '}
+                                to payout.
+                              </Fragment>
+                            )}
+                          </Fragment>
                         }>
-                      <Button
-                        size="small"
-                        disabled={unspents.periodBlocksRange[0] <= u.transaction.blockNumber}
-                        onClick={() => {
-                          unspents.exitUnspent(u)
-                        }}
-                      >
-                        Normal
-                      </Button>   
-                    </Tooltip>                 
-                    <Button
-                      size="small"
-                      style={{ marginLeft: '10px' }}
-                      onClick={() => {
-                        unspents.fastExitUnspent(u)
-                      }}
-                    >
-                      Fast
-                    </Button>
-
+                          <span>🕐 Exiting</span>
+                        </Tooltip>
+                        {unspents.pendingFastExits[inputHash].sig === '' && (
+                          <Button
+                          size="small"
+                          style={{ marginLeft: '10px' }}
+                          onClick={() => {
+                            unspents.signFastExit(u)
+                          }}
+                        >
+                          🔑 Sign
+                        </Button> 
+                        )}
+                      </Fragment>
+                    )}
+                    {!u.pendingFastExit && (
+                      <Fragment>
+                        <Tooltip title={
+                              unspents.periodBlocksRange[0] <= u.transaction.blockNumber 
+                              ? 'Exit can be started after height ' + unspents.periodBlocksRange[1]
+                              : ''
+                            }>
+                          <Button
+                            size="small"
+                            disabled={unspents.periodBlocksRange[0] <= u.transaction.blockNumber}
+                            onClick={() => {
+                              unspents.exitUnspent(u)
+                            }}
+                          >
+                            🐌Normal
+                          </Button>   
+                        </Tooltip>                 
+                        <Button
+                          size="small"
+                          style={{ marginLeft: '10px' }}
+                          onClick={() => {
+                            unspents.fastExitUnspent(u)
+                          }}
+                        >
+                          ⚡Fast
+                        </Button>
+                      </Fragment>
+                    )}
                   </Fragment>
                 )
               };

@@ -5,19 +5,21 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, reaction, computed } from 'mobx';
+import { observable, reaction, computed, when } from 'mobx';
 import {
   Unspent,
   Tx,
   Input,
   Output,
   Outpoint,
+  OutpointJSON,
   Type,
   LeapTransaction,
   helpers,
-  Exit
+  Exit,
+  UnspentJSON,
 } from 'leap-core';
-import { bufferToHex } from 'ethereumjs-util';
+import { bufferToHex, toBuffer } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
 
 import { CONFIG } from '../config';
@@ -32,11 +34,18 @@ import Tokens from './tokens';
 
 const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
 
-type UnspentWithTx = Unspent & { transaction: LeapTransaction };
+type UnspentWithTx = Unspent & { 
+  transaction: LeapTransaction,
+  pendingFastExit?: boolean,
+};
+type UnspentWithTxJSON = UnspentJSON & { transaction: LeapTransaction };
 
-const mockData = {"inputProof": [ '0x4aa9b4b4865c3be688596e7dce7fe90da43126c702030bc3f32d838d7318158e', '0x4607009a00000000000000140000000000000000000000000000000000000000', '0x00000000000003116909fc793c3afda9c5ce749902115273ceef9a80a8cded3d', '0x9221aa6e5d2b87fe0023903ecfbac0635ae8823e40ae6d2fe696b6813ad4911b', '0x9e94649e6716557dee378c5586af598907c6730ab0c0af102f908fffbca4c078', '0x02e082c76cf528c78e1b00000000000000000000000000000000000000000000', '0x0001c9f78d2893e40000000083b3525e17f9eaa92dae3f9924cc333c94c7e98a', '0x0000000000000000000000000000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000000000000000000000000000', '0x9f7b39864833cad4e2a4a65139e5a17b6b0341e2a3f89e1c48216730edf91fa1', '0xca112e33afcdf858b66f4103d33203f46e31408a46ddbce71ac9d0ae80dae5cd', '0x18bc9030ae2b9584a8ea298de2ff560f75e991f8d004204c387a7326b2412ad7', '0x315be4faecc52c10016ecd9fe9095d868ac4139fe7ef4eddd7bb55367ff15739' ], "transferProof": [ '0x4aa9b4b4865c3be688596e7dce7fe90da43126c702030bc3f32d838d7318158e', '0x300800d00000000000000018000000000312aa5b08de7a9454faa07856597f36', '0x6a73d1bbe19ae43f17a81a15f52b6b500a8400b4edcff140e47a859ee8434eee', '0xd76441a92e9371c6b76e2adb2b56fe86a57fcc190198311c3b4a8c112dc5fb70', '0x6ec42b20ed7bed6bac0b6364aecfd36d5a93361b000000000000000000000000', '0x0000000000000000000000008ac7230489e80000000054177ded16b8fe8f9017', '0xd6c44704f6998a914e5400000000000000000000000000000000000000000000', '0x00013f306a2409fc0000000083b3525e17f9eaa92dae3f9924cc333c94c7e98a', '0x0000000000000000000000000000000000000000000000000000000000000000', '0x0000000000000000000000000000000000000000000000000000000000000000', '0xf594e47d692eeb3844e507734d2cf40b942195de76bc8f3aad57c550f337e4af', '0xd09c9cd0ade47bc24745cb0d8d8c0df00c17003d6db30a22bda86799733dfd80', '0x18bc9030ae2b9584a8ea298de2ff560f75e991f8d004204c387a7326b2412ad7', '0x315be4faecc52c10016ecd9fe9095d868ac4139fe7ef4eddd7bb55367ff15739' ], "outputIndex": 0, "inputIndex": 0, "signedData": ['0x00000000000000000000000000000000009a53fba464ea4e1d3d4a7fabf5b25a', '0x0000000000000000000000000000000000000000000000008ac7230489e80000', '0x724a915adb5c84b4b22a93c45c14d709ab9d16a3d4572e98d00980c46668d843', '0x789ea187c5f8fa33ac4ca938e3f44de92bff4f76b660064a2b96b8ff250f779d', '0x000000000000000000000000000000000000000000000000000000000000001b']};
-
-const pendingFastExits = [];
+const objectify = (unspent: UnspentWithTx): UnspentWithTx => {
+  if (!unspent.outpoint.toJSON) {
+    unspent.outpoint = Outpoint.fromJSON(unspent.outpoint as any as OutpointJSON);
+  }
+  return unspent;
+};
 
 export default class Unspents {
   @observable
@@ -45,9 +54,12 @@ export default class Unspents {
   @observable
   private latestBlock: number;
 
+  @observable
+  public pendingFastExits: {};
+
   constructor(
     private exitHandler: ExitHandler,
-    private bridge: Bridge,
+    bridge: Bridge,
     private operator: Operator,
     private account: Account,
     private node: NodeStore,
@@ -66,10 +78,46 @@ export default class Unspents {
     reaction(
       () => bridge.events,
       () => {
-        bridge.events.on('NewHeight', this.finalizeFastExit);
+        bridge.events.on('NewHeight', this.finalizeFastExits);
       }
     );
     reaction(() => this.node.latestBlock, this.fetchUnspents);
+    when(() => (this.latestBlock && !!this.operator.slots[0]), () => this.finalizeFastExits({}));
+    
+    this.loadPendingFastExits();
+  }
+
+  private unspentFromJson(unspentJSON: UnspentWithTxJSON): UnspentWithTx {
+    const unspent = Object.assign({}, unspentJSON) as any;
+    unspent.outpoint = Outpoint.fromJSON(unspentJSON.outpoint);
+    return unspent;
+  }
+
+  private unspentToJson(unspent: UnspentWithTx): UnspentWithTxJSON {
+    const json = Object.assign({}, unspent) as any;
+    json.outpoint = objectify(unspent).outpoint.toJSON();
+    return json;
+  }
+
+  private loadPendingFastExits() {
+    this.pendingFastExits = JSON.parse(
+      localStorage.getItem('pendingFastExits') || '{}'
+    );
+    this.pendingFastExits = Object.keys(this.pendingFastExits).reduce((res, key) => {
+      res[key] = this.pendingFastExits[key];
+      res[key].unspent = this.unspentFromJson(this.pendingFastExits[key].unspent);
+      return res;
+    }, {});
+  }
+
+  private storePendingFastExits() {
+    const exitsJson = Object.keys(this.pendingFastExits).reduce((res, key) => {
+      res[key] = this.pendingFastExits[key];
+      res[key].unspent = this.unspentToJson(res[key].unspent);
+      return res;
+    }, {});
+
+    localStorage.setItem('pendingFastExits', JSON.stringify(exitsJson));  
   }
 
   @computed
@@ -173,18 +221,24 @@ export default class Unspents {
       .then(response => response.json()); // parses response to JSON
   }
 
+  @autobind
+  private finalizeFastExits(period) {
+    console.log('period received', period);
+    if (Object.keys(this.pendingFastExits).length < 1) return;
+    Object.values(this.pendingFastExits)
+      .filter((e:any) => e.effectiveBlock < this.periodBlocksRange[1] && e.sig !== '')
+      .forEach(this.finalizeFastExit.bind(this));
+  }
 
   @autobind
-  private finalizeFastExit(period) {
-    if (pendingFastExits.length < 1) {
-      return;
-    }
+  private finalizeFastExit(exit) {
+    console.log('Finalizing fast exit', exit, this.operator.slots);
     const { signer } = this.operator.slots[0];
-    const [{unspent, sig, rawTx, sigHashBuff}] = pendingFastExits;
+    const { unspent, sig, rawTx, sigHashBuff } = exit;
     const vBuff = Buffer.alloc(32);
     vBuff.writeInt8(sig.v, 31);
     const signedData = Exit.bufferToBytes32Array(
-      Buffer.concat([sigHashBuff, Buffer.from(sig.r), Buffer.from(sig.s), vBuff])
+      Buffer.concat([toBuffer(sigHashBuff), Buffer.from(sig.r), Buffer.from(sig.s), vBuff])
     );
     return Promise.all([
       getProof(this.web3.plasma.instance, rawTx, 0, signer),
@@ -192,7 +246,6 @@ export default class Unspents {
       0,
       signedData
     ]).then(([txProof, inputProof, inputIndex, signedData]) => {
-      pendingFastExits.shift();
       //call api
       this.postData(CONFIG.exitMarketMaker, {
         inputProof: inputProof,
@@ -202,6 +255,8 @@ export default class Unspents {
         signedData: signedData
       }).then(rsp => {
         console.log(rsp);
+        delete this.pendingFastExits[bufferToHex(unspent.outpoint.hash)];
+        this.storePendingFastExits();
       }).catch(err => {
         console.log(err);
       });
@@ -210,6 +265,7 @@ export default class Unspents {
 
   @autobind
   public fastExitUnspent(unspent: UnspentWithTx) {
+    unspent = objectify(unspent);
 
     const token = this.tokens.tokenForColor(unspent.output.color);
 
@@ -217,6 +273,7 @@ export default class Unspents {
 
     let tx, sigHashBuff, rawTx;
 
+    const unspentHash = bufferToHex(unspent.outpoint.hash);
     return token.transfer(this.exitHandler.address, amount)
     .then(data => data.futureReceipt)
     .then(txObj => {
@@ -224,20 +281,36 @@ export default class Unspents {
       tx = Tx.fromRaw(txObj.raw);
       const utxoId = (new Outpoint(tx.hash(), 0)).getUtxoId();
       sigHashBuff = Exit.sigHashBuff(utxoId, amount);
-      return Tx.signMessageWithWeb3(this.web3.injected.instance, `0x${sigHashBuff.toString('hex')}`);
-    }).then(sig => {
-      // keep the sig around
-      pendingFastExits.push({
+
+      // create pending exit after the first sig, so that we can continue
+      // the process if the user mistakingly rejects the second sig or closes the browser
+      this.pendingFastExits[unspentHash] = {
         unspent,
-        sig,
+        sig: '',
         rawTx,
-        sigHashBuff,
-      });
+        effectiveBlock: periodBlockRange(rawTx.blockNumber)[1],
+        sigHashBuff: `0x${sigHashBuff.toString('hex')}`,
+      };
+      this.storePendingFastExits();
+      return this.signFastExit(unspent);
     });
   }
 
+  public signFastExit(unspent: UnspentWithTx) {
+    const unspentHash = bufferToHex(unspent.outpoint.hash);
+    const sigHashBuff = this.pendingFastExits[unspentHash].sigHashBuff;
+    return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff)
+      .then(sig => {
+        this.pendingFastExits[unspentHash].sig = sig;
+        this.storePendingFastExits();
+      });
+  }
+
   public listForColor(color: number) {
-    return this.list.filter(u => u.output.color === color);
+    return this.list.filter(u => u.output.color === color).concat(
+      Object.values(this.pendingFastExits)
+        .map((v: any) => ({ ...objectify(v.unspent), pendingFastExit: true }))
+    );
   }
 
   @autobind

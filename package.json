@@ -95,7 +95,7 @@
     "ethereumjs-util": "^5.2.0",
     "fork-ts-checker-webpack-plugin": "^0.4.15",
     "jsbi-utils": "^1.0.0",
-    "leap-core": "^0.25.0",
+    "leap-core": "^0.26.0",
     "mobx": "^5.0.3",
     "mobx-react": "^5.2.3",
     "preact": "^8.3.1",
