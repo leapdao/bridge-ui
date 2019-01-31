@@ -181,18 +181,21 @@ export default class Unspents {
         );
         const value = chunk.reduce((v, u) => add(v, bi(u.output.value)), ZERO);
         txs.push(
-          Tx.consolidate(
+          Tx.transfer(
             inputs,
-            new Output(value, this.account.address, Number(color))
+            [new Output(value, this.account.address, Number(color))]
           )
         );
         return txs;
       },
-      [] as Array<Tx<Type.CONSOLIDATE>>
+      [] as Array<Tx<Type.TRANSFER>>
     );
 
-    consolidates.forEach(consolidate => {
-      this.web3.plasma.instance.eth.sendSignedTransaction(consolidate.hex() as any);
-    });
+    consolidates.forEach(tx =>
+      tx.signWeb3(this.web3.injected.instance as any)
+        .then(signedTx => 
+          this.web3.plasma.instance.eth.sendSignedTransaction(signedTx.hex() as any)
+        )
+    );
   }
 }
