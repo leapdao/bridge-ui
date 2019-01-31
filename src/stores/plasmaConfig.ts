@@ -22,6 +22,9 @@ export default class PlasmaConfig {
   @observable
   public operatorAddr: string;
 
+  @observable
+  public rootEventDelay: number;
+
   constructor(
     private readonly plasma: Web3Plasma,
   ) {
@@ -35,12 +38,13 @@ export default class PlasmaConfig {
   @autobind
   private fetchConfig() {
     this.plasma.instance.getConfig().then((
-      { rootNetwork, exitHandlerAddr, bridgeAddr, operatorAddr }
+      { rootNetwork, exitHandlerAddr, bridgeAddr, operatorAddr, bridgeDelay, eventsDelay }
     ) => {
       this.rootNetwork = rootNetwork;
       this.exitHandlerAddr = exitHandlerAddr;
       this.bridgeAddr = bridgeAddr;
       this.operatorAddr = operatorAddr;
+      this.rootEventDelay = Number(bridgeDelay || 0) + Number(eventsDelay || 0);
     });
   }
 
