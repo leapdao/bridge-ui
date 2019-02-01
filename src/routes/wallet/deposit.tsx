@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { computed, observable, reaction } from 'mobx';
+import { computed, observable, reaction, autorun } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Form, Button, Table } from 'antd';
 import autobind from 'autobind-decorator';
@@ -59,7 +59,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   value: number | string = 0;
 
   @observable
-  public pendingDeposits: { [key:string]:PendingDeposit } = {};
+  public pendingDeposits: { [key:string]:PendingDeposit };
 
   private storageKey: string;
 
@@ -74,7 +74,9 @@ export default class Deposit extends React.Component<DepositProps, any> {
       () => this.checkPendingDeposits()
     );
 
-    reaction(() => this.selectedToken, () => this.loadPendingDeposits);
+    this.loadPendingDeposits();
+    reaction(() => this.selectedToken, this.loadPendingDeposits);
+    autorun(this.storePendingDeposits);
 
     this.checkPendingDeposits();
   }
@@ -82,9 +84,16 @@ export default class Deposit extends React.Component<DepositProps, any> {
   @autobind
   private loadPendingDeposits() {
     const { color } = this.props;
-    this.pendingDeposits = storage.load(this.storageKey).filter(dep => dep.color === color);
+    const deps = storage.load(this.storageKey);
+    this.pendingDeposits = Object.keys(deps).reduce((colorDeps, txId) => {
+      if (deps[txId].color === color) {
+        colorDeps[txId] = deps[txId];
+      }
+      return colorDeps;
+    }, {});
   }
 
+  @autobind
   private storePendingDeposits() {
     storage.store(this.storageKey, this.pendingDeposits);
   }
@@ -104,7 +113,6 @@ export default class Deposit extends React.Component<DepositProps, any> {
         maturedDeposits.splice(depIndex, 1);
       }
     }
-    this.storePendingDeposits();
   }
 
   @autobind
@@ -112,7 +120,6 @@ export default class Deposit extends React.Component<DepositProps, any> {
     const pending = this.pendingDeposits[event.transactionHash];
     if (pending) {
       pending.blockNumber = event.blockNumber;
-      this.storePendingDeposits();
     }
   }
 
@@ -128,7 +135,6 @@ export default class Deposit extends React.Component<DepositProps, any> {
           color,
           txId: depositTxHash,
         };
-        this.storePendingDeposits();
         this.value = 0;
       });
     });
