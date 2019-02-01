@@ -6,11 +6,12 @@
  */
 
 import * as React from 'react';
-import { Fragment } from 'react';
-import { computed, observable } from 'mobx';
+import { computed, observable, reaction, autorun } from 'mobx';
 import { observer, inject } from 'mobx-react';
-import { Form, Button } from 'antd';
+import { Form, Button, Table } from 'antd';
 import autobind from 'autobind-decorator';
+
+import { EventLog } from 'web3/types';
 
 import TokenValue from '../../components/tokenValue';
 import AmountInput from '../../components/amountInput';
@@ -18,18 +19,36 @@ import Tokens from '../../stores/tokens';
 import Network from '../../stores/network';
 import ExitHandler from '../../stores/exitHandler';
 import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
+import PlasmaConfig from '../../stores/plasmaConfig';
+import Unspents from '../../stores/unspents';
+import storage from '../../utils/storage';
+import Web3Store from '../../stores/web3';
+import EtherscanLink from '../../components/etherscanLink';
+
+const { Fragment } = React;
 
 interface DepositProps {
   tokens?: Tokens;
   network?: Network;
   exitHandler?: ExitHandler;
   color: number;
+  plasmaConfig?: PlasmaConfig;
+  unspents?: Unspents;
+  web3?: Web3Store;
   onColorChange: (color: number) => void;
 }
 
-@inject('tokens', 'exitHandler', 'network')
+type PendingDeposit = {
+  value: string,
+  color: number
+  txId: string,
+  blockNumber?: number,
+}
+
+@inject('tokens', 'exitHandler', 'network', 'plasmaConfig', 'unspents', 'web3')
 @observer
 export default class Deposit extends React.Component<DepositProps, any> {
+
   @computed
   get selectedToken() {
     const { tokens, color } = this.props;
@@ -39,14 +58,83 @@ export default class Deposit extends React.Component<DepositProps, any> {
   @observable
   value: number | string = 0;
 
+  @observable
+  public pendingDeposits: { [key:string]:PendingDeposit };
+
+  private storageKey: string;
+
+  constructor(props) {
+    super(props);
+
+    this.storageKey = `pendingDeposits-${props.exitHandler.address}`;
+    props.exitHandler.events.on('NewDeposit', this.handleNewDeposit);
+
+    reaction(
+      () => props.unspents.list,
+      () => this.checkPendingDeposits()
+    );
+
+    this.loadPendingDeposits();
+    reaction(() => this.selectedToken, this.loadPendingDeposits);
+    autorun(this.storePendingDeposits);
+
+    this.checkPendingDeposits();
+  }
+
+  @autobind
+  private loadPendingDeposits() {
+    const { color } = this.props;
+    const deps = storage.load(this.storageKey);
+    this.pendingDeposits = Object.keys(deps).reduce((colorDeps, txId) => {
+      if (deps[txId].color === color) {
+        colorDeps[txId] = deps[txId];
+      }
+      return colorDeps;
+    }, {});
+  }
+
+  @autobind
+  private storePendingDeposits() {
+    storage.store(this.storageKey, this.pendingDeposits);
+  }
+
+  private checkPendingDeposits() {
+    const maturedDeposits = Object.values(this.pendingDeposits).filter(pending => 
+      this.blocksSince(pending.blockNumber) > 6
+    ).sort((a, b) => b.blockNumber - a.blockNumber);
+
+    const utxos = this.props.unspents.list;
+    for (let i = 0; i < utxos.length && maturedDeposits.length > 0; i++) {
+      const depIndex = maturedDeposits.findIndex(dep => 
+        dep.value === utxos[i].output.value
+      );
+      if (depIndex >= 0) {
+        delete this.pendingDeposits[maturedDeposits[depIndex].txId];
+        maturedDeposits.splice(depIndex, 1);
+      }
+    }
+  }
+
+  @autobind
+  handleNewDeposit(event: EventLog) {
+    const pending = this.pendingDeposits[event.transactionHash];
+    if (pending) {
+      pending.blockNumber = event.blockNumber;
+    }
+  }
+
   @autobind
   handleSubmit(e) {
     e.preventDefault();
-    const { exitHandler } = this.props;
+    const { exitHandler, color } = this.props;
     const value = this.selectedToken.toCents(this.value);
     exitHandler.deposit(this.selectedToken, String(value)).then(({ futureReceipt }) => {
       futureReceipt.once('transactionHash', depositTxHash => {
-        console.log('deposit', depositTxHash); // eslint-disable-line
+        this.pendingDeposits[depositTxHash] = {
+          value: String(value),
+          color,
+          txId: depositTxHash,
+        };
         this.value = 0;
       });
     });
@@ -61,8 +149,15 @@ export default class Deposit extends React.Component<DepositProps, any> {
     );
   }
 
+  private blocksSince(blockNumber: number) {
+    if (blockNumber === undefined) return 0;
+    return Math.max(0, this.props.web3.root.latestBlockNum - blockNumber);
+  }
+
   render() {
-    const { tokens, color, onColorChange } = this.props;
+    const { tokens, color, onColorChange, plasmaConfig } = this.props;
+
+    const { rootEventDelay } = plasmaConfig;
 
     return (
       <Fragment>
@@ -122,6 +217,30 @@ export default class Deposit extends React.Component<DepositProps, any> {
             />
           </dd>
         </dl>
+        {Object.values(this.pendingDeposits).length > 0 && (
+          <Fragment>
+            <h2 style={{ alignItems: 'center', display: 'flex' }}>
+              Pending deposits
+            </h2>
+          
+            <Table
+              style={{ marginTop: 15 }}
+              size='small'
+              pagination={{ pageSize: 4 }}
+              columns={[
+                { title: 'Value', dataIndex: 'value', key: 'value' },
+                { title: 'TxId', dataIndex: 'txId', key: 'txId' },
+                { title: 'Blocks to wait', dataIndex: 'blocks', key: 'blocks' },
+              ]}
+              dataSource={Object.values(this.pendingDeposits).map(pendingDep => ({
+                ...pendingDep,
+                txId: <EtherscanLink value={pendingDep.txId} />,
+                blocks: `${this.blocksSince(pendingDep.blockNumber)}/${rootEventDelay}`,
+                value: this.selectedToken.toTokens(bi(pendingDep.value)),
+              }))}
+            />
+          </Fragment>
+        )}
       </Fragment>
     );
   }
