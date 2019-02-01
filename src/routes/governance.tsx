@@ -11,11 +11,10 @@ import { List, Collapse, Icon } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-import { shortenHex } from '../utils';
 
 import AppLayout from '../components/appLayout';
 import GovernanceContract from '../stores/governanceContract';
-import Network from '../stores/network';
+import EtherscanLink from '../components/etherscanLink';
 
 const { Fragment } = React;
 
@@ -46,10 +45,9 @@ const renderDate = ({ effectiveDate, cancelled }) => {
 
 interface GovernanceProps {
   governanceContract: GovernanceContract;
-  network: Network;
 }
 
-@inject('governanceContract', 'network')
+@inject('governanceContract')
 @observer
 export default class Governance extends React.Component<GovernanceProps, any> {
   
@@ -62,18 +60,7 @@ export default class Governance extends React.Component<GovernanceProps, any> {
       return value;
     }
 
-    const { etherscanBase } = this.props.network;
-    if (!etherscanBase) {
-      return shortenHex(value);
-    }
-
-    const etherscanLink = value => `${etherscanBase}/address/${value}`;
-
-    return (
-      <a href={etherscanLink(value)} title={value} target="_blank" rel="noopener noreferrer">
-        {shortenHex(value)}
-      </a>
-    );
+    return <EtherscanLink value={value}/>;
   }
 
   private renderContent(proposal) {

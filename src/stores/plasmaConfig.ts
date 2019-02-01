@@ -38,13 +38,13 @@ export default class PlasmaConfig {
   @autobind
   private fetchConfig() {
     this.plasma.instance.getConfig().then((
-      { rootNetwork, exitHandlerAddr, bridgeAddr, operatorAddr, bridgeDelay, eventsDelay }
+      { rootNetwork, exitHandlerAddr, bridgeAddr, operatorAddr, bridgeDelay }
     ) => {
       this.rootNetwork = rootNetwork;
       this.exitHandlerAddr = exitHandlerAddr;
       this.bridgeAddr = bridgeAddr;
       this.operatorAddr = operatorAddr;
-      this.rootEventDelay = Number(bridgeDelay || 0) + Number(eventsDelay || 0);
+      this.rootEventDelay = Number(bridgeDelay);
     });
   }
 
