@@ -30,7 +30,7 @@ import { range } from '../utils/range';
 import NodeStore from './node';
 import Web3Store from './web3/';
 
-import { BigIntType, equal, bi, exponentiate, toNumber, multiply, subtract, isBigInt, BigInt } from 'jsbi-utils';
+import { BigIntType, equal, bi, exponentiate, toNumber, ZERO } from 'jsbi-utils';
 
 const Big = require('big.js');
 
@@ -124,8 +124,14 @@ export default class Token extends ContractStore {
    */
   public toCents(tokenValue: BigIntType | number | string): BigIntType {
     if (this.isNft) return bi(tokenValue);
+    let valueNum;
+    try {
+      valueNum = Big(String(tokenValue));
+    } catch(e) {
+      return ZERO;
+    }
 
-    return bi(Big(String(tokenValue)).mul(10 ** this.decimals).round().toFixed());
+    return bi(valueNum.mul(10 ** this.decimals).round().toFixed());
   }
 
   /**
