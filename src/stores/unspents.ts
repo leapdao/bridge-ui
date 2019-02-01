@@ -17,7 +17,6 @@ import {
   LeapTransaction,
   helpers,
   Exit,
-  UnspentJSON,
 } from 'leap-core';
 import { bufferToHex, toBuffer } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
@@ -31,6 +30,7 @@ import Account from './account';
 import NodeStore from './node';
 import Web3Store from './web3/';
 import Tokens from './tokens';
+import storage from '../utils/storage';
 
 const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
 
@@ -38,7 +38,6 @@ type UnspentWithTx = Unspent & {
   transaction: LeapTransaction,
   pendingFastExit?: boolean,
 };
-type UnspentWithTxJSON = UnspentJSON & { transaction: LeapTransaction };
 
 const objectify = (unspent: UnspentWithTx): UnspentWithTx => {
   if (!unspent.outpoint.toJSON) {
@@ -84,40 +83,11 @@ export default class Unspents {
     reaction(() => this.node.latestBlock, this.fetchUnspents);
     when(() => (this.latestBlock && !!this.operator.slots[0]), () => this.finalizeFastExits({}));
     
-    this.loadPendingFastExits();
-  }
-
-  private unspentFromJson(unspentJSON: UnspentWithTxJSON): UnspentWithTx {
-    const unspent = Object.assign({}, unspentJSON) as any;
-    unspent.outpoint = Outpoint.fromJSON(unspentJSON.outpoint);
-    return unspent;
-  }
-
-  private unspentToJson(unspent: UnspentWithTx): UnspentWithTxJSON {
-    const json = Object.assign({}, unspent) as any;
-    json.outpoint = objectify(unspent).outpoint.toJSON();
-    return json;
-  }
-
-  private loadPendingFastExits() {
-    this.pendingFastExits = JSON.parse(
-      localStorage.getItem('pendingFastExits') || '{}'
-    );
-    this.pendingFastExits = Object.keys(this.pendingFastExits).reduce((res, key) => {
-      res[key] = this.pendingFastExits[key];
-      res[key].unspent = this.unspentFromJson(this.pendingFastExits[key].unspent);
-      return res;
-    }, {});
+    this.pendingFastExits = storage.load('pendingFastExits');
   }
 
   private storePendingFastExits() {
-    const exitsJson = Object.keys(this.pendingFastExits).reduce((res, key) => {
-      res[key] = this.pendingFastExits[key];
-      res[key].unspent = this.unspentToJson(res[key].unspent);
-      return res;
-    }, {});
-
-    localStorage.setItem('pendingFastExits', JSON.stringify(exitsJson));  
+    storage.store('pendingFastExits', this.pendingFastExits);
   }
 
   @computed
