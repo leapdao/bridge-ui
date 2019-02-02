@@ -12,7 +12,7 @@
     "precommit": "lint-staged",
     "deploy:dev": "aws s3 sync ./dist s3://bridge-dev.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id E3UQO39J2ZIILR --paths '/*'",
     "deploy:testnet": "aws s3 sync ./dist s3://testnet.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id ERDV80HEAIPI6 --paths '/*'",
-    "deploy:mainnet": "echo \"No bucket for mainnet\" && echo 0"
+    "deploy:mainnet": "aws s3 sync ./dist s3://mainnet.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id E224ANE6YCE3LE --paths '/*'"
   },
   "lint-staged": {
     "*.js": [
