@@ -20,6 +20,8 @@ import Tokens from '../../stores/tokens';
 import Unspents from '../../stores/unspents';
 import ExitHandler from '../../stores/exitHandler';
 
+import { CONFIG } from '../../config';
+
 interface ExitProps {
   tokens?: Tokens;
   unspents?: Unspents;
@@ -140,6 +142,7 @@ export default class Exit extends React.Component<ExitProps, any> {
                         <Button
                           size="small"
                           style={{ marginLeft: '10px' }}
+                          disabled={CONFIG.exitMarketMaker === ''}
                           onClick={() => {
                             unspents.fastExitUnspent(u)
                           }}

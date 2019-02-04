@@ -19,7 +19,7 @@ Dev: http://bridge-dev.leapdao.org/
 
 Testnet: http://testnet.leapdao.org/
 
-Mainnet: N/A
+Mainnet: http://mainnet.leapdao.org/
 
 ## Install
 
@@ -35,7 +35,7 @@ This will use config from `presets/localnet/config.json`
 
 ## Build params (env variables) 
 
-- `CONFIG` - name of config preset. Possible values: `localnet` (default), `testnet`
+- `CONFIG` - name of config preset. Possible values: `localnet` (default), `testnet`, `mainnet`.
 
 ## Deployment
 
@@ -45,4 +45,8 @@ CONFIG=testnet yarn build
 yarn deploy:testnet
 ```
 
-Mainnet: `yarn run deploy:mainnet`
+Mainnet:
+```
+CONFIG=mainnet yarn build
+yarn deploy:mainnet
+```

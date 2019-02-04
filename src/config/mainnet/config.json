@@ -1,0 +1,11 @@
+{
+  "name": "mainnet",
+  "title": "LeapDAO Mainnet",
+  "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
+  "consensus": "poa",
+  "nodes": [
+    "http://node1.mainnet.leapdao.org:8645"
+  ],
+  "tokenFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSedGkkbHD6sdvdnnhJOg5bgLj0XsjU2caIsqyHQyzwmMjyZ9A/viewform?embedded=true",
+  "exitMarketMaker": ""
+}
