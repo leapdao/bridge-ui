@@ -65,13 +65,13 @@ class AppLayout extends Component<AppLayoutProps, any> {
         <Menu.Item key="governance">
           <Link to="/governance">Governance</Link>
         </Menu.Item>
-        <Menu.Item key="slots" style={{ 
-          'display': (CONFIG.consensus !== 'poa' ? 'inline-block' : 'none')
-        }}>
-          <Link to={`/slots`}>
-            Slots auction
-          </Link>
-        </Menu.Item>
+        {CONFIG.consensus !== 'poa' && (
+          <Menu.Item key="slots">
+            <Link to={`/slots`}>
+              Slots auction
+            </Link>
+          </Menu.Item>
+        )}
         <Menu.Item key="registerToken">
           <Link to={`/registerToken`}>
             Register token
@@ -80,11 +80,11 @@ class AppLayout extends Component<AppLayoutProps, any> {
         <Menu.Item key="wallet">
           <Link to="/wallet">Wallet</Link>
         </Menu.Item>
-        <Menu.Item key="faucet" style={{ 
-          'display': (CONFIG.tokenFaucet ? 'inline-block' : 'none')
-        }}>
-          <Link to="/faucet">Get tokens</Link>
-        </Menu.Item>
+        {CONFIG.tokenFaucet && (
+          <Menu.Item key="faucet">
+            <Link to="/faucet">Get tokens</Link>
+          </Menu.Item>
+        )}
         <Menu.Item key="explorer">
           <Link to="/explorer">Explorer</Link>
         </Menu.Item>
