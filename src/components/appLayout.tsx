@@ -80,7 +80,9 @@ class AppLayout extends Component<AppLayoutProps, any> {
         <Menu.Item key="wallet">
           <Link to="/wallet">Wallet</Link>
         </Menu.Item>
-        <Menu.Item key="faucet">
+        <Menu.Item key="faucet" style={{ 
+          'display': (CONFIG.tokenFaucet ? 'inline-block' : 'none')
+        }}>
           <Link to="/faucet">Get tokens</Link>
         </Menu.Item>
         <Menu.Item key="explorer">

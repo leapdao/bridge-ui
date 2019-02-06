@@ -8,6 +8,7 @@
 import * as React from 'react';
 import { observer } from 'mobx-react';
 import AppLayout from '../../components/appLayout';
+import { CONFIG } from '../../config';
 
 @observer
 export default class Home extends React.Component {
@@ -29,7 +30,7 @@ export default class Home extends React.Component {
             <strong>As a user</strong>, you can try out the network:
           </p>
           <ol style={{ marginInlineStart: '1.5em' }}>
-            <li><a href="">Get</a> some LEAP tokens on Rinkeby</li>
+            {CONFIG.tokenFaucet && (<li><a href="/faucet">Get</a> some LEAP tokens on Rinkeby</li>)}
             <li><a href="">Deposit</a> them to the chain. Your root chain coins will be locked in Plasma contract and you will get an equivalent in plasma-tokens on a Leap network.</li>
             <li><a href="">Transfer around</a> your coins. Transfers will happen on the Leap Network, free and fast. You can also try out our <a href="">mobile wallet alpha</a></li>
             <li><a href="">Exit</a> your coins back to the root chain.</li>

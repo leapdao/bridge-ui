@@ -15,9 +15,9 @@ import AppLayout from '../components/appLayout';
 
 import requestApi from '../utils/api';
 import Account from '../stores/account';
+import { CONFIG } from '../config';
 
-const URL = 'https://sarrsmlpsg.execute-api.eu-west-1.amazonaws.com/v0';
-const api = requestApi(URL);
+const api = requestApi(CONFIG.tokenFaucet);
 
 const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
 
@@ -72,6 +72,12 @@ export default class Faucet extends React.Component<FaucetProps, any> {
 
   render() {
     const { account } = this.props;
+
+    if (!CONFIG.tokenFaucet) {
+      return (<AppLayout section="faucet">
+        <span>Faucet is not set up</span>
+      </AppLayout>);
+    }
 
     return (
       <AppLayout section="faucet">
