@@ -5,14 +5,12 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, computed, reaction } from 'mobx';
+import { observable, computed, reaction, when } from 'mobx';
 import { Tx, TxJSON, LeapTransaction } from 'leap-core';
 import { Block } from 'web3/eth/types';
-import NodeStore from './node';
 import Web3Store from './web3/';
 import Tokens from './tokens';
-
-const LOCAL_STORAGE_KEY = 'EXPLORER_CACHE';
+import PlasmaConfig from './plasmaConfig';
 
 export enum Types {
   BLOCK,
@@ -42,17 +40,29 @@ export default class Explorer {
   @observable
   public current;
 
+  private storageKey;
+
   constructor(
     private web3: Web3Store,
-    private tokens: Tokens
+    private tokens: Tokens,
+    plasmaConfig: PlasmaConfig,
   ) {
+    when(
+      () => !!plasmaConfig.bridgeAddr,
+      () => {
+        this.storageKey = `EXPLORER_CACHE-${plasmaConfig.bridgeAddr}`;    
+        this.loadCache();
+      }
+    );
+  }
+
+  private loadCache() {
     try {
-      const lsCache = localStorage.getItem(LOCAL_STORAGE_KEY);
+      const lsCache = localStorage.getItem(this.storageKey);
       if (lsCache) {
         this._cache = JSON.parse(lsCache);
       }
     } catch (e) {}
-
   }
 
   private get cache() {
@@ -60,8 +70,9 @@ export default class Explorer {
   }
 
   private setCache(key, value) {
+    if (!this.storageKey) return;
     this._cache[key] = value;
-    localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(this._cache));
+    localStorage.setItem(this.storageKey, JSON.stringify(this._cache));
   }
 
   private static getType(obj) {
