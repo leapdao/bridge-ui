@@ -35,11 +35,11 @@ export default class Home extends React.Component {
           </p>
           <ol style={{ marginInlineStart: '1.5em' }}>
             {CONFIG.tokenFaucet && (<li>Get some tokens from the testnet <a href="/faucet">faucet</a>.</li>)}
-            <li><a href="/wallet">Deposit</a> them to the chain. Your root chain coins will be locked in the Plasma contract and you will get an equivalent balance on the Leap network.</li>
+            <li><a href="/wallet">Deposit</a> them to the chain. Your root chain coins (Rinkeby) will be locked in the Plasma contract and you will get an equivalent balance on the Leap network.</li>
             <li><a href="/wallet">Transfer around</a> your coins. Transfers will happen on the Leap Network, free and fast. You can also try out our <a href="https://github.com/leapdao/mobile-plasma-wallet">mobile wallet alpha</a>.</li>
             <li>Synchronize a <a href="https://github.com/leapdao/leap-node">Plasma node</a> to check the validity of the chain and security of your funds.</li>
             <li>Keep an eye on recent <a href="/governance">goverance proposals</a> that are may change security assumptions.</li>
-            <li><a href="/wallet">Exit</a> your coins back to the root chain.</li>
+            <li><a href="/wallet">Exit</a> your coins back to the root chain (Rinkeby).</li>
           </ol>
 
           <p>
