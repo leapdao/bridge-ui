@@ -22,3 +22,9 @@ export {
 export {
   default as CloseCircleFill,
 } from '@ant-design/icons/lib/fill/CloseCircleFill';
+export {
+  default as IssuesCloseOutline,
+} from '@ant-design/icons/lib/outline/IssuesCloseOutline';
+export {
+  default as ClockCircleOutline,
+} from '@ant-design/icons/lib/outline/ClockCircleOutline';
