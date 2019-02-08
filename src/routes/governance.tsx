@@ -56,7 +56,7 @@ export default class Governance extends React.Component<GovernanceProps, any> {
   }
   
   private formatParam(abi, value) {
-    if (abi.inputs[0].type !== 'address') {
+    if (!abi || abi.inputs[0].type !== 'address') {
       return value;
     }
 
