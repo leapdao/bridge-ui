@@ -19,7 +19,7 @@ import { CONFIG } from '../config';
 
 const api = requestApi(CONFIG.tokenFaucet);
 
-const requestFund = tweetUrl => api('post', 'tweetFund', { tweetUrl });
+const requestFund = tweetUrl => api('post', '', { tweetUrl });
 
 interface FaucetProps {
   account: Account;
@@ -42,7 +42,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
   handleSuccess() {
     this.value = '';
     this.sending = false;
-    this.success = 'Cool! Wait a minute, we are sending tokens to you';
+    this.success = 'Cool! You should receive your tokens already. Now go to the Wallet and play around.';
   }
 
   @autobind
@@ -82,6 +82,9 @@ export default class Faucet extends React.Component<FaucetProps, any> {
     return (
       <AppLayout section="faucet">
         <h1>Get tokens</h1>
+        <p>
+          Tweet something about @leapdao and get some testnet LEAP tokens on Plasma! Don't forget to include your Ethereum address in the tweet.
+        </p>
         <Form onSubmit={this.handleSubmit} layout="inline">
           {this.success && <Alert type="success" message={this.success} />}
           {this.error && <Alert type="error" message={this.error} />}
