@@ -16,6 +16,14 @@ export default [
         type: 'uint32',
       },
       {
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        name: 'stake',
+        type: 'uint64',
+      },
+      {
         name: 'signer',
         type: 'address',
       },
@@ -28,6 +36,14 @@ export default [
         type: 'uint32',
       },
       {
+        name: 'newOwner',
+        type: 'address',
+      },
+      {
+        name: 'newStake',
+        type: 'uint64',
+      },
+      {
         name: 'newSigner',
         type: 'address',
       },
@@ -38,7 +54,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -52,7 +68,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -66,7 +82,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -80,7 +96,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -94,7 +110,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -108,7 +124,21 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'vault',
+    outputs: [
+      {
+        name: '',
+        type: 'address',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
     anonymous: false,
@@ -120,7 +150,7 @@ export default [
       },
     ],
     name: 'Epoch',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -132,7 +162,7 @@ export default [
       },
     ],
     name: 'EpochLength',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -164,7 +194,7 @@ export default [
       },
     ],
     name: 'ValidatorJoin',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -201,7 +231,7 @@ export default [
       },
     ],
     name: 'ValidatorLogout',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -228,7 +258,7 @@ export default [
       },
     ],
     name: 'ValidatorLeave',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -255,13 +285,44 @@ export default [
       },
     ],
     name: 'ValidatorUpdate',
-    type: 'event'
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'blocksRoot',
+        type: 'bytes32',
+      },
+      {
+        indexed: true,
+        name: 'slotId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        name: 'owner',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        name: 'periodRoot',
+        type: 'bytes32',
+      },
+    ],
+    name: 'Submission',
+    type: 'event',
   },
   {
     constant: false,
     inputs: [
       {
         name: '_bridge',
+        type: 'address',
+      },
+      {
+        name: '_vault',
         type: 'address',
       },
       {
@@ -273,7 +334,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -287,7 +348,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -309,7 +370,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -323,29 +384,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_slotId',
-        type: 'uint256',
-      },
-      {
-        name: '_prevHash',
-        type: 'bytes32',
-      },
-      {
-        name: '_root',
-        type: 'bytes32',
-      },
-    ],
-    name: 'submitPeriod',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -363,10 +402,10 @@ export default [
         type: 'bytes32',
       },
     ],
-    name: 'submitPeriodForReward',
+    name: 'submitPeriod',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
 ] as ABIDefinition[];

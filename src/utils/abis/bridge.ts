@@ -13,7 +13,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -27,7 +27,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -41,7 +41,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -54,15 +54,7 @@ export default [
     name: 'periods',
     outputs: [
       {
-        name: 'parent',
-        type: 'bytes32',
-      },
-      {
         name: 'height',
-        type: 'uint32',
-      },
-      {
-        name: 'parentIndex',
         type: 'uint32',
       },
       {
@@ -72,7 +64,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -86,7 +78,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -100,7 +92,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     anonymous: false,
@@ -117,7 +109,7 @@ export default [
       },
     ],
     name: 'NewHeight',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -129,7 +121,7 @@ export default [
       },
     ],
     name: 'NewOperator',
-    type: 'event'
+    type: 'event',
   },
   {
     constant: false,
@@ -143,7 +135,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -157,7 +149,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -171,7 +163,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -185,7 +177,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -208,6 +200,6 @@ export default [
     ],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
 ] as ABIDefinition[];

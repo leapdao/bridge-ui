@@ -2,6 +2,28 @@ import { ABIDefinition } from 'web3/eth/abi';
 
 export default [
   {
+    constant: false,
+    inputs: [
+      {
+        name: '_bridge',
+        type: 'address',
+      },
+      {
+        name: '_vault',
+        type: 'address',
+      },
+      {
+        name: '_epochLength',
+        type: 'uint256',
+      },
+    ],
+    name: 'initialize',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     constant: true,
     inputs: [
       {
@@ -57,6 +79,20 @@ export default [
     type: 'function',
   },
   {
+    constant: false,
+    inputs: [
+      {
+        name: '_epochLength',
+        type: 'uint256',
+      },
+    ],
+    name: 'setEpochLength',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     constant: true,
     inputs: [],
     name: 'lastCompleteEpoch',
@@ -96,6 +132,50 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+      {
+        name: '_prevHash',
+        type: 'bytes32',
+      },
+      {
+        name: '_blocksRoot',
+        type: 'bytes32',
+      },
+    ],
+    name: 'submitPeriod',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+      {
+        name: '_signerAddr',
+        type: 'address',
+      },
+      {
+        name: '_tenderAddr',
+        type: 'bytes32',
+      },
+    ],
+    name: 'setSlot',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
@@ -288,40 +368,31 @@ export default [
     type: 'event',
   },
   {
-    constant: false,
+    anonymous: false,
     inputs: [
       {
-        name: '_bridge',
+        indexed: true,
+        name: 'blocksRoot',
+        type: 'bytes32',
+      },
+      {
+        indexed: true,
+        name: 'slotId',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        name: 'owner',
         type: 'address',
       },
       {
-        name: '_vault',
-        type: 'address',
-      },
-      {
-        name: '_epochLength',
-        type: 'uint256',
+        indexed: false,
+        name: 'periodRoot',
+        type: 'bytes32',
       },
     ],
-    name: 'initialize',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_epochLength',
-        type: 'uint256',
-      },
-    ],
-    name: 'setEpochLength',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
+    name: 'Submission',
+    type: 'event',
   },
   {
     constant: false,
@@ -358,28 +429,6 @@ export default [
       },
     ],
     name: 'activate',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_slotId',
-        type: 'uint256',
-      },
-      {
-        name: '_prevHash',
-        type: 'bytes32',
-      },
-      {
-        name: '_root',
-        type: 'bytes32',
-      },
-    ],
-    name: 'submitPeriod',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',

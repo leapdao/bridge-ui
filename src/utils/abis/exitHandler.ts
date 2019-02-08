@@ -3,33 +3,6 @@ import { ABIDefinition } from 'web3/eth/abi';
 export default [
   {
     constant: true,
-    inputs: [
-      {
-        name: '',
-        type: 'bytes32',
-      },
-    ],
-    name: 'verifications',
-    outputs: [
-      {
-        name: 'startTime',
-        type: 'uint32',
-      },
-      {
-        name: 'owner',
-        type: 'address',
-      },
-      {
-        name: 'stake',
-        type: 'uint256',
-      },
-    ],
-    payable: false,
-    stateMutability: 'view',
-    type: 'function'
-  },
-  {
-    constant: true,
     inputs: [],
     name: 'depositCount',
     outputs: [
@@ -40,7 +13,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -54,7 +27,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -85,7 +58,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -103,7 +76,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -117,7 +90,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -131,7 +104,21 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_minGasPrice',
+        type: 'uint256',
+      },
+    ],
+    name: 'setMinGasPrice',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
   },
   {
     constant: true,
@@ -145,7 +132,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -159,7 +146,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -173,7 +160,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -195,7 +182,21 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'minGasPrice',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
   },
   {
     constant: true,
@@ -214,7 +215,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -228,7 +229,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -247,7 +248,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -270,7 +271,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -284,7 +285,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: true,
@@ -323,7 +324,7 @@ export default [
     ],
     payable: false,
     stateMutability: 'view',
-    type: 'function'
+    type: 'function',
   },
   {
     anonymous: false,
@@ -355,31 +356,7 @@ export default [
       },
     ],
     name: 'ExitStarted',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: true,
-        name: 'txHash',
-        type: 'bytes32',
-      },
-    ],
-    name: 'VerificationStarted',
-    type: 'event'
-  },
-  {
-    anonymous: false,
-    inputs: [
-      {
-        indexed: false,
-        name: 'data',
-        type: 'bytes',
-      },
-    ],
-    name: 'Debug',
-    type: 'event'
+    type: 'event',
   },
   {
     anonymous: false,
@@ -406,7 +383,19 @@ export default [
       },
     ],
     name: 'NewDeposit',
-    type: 'event'
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        name: 'minGasPrice',
+        type: 'uint256',
+      },
+    ],
+    name: 'MinGasPrice',
+    type: 'event',
   },
   {
     anonymous: false,
@@ -423,51 +412,7 @@ export default [
       },
     ],
     name: 'NewToken',
-    type: 'event'
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_proof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_outputIndex',
-        type: 'uint8',
-      },
-    ],
-    name: 'startVerification',
-    outputs: [],
-    payable: true,
-    stateMutability: 'payable',
-    type: 'function'
-  },
-  {
-    constant: false,
-    inputs: [
-      {
-        name: '_doublespendProof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_consolidateProof',
-        type: 'bytes32[]',
-      },
-      {
-        name: '_inputIndex',
-        type: 'uint8',
-      },
-      {
-        name: '_consolidateInputIndex',
-        type: 'uint8',
-      },
-    ],
-    name: 'challengeConsolidateDoublespent',
-    outputs: [],
-    payable: false,
-    stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'event',
   },
   {
     constant: false,
@@ -489,7 +434,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -503,7 +448,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -517,7 +462,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -543,7 +488,7 @@ export default [
     outputs: [],
     payable: true,
     stateMutability: 'payable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -557,7 +502,7 @@ export default [
     outputs: [],
     payable: true,
     stateMutability: 'payable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -571,7 +516,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -597,7 +542,7 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
   {
     constant: false,
@@ -623,6 +568,6 @@ export default [
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
-    type: 'function'
+    type: 'function',
   },
 ] as ABIDefinition[];
