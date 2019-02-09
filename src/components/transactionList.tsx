@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table } from 'antd';
+import { Table, List } from 'antd';
 import { Type } from 'leap-core';
 import { Link } from 'react-router-dom';
 
@@ -16,7 +16,7 @@ const TransactionList = ({ txs }) => {
       hash: tx.hash,
       from: tx.from,
       to: tx.to,
-      value: { value: tx.value, color: tx.color },
+      outputs: tx.outputs,
       type: TYPES[tx.type],
     };
   });
@@ -51,10 +51,26 @@ const TransactionList = ({ txs }) => {
       ),
     },
     {
-      title: 'Value',
-      dataIndex: 'value',
-      key: 'value',
-      render: props => props.color !== undefined && <TokenValue {...props} />,
+      title: 'Outputs',
+      dataIndex: 'outputs',
+      key: 'outputs',
+      render: outputs => (
+        <List
+          itemLayout="vertical"
+          split={false}
+          dataSource={outputs}
+          renderItem={output => (
+            <List.Item>
+              Address:{' '}
+              <Link to={`/explorer/address/${output.address}`}>
+                {shortenHex(output.address)}
+              </Link>
+              <br />
+              Value: <TokenValue {...output} />
+            </List.Item>
+          )}
+        />
+      ),
     },
     {
       title: 'Type',
