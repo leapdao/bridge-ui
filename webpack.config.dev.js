@@ -134,7 +134,9 @@ module.exports = {
   },
   plugins: [
     new ForkTSCheckerWebpackPlugin(),
-    new webpack.EnvironmentPlugin(['CONFIG']),
+    new webpack.EnvironmentPlugin({
+      CONFIG: 'localnet',
+    }),
     new HtmlPlugin({
       template: 'src/index.html',
     }),
