@@ -109,8 +109,6 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
             <Link to={`/explorer/address/${this.tx.to}`}>{this.tx.to}</Link>
           </Fragment>
         )}
-        <h3>Value</h3>
-        <TokenValue value={this.tx.value} color={this.tx.color} />
         <h3>Type</h3>
         {TYPES[this.tx.type]}
         {this.tx.inputs && this.tx.inputs.length > 0 && (
