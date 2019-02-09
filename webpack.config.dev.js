@@ -7,7 +7,7 @@ const HtmlPlugin = require('html-webpack-plugin');
 const ForkTSCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
 
 module.exports = {
-  entry: './src/index.tsx',
+  entry: ['babel-polyfill', './src/index.tsx'],
   mode: 'development',
   output: {
     publicPath: '/',

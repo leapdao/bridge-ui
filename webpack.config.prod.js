@@ -16,7 +16,7 @@ const threadLoader = {
 };
 
 module.exports = {
-  entry: './src/index.tsx',
+  entry: ['babel-polyfill', './src/index.tsx'],
   mode: 'production',
   output: {
     publicPath: '/',
