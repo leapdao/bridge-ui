@@ -37,7 +37,7 @@ type Proposal = {
   subject,
   methodStr: string,
   summaryStr: string,
-  newValue?: string,
+  newValue?: Array<string>,
   currentValue?: string,
 };
 
@@ -169,13 +169,13 @@ export default class GovernanceContract extends ContractStore {
     if (!governanceChange) return Promise.resolve({
       ...proposal,
       summaryStr: msg.abi.name,
-      newValue: this.proposalParamsStr(msg.params),
+      newValue: toArray(msg.params),
     });
 
     return this.readCurrentValue(proposal, governanceChange).then(currentValue => ({
       ...proposal,
       summaryStr: governanceChange.name,
-      newValue: this.proposalParamsStr(msg.params),
+      newValue: toArray(msg.params),
       currentValue,
     }));
   }

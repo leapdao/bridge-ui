@@ -15,6 +15,7 @@ import Web3SubmitWarning from '../components/web3SubmitWarning';
 import AppLayout from '../components/appLayout';
 import GovernanceContract from '../stores/governanceContract';
 import EtherscanLink from '../components/etherscanLink';
+import { shortenHex } from '../utils';
 
 const { Fragment } = React;
 
@@ -47,6 +48,13 @@ interface GovernanceProps {
   governanceContract: GovernanceContract;
 }
 
+const isEtherscannable = (value: string) => 
+  value.startsWith && value.startsWith('0x') &&
+  (value.length === 42 || value.length === 66);
+
+const isLengthyHex = (value: string) => 
+  value.startsWith && value.startsWith('0x') && value.length > 20;
+
 @inject('governanceContract')
 @observer
 export default class Governance extends React.Component<GovernanceProps, any> {
@@ -55,12 +63,21 @@ export default class Governance extends React.Component<GovernanceProps, any> {
     super(props);
   }
   
-  private formatParam(abi, value) {
-    if (!abi || abi.inputs[0].type !== 'address') {
-      return value;
+  private formatValue(value) {
+    
+    if (isEtherscannable(value)) {
+      return <EtherscanLink key={value} value={value}/>;
     }
 
-    return <EtherscanLink value={value}/>;
+    if (isLengthyHex(value)) {
+      value = shortenHex(value);
+    }
+
+    return (<span key={value}>{String(value)}</span>);
+  }
+
+  private formatParams(values) {
+    return values.map(this.formatValue).map(v => [', ', v]).flat().splice(1);
   }
 
   private renderContent(proposal) {
@@ -68,12 +85,12 @@ export default class Governance extends React.Component<GovernanceProps, any> {
         {proposal.currentValue && (
           <div className="attribute">
             <label>Current value:</label>
-            <span>{this.formatParam(proposal.msg.abi, proposal.currentValue)}</span>      
+            <span>{this.formatValue(proposal.currentValue)}</span>      
           </div>
         )}
         <div className="attribute">
           <label>New value:</label>
-          <span>{this.formatParam(proposal.msg.abi, proposal.newValue)}</span>
+          <span>{this.formatParams(proposal.newValue)}</span>
         </div>
       <Collapse bordered={false}>
         <Collapse.Panel header="Details" key="1" className="details">
