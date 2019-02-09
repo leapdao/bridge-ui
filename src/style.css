@@ -105,7 +105,7 @@ h2:first-child {
 }
 
 .governanceProposal .ant-collapse-item {
-  border-bottom: 0;
+  border-bottom: 0 !important;
 }
 
 .governanceProposal .ant-collapse-content > .ant-collapse-content-box {
