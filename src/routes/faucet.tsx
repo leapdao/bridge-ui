@@ -39,9 +39,14 @@ export default class Faucet extends React.Component<FaucetProps, any> {
 
   @autobind
   @action
-  handleSuccess() {
-    this.value = '';
+  handleSuccess(data) {
     this.sending = false;
+    if (data.errorMessage) {
+      this.error = data.errorMessage;
+      return;
+    }
+    this.value = '';
+    this.error = '';
     this.success = 'Cool! You should receive your tokens already. Now go to the Wallet and play around.';
   }
 
