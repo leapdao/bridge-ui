@@ -3,6 +3,12 @@ import { List } from 'antd';
 import { NamedNodeEntry } from '../utils/types.d';
 
 function callMethod(node, method, params = []) {
+  // poorman's wss -> https fallback
+  // TODO: fix this, ideally don't use fetch, but web3
+  if (node.indexOf('wss') > -1) {
+    node = node.replace('wss', 'https');
+    node = node.replace(':1443', '');
+  }
   return fetch(node, {
     method: 'post',
     body: JSON.stringify({
