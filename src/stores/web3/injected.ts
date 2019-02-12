@@ -47,7 +47,7 @@ export default class Web3Injected {
 
   public enable() {
     const { ethereum } = window as any;
-    const metamask = ethereum && ethereum._metamask; // eslint-disable-line no-underscore-dangle
+    const metamask = ethereum._metamask || ethereum; // eslint-disable-line no-underscore-dangle
 
     if (!metamask) {
       throw new Error('Only for EIP-1102 compilant metamask');
