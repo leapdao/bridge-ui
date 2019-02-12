@@ -131,6 +131,9 @@ h2:first-child {
   .leap-hex-full {
     display: none;
   }
+}
+
+@media screen and (max-width: 600px) {
   .ant-layout-content {
     padding-left: 0px !important;
     padding-right: 0px !important;
