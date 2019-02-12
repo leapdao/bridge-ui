@@ -89,7 +89,9 @@ export default class AmountInput extends React.Component<
     return (
       <Select
         value={color}
-        style={{ width: this.token.isNft ? 120 : 80 }}
+        style={{
+          width: this.token.isNft ? '120px !important' : '80px !import',
+        }}
         onChange={this.handleColorChange}
       >
         {tokens.list.map(token => (
@@ -118,7 +120,10 @@ export default class AmountInput extends React.Component<
                 allowClear
               >
                 {((balance as BigIntType[]) || []).map(id => (
-                  <Select.Option key={nftDisplayValue(id)} value={nftDisplayValue(id)}>
+                  <Select.Option
+                    key={nftDisplayValue(id)}
+                    value={nftDisplayValue(id)}
+                  >
                     {nftDisplayValue(id)}
                   </Select.Option>
                 ))}

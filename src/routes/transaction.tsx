@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import TokenValue from '../components/tokenValue';
 import { swapObject } from '../utils';
 import Explorer from '../stores/explorer';
+import HexString from '../components/hexString';
 
 const TYPES = swapObject(Type);
 
@@ -25,7 +26,10 @@ interface TransactionRouteProps {
 const InputItem = observer(({ input }) => {
   return (
     <List.Item>
-      <Link to={`/explorer/tx/${input.hash}`}>{input.hash}</Link>: {input.index}
+      <Link to={`/explorer/tx/${input.hash}`}>
+        <HexString>{input.hash}</HexString>
+      </Link>
+      : {input.index}
     </List.Item>
   );
 });
@@ -90,23 +94,27 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
     return (
       <Card title="Transaction" className="explorer-section">
         <h3>Hash</h3>
-        {this.tx.hash}
+        <HexString>{this.tx.hash}</HexString>
         <h3>Block</h3>
         <Link to={`/explorer/block/${this.tx.blockHash}`}>
-          {this.tx.blockHash}
+          <HexString>{this.tx.blockHash}</HexString>
         </Link>
         <h3>ID in block</h3>
         {this.tx.transactionIndex}
         {this.tx.from && (
           <Fragment>
             <h3>From</h3>
-            <Link to={`/explorer/address/${this.tx.from}`}>{this.tx.from}</Link>
+            <Link to={`/explorer/address/${this.tx.from}`}>
+              <HexString>{this.tx.from}</HexString>
+            </Link>
           </Fragment>
         )}
         {this.tx.to && (
           <Fragment>
             <h3>To</h3>
-            <Link to={`/explorer/address/${this.tx.to}`}>{this.tx.to}</Link>
+            <Link to={`/explorer/address/${this.tx.to}`}>
+              <HexString>{this.tx.to}</HexString>
+            </Link>
           </Fragment>
         )}
         <h3>Type</h3>
@@ -131,7 +139,7 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
                 <List.Item>
                   Address:{' '}
                   <Link to={`/explorer/address/${output.address}`}>
-                    {output.address}
+                    <HexString>{output.address}</HexString>
                   </Link>
                   <br />
                   Color: {output.color}

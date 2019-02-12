@@ -47,7 +47,8 @@ export default class Faucet extends React.Component<FaucetProps, any> {
     }
     this.value = '';
     this.error = '';
-    this.success = 'Cool! You should receive your tokens already. Now go to the Wallet and play around.';
+    this.success =
+      'Cool! You should receive your tokens already. Now go to the Wallet and play around.';
   }
 
   @autobind
@@ -79,23 +80,26 @@ export default class Faucet extends React.Component<FaucetProps, any> {
     const { account } = this.props;
 
     if (!CONFIG.tokenFaucet) {
-      return (<AppLayout section="faucet">
-        <span>Faucet is not set up</span>
-      </AppLayout>);
+      return (
+        <AppLayout section="faucet">
+          <span>Faucet is not set up</span>
+        </AppLayout>
+      );
     }
 
     return (
       <AppLayout section="faucet">
         <h1>Get tokens</h1>
         <p>
-          Tweet something about @leapdao and get some testnet LEAP tokens on Plasma! Don't forget to include your Ethereum address in the tweet.
+          Tweet something about @leapdao and get some testnet LEAP tokens on
+          Plasma! Don't forget to include your Ethereum address in the tweet.
         </p>
         <Form onSubmit={this.handleSubmit} layout="inline">
           {this.success && <Alert type="success" message={this.success} />}
           {this.error && <Alert type="error" message={this.error} />}
           {(this.success || this.error) && <Divider />}
 
-          <Form.Item>
+          <Form.Item className="wallet-input">
             <Input
               addonBefore="Tweet url"
               value={this.value}

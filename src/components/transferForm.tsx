@@ -7,7 +7,13 @@ import { Input, Button, Form } from 'antd';
 import autobind from 'autobind-decorator';
 import AmountInput from './amountInput';
 import Tokens from '../stores/tokens';
-import { BigIntType, lessThanOrEqual, greaterThan, biMax, ZERO } from 'jsbi-utils';
+import {
+  BigIntType,
+  lessThanOrEqual,
+  greaterThan,
+  biMax,
+  ZERO,
+} from 'jsbi-utils';
 
 interface TransferFormProps {
   tokens?: Tokens;
@@ -31,7 +37,10 @@ class TransferForm extends React.Component<TransferFormProps, any> {
 
     if (!this.token.isNft) {
       const maxValue = this.token.plasmaBalance;
-      if (maxValue && greaterThan(this.token.toCents(this.value), maxValue as BigIntType)) {
+      if (
+        maxValue &&
+        greaterThan(this.token.toCents(this.value), maxValue as BigIntType)
+      ) {
         return `Should <= ${this.token.toTokens(maxValue as BigIntType)}`;
       }
     }
@@ -113,24 +122,24 @@ class TransferForm extends React.Component<TransferFormProps, any> {
 
     return (
       <Form onSubmit={this.handleSubmit} className="transferForm">
-        <AmountInput
-          plasma
-          width={450}
-          color={color}
-          onChange={this.handleChange}
-          value={this.value}
-          placeholder="Amount to transfer"
-        />
+        <div className="wallet-input">
+          <AmountInput
+            plasma
+            color={color}
+            onChange={this.handleChange}
+            value={this.value}
+            placeholder="Amount to transfer"
+          />
+        </div>
         {this.showErrors && this.valueError && (
           <Fragment>
             <br />
             <span style={{ color: 'red' }}>{this.valueError}</span>
           </Fragment>
         )}
-        <Form.Item>
+        <Form.Item className="wallet-input">
           <Input
             value={this.receiver}
-            style={{ width: 450, font: 'inherit' }}
             onChange={this.handleReceiverChange}
             placeholder="Receiver address"
           />

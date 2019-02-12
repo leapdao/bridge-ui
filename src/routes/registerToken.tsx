@@ -11,11 +11,10 @@ import Iframe from 'react-iframe';
 import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { List, Form, Input, Button, Icon } from 'antd';
+import { List, Icon } from 'antd';
 
-import { isValidAddress } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
-import Web3SubmitWarning from '../components/web3SubmitWarning';
+import HexString from '../components/hexString';
 import AppLayout from '../components/appLayout';
 import ExitHandler from '../stores/exitHandler';
 import Network from '../stores/network';
@@ -38,7 +37,9 @@ const Item = observer(({ item }) => (
         </Fragment>
       }
       description={
-        <Link to={`/explorer/address/${item.address}`}>{item.address}</Link>
+        <Link to={`/explorer/address/${item.address}`}>
+          <HexString>{item.address}</HexString>
+        </Link>
       }
     />
   </List.Item>
@@ -96,7 +97,8 @@ export default class RegisterToken extends React.Component<
           <Iframe url={CONFIG.tokenFormUrl}
             position="relative"
             height="997px"
-            width="640px"
+            width="100%"
+            maxWidth="640px"
             frameBorder="0px"
             marginHeight="0px"
             marginWidth="0px"

@@ -79,7 +79,11 @@ const TransactionList = ({ txs }) => {
     },
   ];
 
-  return <Table dataSource={transactions} columns={columns} />;
+  return (
+    <div className="leap-table">
+      <Table dataSource={transactions} columns={columns} />
+    </div>
+  );
 };
 
 export default TransactionList;
