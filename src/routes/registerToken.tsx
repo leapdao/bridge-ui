@@ -97,7 +97,8 @@ export default class RegisterToken extends React.Component<
           <Iframe url={CONFIG.tokenFormUrl}
             position="relative"
             height="997px"
-            width="640px"
+            width="100%"
+            maxWidth="640px"
             frameBorder="0px"
             marginHeight="0px"
             marginWidth="0px"
