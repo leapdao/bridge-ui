@@ -14,7 +14,7 @@ export default class Web3Plasma {
     const plasmaProvider = CONFIG.nodes && CONFIG.nodes[0].url;
 
     this.instance = helpers.extendWeb3(
-      new Web3(new Web3.providers.HttpProvider(plasmaProvider))
+      new Web3(new Web3.providers.WebsocketProvider(plasmaProvider))
     );
 
     this.instance.eth.net
