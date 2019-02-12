@@ -133,7 +133,7 @@ h2:first-child {
   }
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 700px) {
   .ant-layout-content {
     padding-left: 0px !important;
     padding-right: 0px !important;
@@ -174,12 +174,6 @@ h2:first-child {
 
 .wallet-input .ant-form-item-control-wrapper {
   width: 100%;
-}
-
-@media screen and (min-width: 500px) {
-  .wallet-input {
-    width: 450px;
-  }
 }
 
 .leap-table {

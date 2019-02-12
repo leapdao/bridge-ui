@@ -94,7 +94,6 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
     return (
       <Card title="Transaction" className="explorer-section">
         <h3>Hash</h3>
-        <HexString />
         <HexString>{this.tx.hash}</HexString>
         <h3>Block</h3>
         <Link to={`/explorer/block/${this.tx.blockHash}`}>
