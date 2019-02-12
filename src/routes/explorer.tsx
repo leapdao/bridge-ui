@@ -15,6 +15,7 @@ import { observable } from 'mobx';
 import { Form, Input, Button, Divider, Alert } from 'antd';
 
 import AppLayout from '../components/appLayout';
+import HexString from '../components/hexString';
 import ExplorerStore from '../stores/explorer';
 import Network from '../stores/network';
 import Tokens from '../stores/tokens';
@@ -48,13 +49,20 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
   }
 
   public render() {
-    const { explorer, network, match, operator, exitHandler, bridge } = this.props;
+    const {
+      explorer,
+      network,
+      match,
+      operator,
+      exitHandler,
+      bridge,
+    } = this.props;
 
     return (
       <AppLayout section="explorer">
         <h1>Block Explorer</h1>
         <Form layout="inline">
-          <Form.Item>
+          <Form.Item className="wallet-input">
             <Input
               addonBefore="Search"
               value={this.value}
@@ -104,17 +112,23 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
           <dt>Network</dt>
           <dd>{network.name}</dd>
           <dt>Bridge contract</dt>
-          <dd>{bridge.address}</dd>
+          <dd>
+            <HexString>{bridge.address}</HexString>
+          </dd>
           <dt>Operator contract</dt>
-          <dd>{operator.address}</dd>
+          <dd>
+            <HexString>{operator.address}</HexString>
+          </dd>
           <dt>Exit contract</dt>
-          <dd>{exitHandler.address}</dd>
+          <dd>
+            <HexString>{exitHandler.address}</HexString>
+          </dd>
           {this.psc && (
             <Fragment>
               <dt>Token contract address</dt>
               <dd>
                 <Link to={`/explorer/address/${this.psc.address}`}>
-                  {this.psc.address}
+                  <HexString>{this.psc.address}</HexString>
                 </Link>
               </dd>
             </Fragment>

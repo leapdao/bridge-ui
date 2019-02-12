@@ -22,7 +22,6 @@ import Tokens from '../stores/tokens';
 import Account from '../stores/account';
 import Web3Store from '../stores/web3/';
 
-
 interface AppLayoutProps {
   tokens?: Tokens;
   account?: Account;
@@ -67,15 +66,11 @@ class AppLayout extends Component<AppLayoutProps, any> {
         </Menu.Item>
         {CONFIG.consensus !== 'poa' && (
           <Menu.Item key="slots">
-            <Link to={`/slots`}>
-              Slots auction
-            </Link>
+            <Link to={`/slots`}>Slots auction</Link>
           </Menu.Item>
         )}
         <Menu.Item key="registerToken">
-          <Link to={`/registerToken`}>
-            Register token
-          </Link>
+          <Link to={`/registerToken`}>Register token</Link>
         </Menu.Item>
         <Menu.Item key="wallet">
           <Link to="/wallet">Wallet</Link>
@@ -155,7 +150,6 @@ class AppLayout extends Component<AppLayoutProps, any> {
         </Layout.Header>
         <Layout.Content
           style={{
-            padding: '20px 50px',
             display: 'flex',
             flexDirection: 'column',
           }}

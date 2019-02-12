@@ -9,6 +9,7 @@ import NodeStore from '../stores/node';
 import Web3Store from '../stores/web3/';
 import Explorer from '../stores/explorer';
 import { match } from 'react-router';
+import HexString from '../components/hexString';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -112,7 +113,7 @@ class Block extends React.Component<BlockRouteProps, any> {
           )}
         </div>
         <h3>Hash:</h3>
-        {this.block.hash}
+        <HexString>{this.block.hash}</HexString>
         <h3>Timestamp:</h3>
         {dateFormat.format(this.block.timestamp * 1000)}
         <h3>Transactions:</h3>

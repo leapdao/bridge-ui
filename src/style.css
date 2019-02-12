@@ -70,7 +70,7 @@ h2:first-child {
 /* Governance proposal item */
 
 .governanceProposal .details * {
-  color: rgba(0,0,0,.45);
+  color: rgba(0, 0, 0, 0.45);
 }
 
 .governanceProposal .ant-list-item-meta h4 {
@@ -96,10 +96,14 @@ h2:first-child {
   padding: 0 0 0 16px;
   margin-top: 12px;
   line-height: 12px;
-  color: rgba(0,0,0,.45);
+  color: rgba(0, 0, 0, 0.45);
 }
 
-.governanceProposal .ant-collapse > .ant-collapse-item > .ant-collapse-header .arrow {
+.governanceProposal
+  .ant-collapse
+  > .ant-collapse-item
+  > .ant-collapse-header
+  .arrow {
   left: 0;
   line-height: 0;
 }
@@ -110,4 +114,76 @@ h2:first-child {
 
 .governanceProposal .ant-collapse-content > .ant-collapse-content-box {
   padding: 0;
+}
+
+.ant-layout-content {
+  padding: 20px 50px;
+}
+
+.leap-hex-short {
+  display: none;
+}
+
+@media screen and (max-width: 500px) {
+  .leap-hex-short {
+    display: inline;
+  }
+  .leap-hex-full {
+    display: none;
+  }
+  .ant-layout-content {
+    padding-left: 0px !important;
+    padding-right: 0px !important;
+  }
+
+  .ant-layout-header {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+
+  .explorer-section {
+    margin-left: -20px;
+    margin-right: -20px;
+  }
+
+  .explorer-section .ant-card-body {
+    overflow-x: auto;
+  }
+}
+
+.wallet-input {
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 450px;
+}
+
+.wallet-input .ant-select:not(.ant-input-group-addon .ant-select) {
+  width: 100% !important;
+}
+
+.wallet-input .ant-form-item {
+  width: 100% !important;
+}
+
+.wallet-input .ant-input-group-wrapper {
+  width: 100% !important;
+}
+
+.wallet-input .ant-form-item-control-wrapper {
+  width: 100%;
+}
+
+@media screen and (min-width: 500px) {
+  .wallet-input {
+    width: 450px;
+  }
+}
+
+.leap-table {
+  padding-bottom: 30px;
+  overflow-x: auto;
+}
+
+.leap-table table {
+  min-width: 700px;
 }

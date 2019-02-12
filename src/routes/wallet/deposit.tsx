@@ -24,6 +24,7 @@ import Unspents from '../../stores/unspents';
 import storage from '../../utils/storage';
 import Web3Store from '../../stores/web3';
 import EtherscanLink from '../../components/etherscanLink';
+import HexString from '../../components/hexString';
 
 const { Fragment } = React;
 
@@ -39,16 +40,15 @@ interface DepositProps {
 }
 
 type PendingDeposit = {
-  value: string,
-  color: number
-  txId: string,
-  blockNumber?: number,
-}
+  value: string;
+  color: number;
+  txId: string;
+  blockNumber?: number;
+};
 
 @inject('tokens', 'exitHandler', 'network', 'plasmaConfig', 'unspents', 'web3')
 @observer
 export default class Deposit extends React.Component<DepositProps, any> {
-
   @computed
   get selectedToken() {
     const { tokens, color } = this.props;
@@ -59,7 +59,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   value: number | string = 0;
 
   @observable
-  public pendingDeposits: { [key:string]:PendingDeposit };
+  public pendingDeposits: { [key: string]: PendingDeposit };
 
   private storageKey: string;
 
@@ -69,10 +69,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
     this.storageKey = `pendingDeposits-${props.exitHandler.address}`;
     props.exitHandler.events.on('NewDeposit', this.handleNewDeposit);
 
-    reaction(
-      () => props.unspents.list,
-      () => this.checkPendingDeposits()
-    );
+    reaction(() => props.unspents.list, () => this.checkPendingDeposits());
 
     this.loadPendingDeposits();
     reaction(() => this.selectedToken, this.loadPendingDeposits);
@@ -99,14 +96,14 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   private checkPendingDeposits() {
-    const maturedDeposits = Object.values(this.pendingDeposits).filter(pending => 
-      this.blocksSince(pending.blockNumber) > 6
-    ).sort((a, b) => b.blockNumber - a.blockNumber);
+    const maturedDeposits = Object.values(this.pendingDeposits)
+      .filter(pending => this.blocksSince(pending.blockNumber) > 6)
+      .sort((a, b) => b.blockNumber - a.blockNumber);
 
     const utxos = this.props.unspents.list;
     for (let i = 0; i < utxos.length && maturedDeposits.length > 0; i++) {
-      const depIndex = maturedDeposits.findIndex(dep => 
-        dep.value === utxos[i].output.value
+      const depIndex = maturedDeposits.findIndex(
+        dep => dep.value === utxos[i].output.value
       );
       if (depIndex >= 0) {
         delete this.pendingDeposits[maturedDeposits[depIndex].txId];
@@ -128,24 +125,28 @@ export default class Deposit extends React.Component<DepositProps, any> {
     e.preventDefault();
     const { exitHandler, color } = this.props;
     const value = this.selectedToken.toCents(this.value);
-    exitHandler.deposit(this.selectedToken, String(value)).then(({ futureReceipt }) => {
-      futureReceipt.once('transactionHash', depositTxHash => {
-        this.pendingDeposits[depositTxHash] = {
-          value: String(value),
-          color,
-          txId: depositTxHash,
-        };
-        this.value = 0;
+    exitHandler
+      .deposit(this.selectedToken, String(value))
+      .then(({ futureReceipt }) => {
+        futureReceipt.once('transactionHash', depositTxHash => {
+          this.pendingDeposits[depositTxHash] = {
+            value: String(value),
+            color,
+            txId: depositTxHash,
+          };
+          this.value = 0;
+        });
       });
-    });
   }
 
   canSubmitValue(value: BigIntType) {
     const { network } = this.props;
     return (
       network.canSubmit &&
-      value && greaterThan(bi(value), ZERO) &&
-      (this.selectedToken.isNft || lessThanOrEqual(bi(value), this.selectedToken.balance))
+      value &&
+      greaterThan(bi(value), ZERO) &&
+      (this.selectedToken.isNft ||
+        lessThanOrEqual(bi(value), this.selectedToken.balance))
     );
   }
 
@@ -171,26 +172,30 @@ export default class Deposit extends React.Component<DepositProps, any> {
         )}
 
         <Form onSubmit={this.handleSubmit} layout="inline">
-          <AmountInput
-            placeholder="Amount to deposit"
-            value={this.value}
-            onChange={value => {
-              this.value = value;
-            }}
-            color={color}
-            onColorChange={newColor => {
-              onColorChange(newColor);
-              this.value = tokens.tokenForColor(newColor).isNft
-                ? ''
-                : this.value;
-            }}
-          />
+          <div className="wallet-input">
+            <AmountInput
+              placeholder="Amount to deposit"
+              value={this.value}
+              onChange={value => {
+                this.value = value;
+              }}
+              color={color}
+              onColorChange={newColor => {
+                onColorChange(newColor);
+                this.value = tokens.tokenForColor(newColor).isNft
+                  ? ''
+                  : this.value;
+              }}
+            />
+          </div>
 
           <Form.Item>
             <Button
               htmlType="submit"
               type="primary"
-              disabled={!this.canSubmitValue(this.selectedToken.toCents(this.value))}
+              disabled={
+                !this.canSubmitValue(this.selectedToken.toCents(this.value))
+              }
             >
               Deposit
             </Button>
@@ -201,7 +206,9 @@ export default class Deposit extends React.Component<DepositProps, any> {
           <dt>Token name</dt>
           <dd>{this.selectedToken.name}</dd>
           <dt>Token contract address</dt>
-          <dd>{this.selectedToken.address}</dd>
+          <dd>
+            <HexString>{this.selectedToken.address}</HexString>
+          </dd>
           <dt>Token balance</dt>
           <dd>
             <TokenValue
@@ -222,22 +229,26 @@ export default class Deposit extends React.Component<DepositProps, any> {
             <h2 style={{ alignItems: 'center', display: 'flex' }}>
               Pending deposits
             </h2>
-          
+
             <Table
               style={{ marginTop: 15 }}
-              size='small'
+              size="small"
               pagination={{ pageSize: 4 }}
               columns={[
                 { title: 'Value', dataIndex: 'value', key: 'value' },
                 { title: 'TxId', dataIndex: 'txId', key: 'txId' },
                 { title: 'Blocks to wait', dataIndex: 'blocks', key: 'blocks' },
               ]}
-              dataSource={Object.values(this.pendingDeposits).map(pendingDep => ({
-                ...pendingDep,
-                txId: <EtherscanLink value={pendingDep.txId} />,
-                blocks: `${this.blocksSince(pendingDep.blockNumber)}/${rootEventDelay}`,
-                value: this.selectedToken.toTokens(bi(pendingDep.value)),
-              }))}
+              dataSource={Object.values(this.pendingDeposits).map(
+                pendingDep => ({
+                  ...pendingDep,
+                  txId: <EtherscanLink value={pendingDep.txId} />,
+                  blocks: `${this.blocksSince(
+                    pendingDep.blockNumber
+                  )}/${rootEventDelay}`,
+                  value: this.selectedToken.toTokens(bi(pendingDep.value)),
+                })
+              )}
             />
           </Fragment>
         )}
