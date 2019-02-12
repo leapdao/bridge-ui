@@ -45,7 +45,7 @@ export default class Transfer extends React.Component<TransferProps, any> {
               this.selectedToken.isNft
                 ? bi(amount)
                 : this.selectedToken.toCents(amount)
-            ).then(a => a.futureReceipt).then(a => console.log(a))
+            ).then(a => a.futureReceipt)
           }
           disabled={!network || !network.canSubmit}
         />

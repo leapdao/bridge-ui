@@ -67,7 +67,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
     super(props);
 
     this.storageKey = `pendingDeposits-${props.exitHandler.address}`;
-    props.exitHandler.events.on('NewDeposit', this.handleNewDeposit);
+    props.exitHandler.contract.events.NewDeposit({}, this.handleNewDeposit);
 
     reaction(
       () => props.unspents.list,
@@ -116,7 +116,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   @autobind
-  handleNewDeposit(event: EventLog) {
+  handleNewDeposit(_, event: EventLog) {
     const pending = this.pendingDeposits[event.transactionHash];
     if (pending) {
       pending.blockNumber = event.blockNumber;

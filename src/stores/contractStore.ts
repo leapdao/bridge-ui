@@ -11,14 +11,11 @@ import Contract from 'web3/eth/contract';
 import PromiEvent from 'web3/promiEvent';
 import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
-import ContractEventsSubscription from '../utils/ContractEventsSubscription';
 import Web3Store from './web3/';
 
 export default class ContractStore {
   @observable
   public address: string;
-
-  private activeEventSub: ContractEventsSubscription;
 
   constructor(
     public abi: any[],
@@ -27,26 +24,6 @@ export default class ContractStore {
     public web3: Web3Store
   ) {
     this.address = address;
-  }
-
-  @computed
-  public get events(): ContractEventsSubscription | undefined {
-    if (!this.contract) return;
-    console.log(
-      `Setting up event listener for contract at ${
-        this.contract.options.address
-      }..`
-    );
-    if (this.activeEventSub) {
-      console.log('Stopping the old subscription..');
-      this.activeEventSub.stop();
-    }
-    this.activeEventSub = new ContractEventsSubscription(
-      this.contract,
-      this.web3.root.instance,
-    );
-    this.activeEventSub.start();
-    return this.activeEventSub;
   }
 
   @computed
