@@ -1,4 +1,4 @@
-import { ABIDefinition } from 'web3/eth/abi';
+import { AbiItem } from 'web3-utils';
 
 export default [
   {
@@ -202,4 +202,4 @@ export default [
     stateMutability: 'nonpayable',
     type: 'function',
   },
-] as ABIDefinition[];
+] as AbiItem[];

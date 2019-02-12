@@ -4,7 +4,7 @@
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
  */
-import { reaction, action, observable } from 'mobx';
+import { reaction, action } from 'mobx';
 import autobind from 'autobind-decorator';
 
 import { exitHandler as exitHandlerAbi } from '../utils/abis';
@@ -17,7 +17,6 @@ import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import Web3Store from './web3/';
 import PlasmaConfig from './plasmaConfig';
-import { Outpoint, Unspent } from 'leap-core';
 
 
 export default class ExitHandler extends ContractStore {

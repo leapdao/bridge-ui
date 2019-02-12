@@ -7,7 +7,7 @@
 
 import { observable, computed, when } from 'mobx';
 import { Tx, TxJSON, LeapTransaction, Unspent } from 'leap-core';
-import { Block } from 'web3/eth/types';
+import { Block } from 'web3-eth';
 import Web3Store from './web3/';
 import Tokens from './tokens';
 import PlasmaConfig from './plasmaConfig';

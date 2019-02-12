@@ -7,7 +7,7 @@
 
 import { observable, action, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
-import Contract from 'web3/eth/contract';
+import { Contract } from 'web3-eth-contract';
 import { operator as operatorAbi } from '../utils/abis';
 
 import Token from './token';

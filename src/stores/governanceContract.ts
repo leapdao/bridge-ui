@@ -7,7 +7,7 @@
 import { reaction, observable, IObservableArray, computed } from 'mobx';
 
 import Web3Store from './web3/';
-import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3/eth/abi';
+import { AbiItem } from 'web3-utils';
 
 import { range, toArray } from '../utils';
 import { 
@@ -20,11 +20,11 @@ import Transactions from '../components/txNotification/transactions';
 import ExitHandler from './exitHandler';
 import Operator from './operator';
 
-type ABIDefinitionBySig = Map<String, ABIDefinition>;
+type ABIDefinitionBySig = Map<String, AbiItem>;
 
 type DecodedMessage = { 
-  abi?: ABIDefinition,
-  params?: EthAbiDecodeParametersResultObject, 
+  abi?: AbiItem,
+  params?: {[key: string]: any;}, 
   raw: string
 };
 
@@ -85,7 +85,7 @@ const governanceParams = {
 };
 
 export default class GovernanceContract extends ContractStore {
-  private funcBySignature: Map<String, ABIDefinition>;
+  private funcBySignature: Map<String, AbiItem>;
 
   @observable
   public proposals: IObservableArray<Proposal>;
@@ -153,7 +153,7 @@ export default class GovernanceContract extends ContractStore {
     return Promise.resolve('');
   }
 
-  private proposalParamsStr(params: EthAbiDecodeParametersResultObject): string {
+  private proposalParamsStr(params: {[key: string]: any;}): string {
     return toArray(params).join(', ');
   }
 
@@ -239,11 +239,11 @@ export default class GovernanceContract extends ContractStore {
     };
   }
 
-  private calculateAbiSignatures(): Map<String, ABIDefinition> {
-    return (governableAbi as ABIDefinition[])
+  private calculateAbiSignatures(): Map<String, AbiItem> {
+    return governableAbi
       .filter(m => m.type === 'function')
       .reduce<ABIDefinitionBySig>(
-        (m: ABIDefinitionBySig, def: ABIDefinition) => {
+        (m: ABIDefinitionBySig, def: AbiItem) => {
           const sig = this.web3.root.instance.eth.abi.encodeFunctionSignature(def);
           m[sig] = def;
           return m;

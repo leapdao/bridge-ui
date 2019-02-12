@@ -11,7 +11,7 @@ import { observer, inject } from 'mobx-react';
 import { Form, Button, Table } from 'antd';
 import autobind from 'autobind-decorator';
 
-import { EventLog } from 'web3/types';
+import { EventLog } from 'web3-core';
 
 import TokenValue from '../../components/tokenValue';
 import AmountInput from '../../components/amountInput';

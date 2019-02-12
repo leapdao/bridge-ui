@@ -1,5 +1,4 @@
-import { TransactionReceipt } from 'web3/types';
-import PromiEvent from 'web3/promiEvent';
+import { TransactionReceipt, PromiEvent } from 'web3-core';
 
 export const txSuccess = (tx: PromiEvent<TransactionReceipt>) =>
   tx.then((receipt: TransactionReceipt) => {

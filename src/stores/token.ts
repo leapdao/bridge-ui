@@ -14,13 +14,12 @@ import {
   reaction,
 } from 'mobx';
 import { helpers, Tx, Input, Output } from 'leap-core';
-import * as Web3PromiEvent from 'web3-core-promievent';
+import { EventLog } from 'web3-core';
+const { PromiEvent } = require('web3-core-promievent')
 import autobind from 'autobind-decorator';
-import { EventLog } from 'web3/types';
 import { erc20, erc721 } from '../utils/abis';
 import { isNFT } from '../utils';
 import { txSuccess } from '../utils/txSuccess';
-
 import Account from './account';
 import ContractStore from './contractStore';
 import Transactions from '../components/txNotification/transactions';
@@ -145,7 +144,7 @@ export default class Token extends ContractStore {
       return Promise.reject('No metamask');
     }
 
-    const promiEvent = Web3PromiEvent();
+    const promiEvent = new PromiEvent();
     this.web3.plasma.instance
       .getUnspent(this.account.address)
       .then(unspent => {
