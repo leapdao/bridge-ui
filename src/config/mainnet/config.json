@@ -8,5 +8,6 @@
   ],
   "tokenFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSedGkkbHD6sdvdnnhJOg5bgLj0XsjU2caIsqyHQyzwmMjyZ9A/viewform?embedded=true",
   "exitMarketMaker": "",
-  "tokenFaucet": "https://qf7qaraa7b.execute-api.eu-west-1.amazonaws.com/mainnet"
+  "tokenFaucet": "https://qf7qaraa7b.execute-api.eu-west-1.amazonaws.com/mainnet",
+  "denverFaucet": "https://qf7qaraa7b.execute-api.eu-west-1.amazonaws.com/mainnet/address"
 }

@@ -33,6 +33,7 @@ import TxNotification from './components/txNotification';
 
 import Explorer from './routes/explorer';
 import Faucet from './routes/faucet';
+import DenverFaucet from './routes/denverFaucet';
 import Wallet from './routes/wallet';
 import Slots from './routes/slots';
 import RegisterToken from './routes/registerToken';
@@ -96,6 +97,7 @@ ReactDOM.render(
           exact
           component={RegisterToken}
         />
+        <Route path="/denver" component={DenverFaucet} />
         <Route path="/wallet" component={Wallet} />
         <Route path="/explorer" component={Explorer} />
         <Route path="/faucet" component={Faucet} />
