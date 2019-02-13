@@ -79,7 +79,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
   render() {
     const { account } = this.props;
 
-    if (!CONFIG.tokenFaucet) {
+    if (!CONFIG.denverFaucet) {
       return (
         <AppLayout section="faucet">
           <span>Faucet is not set up</span>
