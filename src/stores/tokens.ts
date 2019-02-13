@@ -36,9 +36,9 @@ export default class Tokens {
 
     reaction(() => this.exitHandler.contract, this.init);
     reaction(
-      () => this.exitHandler.events,
+      () => this.exitHandler.contract,
       () => {
-        this.exitHandler.events.on('NewToken', this.loadTokens.bind(this));
+        this.exitHandler.contract.events.NewToken({}, this.loadTokens.bind(this));
       }
     );
   }

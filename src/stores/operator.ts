@@ -71,9 +71,9 @@ export default class Operator extends ContractStore {
       return this.contract;
     }, this.init);
     reaction(
-      () => this.events,
+      () => this.contract,
       () => {
-        this.events.on('allEvents', this.loadContractData.bind(this));
+        this.contract.events.allEvents({}, this.loadContractData);
       }
     );
   }
@@ -97,6 +97,7 @@ export default class Operator extends ContractStore {
     this.lastCompleteEpoch = Number(lastCompleteEpoch);
   }
 
+  @autobind
   private loadContractData() {
     Promise.all([
       readSlots(this.contract),

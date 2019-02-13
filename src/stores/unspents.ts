@@ -68,20 +68,20 @@ export default class Unspents {
     reaction(() => this.account.address, this.clearUnspents);
     reaction(() => this.account.address, this.fetchUnspents);
     reaction(
-      () => exitHandler.events,
+      () => exitHandler.contract,
       () => {
-        exitHandler.events.on('NewDeposit', this.fetchUnspents);
-        exitHandler.events.on('ExitStarted', this.fetchUnspents); 
+        exitHandler.contract.events.NewDeposit({}, this.fetchUnspents);
+        exitHandler.contract.events.ExitStarted({}, this.fetchUnspents); 
       }
     );
     reaction(
-      () => bridge.events,
+      () => bridge.contract,
       () => {
-        bridge.events.on('NewHeight', this.finalizeFastExits);
+        bridge.contract.events.NewHeight({}, this.finalizeFastExits);
       }
     );
     reaction(() => this.node.latestBlock, this.fetchUnspents);
-    when(() => (this.latestBlock && !!this.operator.slots[0]), () => this.finalizeFastExits({}));
+    when(() => (this.latestBlock && !!this.operator.slots[0]), () => this.finalizeFastExits(null, {}));
     
     this.pendingFastExits = storage.load('pendingFastExits');
   }
@@ -192,7 +192,7 @@ export default class Unspents {
   }
 
   @autobind
-  private finalizeFastExits(period) {
+  private finalizeFastExits(_, period) {
     console.log('period received', period);
     if (Object.keys(this.pendingFastExits).length < 1) return;
     Object.values(this.pendingFastExits)

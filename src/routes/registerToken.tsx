@@ -68,7 +68,6 @@ export default class RegisterToken extends React.Component<
     exitHandler
       .registerToken(this.tokenAddr)
       .on('transactionHash', registerTxHash => {
-        console.log('registerToken', registerTxHash); // eslint-disable-line
         this.tokenAddr = '';
       });
   }

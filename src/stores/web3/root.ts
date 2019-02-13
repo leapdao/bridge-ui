@@ -40,8 +40,7 @@ export default class Web3Root {
   @action
   private setRootWeb3() {
     if (!this.plasmaConfig) return;
-    this.instance = new Web3(
-      new Web3.providers.HttpProvider(this.plasmaConfig.rootNetwork)
-    );
+    const wssfy = (url) => url.replace(/https?(.+)\/?/, 'wss$1/ws');
+    this.instance = new Web3(wssfy(this.plasmaConfig.rootNetwork));
   }
 }
