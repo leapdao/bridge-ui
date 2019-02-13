@@ -13,10 +13,26 @@ import Web3Store from './web3/';
 import PlasmaConfig from './plasmaConfig';
 
 const PUBLIC_NETWORKS = {
-  1: { name: 'Mainnet', provider: 'https://mainnet.infura.io', etherscanBase: 'https://etherscan.io' },
-  3: { name: 'Ropsten', provider: 'https://ropsten.infura.io', etherscanBase: 'https://ropsten.etherscan.io' },
-  4: { name: 'Rinkeby', provider: 'https://rinkeby.infura.io', etherscanBase: 'https://rinkeby.etherscan.io' },
-  42: { name: 'Kovan', provider: 'https://kovan.infura.io', etherscanBase: 'https://kovan.etherscan.io' },
+  1: {
+    name: 'Mainnet',
+    provider: 'https://mainnet.infura.io',
+    etherscanBase: 'https://etherscan.io',
+  },
+  3: {
+    name: 'Ropsten',
+    provider: 'https://ropsten.infura.io',
+    etherscanBase: 'https://ropsten.etherscan.io',
+  },
+  4: {
+    name: 'Rinkeby',
+    provider: 'https://rinkeby.infura.io',
+    etherscanBase: 'https://rinkeby.etherscan.io',
+  },
+  42: {
+    name: 'Kovan',
+    provider: 'https://kovan.infura.io',
+    etherscanBase: 'https://kovan.etherscan.io',
+  },
 };
 
 export default class Network {
@@ -38,7 +54,7 @@ export default class Network {
   constructor(
     private readonly account: Account,
     private readonly web3: Web3Store,
-    private readonly plasmaConfig: PlasmaConfig,
+    private readonly plasmaConfig: PlasmaConfig
   ) {
     if (this.web3.injected.instance) {
       this.fetchNetwork();
@@ -68,7 +84,7 @@ export default class Network {
   @computed
   public get canSubmit() {
     return (
-      !!(window as any).web3 &&
+      (!!(window as any).web3 || !!(window as any).ethereum) &&
       !!this.account.address &&
       this.networkId === this.mmNetwork
     );
@@ -83,17 +99,17 @@ export default class Network {
     if (rootNetwork.match(/https?:\/\/(localhost|127\.0\.0\.1).*/)) {
       return { name: 'Local network', id: '5777' };
     }
-    
+
     if (rootNetwork.startsWith('http')) {
-      const nId = Object.keys(PUBLIC_NETWORKS).find(nId => 
-        PUBLIC_NETWORKS[nId].provider === rootNetwork
+      const nId = Object.keys(PUBLIC_NETWORKS).find(
+        nId => PUBLIC_NETWORKS[nId].provider === rootNetwork
       );
       return { id: nId, ...PUBLIC_NETWORKS[nId] };
     }
 
     return {
-      ...PUBLIC_NETWORKS[rootNetwork] || [],
-      id: rootNetwork
+      ...(PUBLIC_NETWORKS[rootNetwork] || []),
+      id: rootNetwork,
     };
   }
 
@@ -111,6 +127,6 @@ export default class Network {
 
     this.name = publicNetwork.name;
     this.etherscanBase = publicNetwork.etherscanBase;
-    this.networkId = publicNetwork.id;      
+    this.networkId = publicNetwork.id;
   }
 }
