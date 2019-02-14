@@ -96,8 +96,9 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   private checkPendingDeposits() {
+    const { rootEventDelay } = this.props.plasmaConfig;
     const maturedDeposits = Object.values(this.pendingDeposits)
-      .filter(pending => this.blocksSince(pending.blockNumber) > 6)
+      .filter(pending => this.blocksSince(pending.blockNumber) >= rootEventDelay)
       .sort((a, b) => b.blockNumber - a.blockNumber);
 
     const utxos = this.props.unspents.list;
@@ -152,7 +153,11 @@ export default class Deposit extends React.Component<DepositProps, any> {
 
   private blocksSince(blockNumber: number) {
     if (blockNumber === undefined) return 0;
-    return Math.max(0, this.props.web3.root.latestBlockNum - blockNumber);
+    const blocksSince = Math.min(
+      this.props.plasmaConfig.rootEventDelay, 
+      this.props.web3.root.latestBlockNum - blockNumber
+    );
+    return Math.max(0, blocksSince);
   }
 
   render() {

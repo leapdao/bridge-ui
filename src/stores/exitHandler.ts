@@ -82,8 +82,7 @@ export default class ExitHandler extends ContractStore {
     return this.getExitStake().then(exitStake => {
       const tx = this.iContract.methods.startExit(youngestInputProof, proof, outIndex, inputIndex).send({
         from: this.account.address,
-        value: String(exitStake),
-        gas: 1500000,
+        value: String(exitStake)
       });
 
       this.watchTx(tx, 'startExit', {
