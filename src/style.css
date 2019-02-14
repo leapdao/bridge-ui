@@ -171,3 +171,26 @@ h2:first-child {
 .leap-table table {
   min-width: 700px;
 }
+
+@keyframes copiedPopup {
+  0% {
+    transform: translate(0, 0);
+    opacity: 0;
+  }
+
+  100% {
+    transform: translate(0, -100%);
+    opacity: 1;
+  }
+}
+
+.copied-msg {
+  position: absolute;
+  transform: translate(0, -100%);
+  font-size: 14px;
+  padding: 5px;
+  border-radius: 3px;
+  color: #ffffff;
+  background-color: rgba(0, 0, 0, 0.8);
+  animation: copiedPopup 0.1s;
+}
