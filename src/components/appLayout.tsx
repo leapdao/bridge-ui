@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react';
+import * as ReactDOM from 'react-dom';
 import { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -21,6 +22,7 @@ import '../style.css';
 import Tokens from '../stores/tokens';
 import Account from '../stores/account';
 import Web3Store from '../stores/web3/';
+import { observable } from 'mobx';
 
 interface AppLayoutProps {
   tokens?: Tokens;
@@ -32,8 +34,25 @@ interface AppLayoutProps {
 @inject('tokens', 'account', 'web3')
 @observer
 class AppLayout extends Component<AppLayoutProps, any> {
+  private dropdown: any = null;
+
+  @observable menuVisible = false;
+
   constructor(props) {
     super(props);
+  }
+
+  componentDidMount() {
+    document.addEventListener('click', e => {
+      if (
+        !(
+          this.dropdown &&
+          ReactDOM.findDOMNode(this.dropdown).contains(e.target)
+        )
+      ) {
+        this.menuVisible = false;
+      }
+    });
   }
 
   private get psc() {
@@ -134,16 +153,26 @@ class AppLayout extends Component<AppLayoutProps, any> {
               )}
             </span>
             <MediaQuery maxWidth={1048}>
-              <Dropdown overlay={menu(false)} placement="bottomRight">
-                <a
-                  className="ant-dropdown-link"
-                  href="#"
+              <Dropdown
+                overlay={menu(false)}
+                placement="bottomRight"
+                visible={this.menuVisible}
+                ref={ref => {
+                  this.dropdown = ref;
+                }}
+              >
+                <div
+                  tabIndex={0}
                   style={{
-                    paddingTop: 8,
+                    padding: '0 5px',
+                    marginRight: -5,
+                  }}
+                  onClick={() => {
+                    this.menuVisible = !this.menuVisible;
                   }}
                 >
                   <Icon type="bars" style={{ fontSize: 24 }} />
-                </a>
+                </div>
               </Dropdown>
             </MediaQuery>
           </div>

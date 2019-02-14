@@ -33,6 +33,9 @@ export default class Web3Injected {
       this.updateInstance(web3.currentProvider);
     } else {
       this.updateInstance(null, false);
+      if (ethereum) {
+        this.enable();
+      }
     }
   }
 

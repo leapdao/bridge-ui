@@ -40,12 +40,14 @@ export default class Transfer extends React.Component<TransferProps, any> {
         <TransferForm
           color={this.selectedToken.color}
           onSubmit={(addr, amount) =>
-            this.selectedToken.transfer(
-              addr,
-              this.selectedToken.isNft
-                ? bi(amount)
-                : this.selectedToken.toCents(amount)
-            ).then(a => a.futureReceipt)
+            this.selectedToken
+              .transfer(
+                addr,
+                this.selectedToken.isNft
+                  ? bi(amount)
+                  : this.selectedToken.toCents(amount)
+              )
+              .then(a => a.futureReceipt)
           }
           disabled={!network || !network.canSubmit}
         />

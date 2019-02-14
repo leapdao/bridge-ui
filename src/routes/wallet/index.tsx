@@ -17,6 +17,7 @@ import Exit from './exit';
 import AppLayout from '../../components/appLayout';
 import Tokens from '../../stores/tokens';
 import Account from '../../stores/account';
+import HexString from '../../components/hexString';
 
 interface WalletProps {
   tokens: Tokens;
@@ -63,16 +64,14 @@ export default class Wallet extends React.Component<WalletProps, any> {
     return (
       <AppLayout section="wallet">
         <Web3SubmitWarning />
-
+        My address: <HexString>{this.props.account.address}</HexString>
         <Deposit
           color={this.color}
           onColorChange={color => {
             this.color = color;
           }}
         />
-
         <Transfer color={this.color} />
-
         <Exit color={this.color} />
       </AppLayout>
     );
