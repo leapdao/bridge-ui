@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { Fragment } from 'react';
 import { inject, observer } from 'mobx-react';
-import { Alert, Button } from 'antd';
+import { Alert } from 'antd';
 import Network from '../stores/network';
 import Web3Store from '../stores/web3/';
 import Account from '../stores/account';
+import ConnectWeb3 from './connectWeb3';
 
 interface Web3SubmitWarningProps {
   network?: Network;
@@ -36,12 +37,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
           message={
             <Fragment>
               To be able to send transactions you need to{' '}
-              <Button onClick={() => web3.injected.enable()}>
-                connect MetaMask{' '}
-                <span role="img" aria-label="fox">
-                  🦊
-                </span>
-              </Button>
+              <ConnectWeb3 onClick={() => { web3.injected.enable(); }}/>
             </Fragment>
           }
         />

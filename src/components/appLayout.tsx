@@ -11,7 +11,7 @@ import { Component, Fragment } from 'react';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
-import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
+import { Dropdown, Icon, Layout, Menu, Spin } from 'antd';
 
 import { CONFIG } from '../config';
 import AppLogo from './appLogo';
@@ -23,6 +23,7 @@ import Tokens from '../stores/tokens';
 import Account from '../stores/account';
 import Web3Store from '../stores/web3/';
 import { observable } from 'mobx';
+import ConnectWeb3 from './connectWeb3';
 
 interface AppLayoutProps {
   tokens?: Tokens;
@@ -136,20 +137,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
                 </Fragment>
               )}
               {web3 && web3.injected.available && !web3.injected.instance && (
-                <Button
-                  onClick={() => {
-                    web3.injected.enable();
-                  }}
-                >
-                  <span
-                    role="img"
-                    aria-label="fox"
-                    style={{ bottom: -1, position: 'relative' }}
-                  >
-                    🦊
-                  </span>{' '}
-                  Connect MetaMask
-                </Button>
+                <ConnectWeb3 onClick={() => { web3.injected.enable(); }}/>
               )}
             </span>
             <MediaQuery maxWidth={1048}>
