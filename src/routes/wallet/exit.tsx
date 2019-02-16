@@ -14,6 +14,8 @@ import { Button, Table, Tooltip } from 'antd';
 import { bufferToHex } from 'ethereumjs-util';
 
 import TokenValue from '../../components/tokenValue';
+import FinalizeExitButton from '../../components/finalizeExitButton';
+
 import { shortenHex } from '../../utils';
 import { BigInt } from 'jsbi-utils';
 import Tokens from '../../stores/tokens';
@@ -183,11 +185,7 @@ export default class Exit extends React.Component<ExitProps, any> {
           />
         </div>
 
-        <Button
-          onClick={() => exitHandler.finalizeExits(this.selectedToken.color)}
-        >
-          Finalize {this.selectedToken.symbol} top exit
-        </Button>
+        <FinalizeExitButton token={this.selectedToken}/>
       </Fragment>
     );
   }
