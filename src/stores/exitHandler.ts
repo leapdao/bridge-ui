@@ -4,7 +4,7 @@
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
  */
-import { reaction, action } from 'mobx';
+import { reaction, action, computed } from 'mobx';
 import { EventLog } from 'web3/types';
 import autobind from 'autobind-decorator';
 
@@ -36,6 +36,11 @@ export default class ExitHandler extends ContractStore {
       reaction(() => plasmaConfig.exitHandlerAddr, this.setAddress);
     }
     
+  }
+
+  public exitQueueSize(color: number) {
+    return this.contract.methods.tokens(color).call()
+      .then(queue => queue.currentSize);
   }
 
   public deposit(token: Token, amount: any): Promise<InflightTxReceipt> {
