@@ -61,18 +61,17 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
     return (
       <AppLayout section="explorer">
         <h1>Block Explorer</h1>
-        <Form layout="inline">
-          <Form.Item className="wallet-input">
+        <Form layout="inline" className="explorer-search">
+          <Form.Item className="explorer-search__input">
             <Input
               addonBefore="Search"
               value={this.value}
-              style={{ width: 700 }}
               onChange={e => {
                 this.value = e.target.value;
               }}
             />
           </Form.Item>
-          <Form.Item>
+          <Form.Item className="explorer-search__button">
             <Button
               type="primary"
               loading={explorer.searching}

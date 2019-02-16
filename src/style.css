@@ -194,3 +194,20 @@ h2:first-child {
   background-color: rgba(0, 0, 0, 0.8);
   animation: copiedPopup 0.1s;
 }
+
+.explorer-search {
+  display: flex;
+  max-width: 700px;
+}
+
+.explorer-search__input {
+  flex: 1 0 auto;
+}
+
+.explorer-search__input > .ant-form-item-control-wrapper {
+  width: 100%;
+}
+
+.explorer-search__button {
+  flex: 0 1 auto;
+}
