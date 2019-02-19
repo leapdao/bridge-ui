@@ -4,7 +4,7 @@
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
  */
-import { reaction, observable, IObservableArray } from 'mobx';
+import { reaction, observable, IObservableArray, computed } from 'mobx';
 
 import Web3Store from './web3/';
 import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3/eth/abi';
@@ -90,6 +90,14 @@ export default class GovernanceContract extends ContractStore {
   @observable
   public proposals: IObservableArray<Proposal>;
 
+  @computed
+  public get canFinalize() : boolean {
+    return this.proposals && this.proposals.filter(proposal => {
+      const date = new Date();
+      return proposal.effectiveDate <= date.getTime() 
+    }).length > 0
+  }
+
   @observable
   public noGovernance: boolean;
 
@@ -111,6 +119,20 @@ export default class GovernanceContract extends ContractStore {
         })
       }
     );
+  }
+
+  public finalize() {
+    if (!this.iContract) {
+      console.error('Need injected web3 to finalize')
+      return;
+    }
+    const tx = this.iContract.methods.finalize().send();
+
+    this.watchTx(tx, 'finalize', {
+      message: 'Finalize proposals',
+    });
+
+    return tx;
   }
 
   private readCurrentValue(proposal, governanceChange) {

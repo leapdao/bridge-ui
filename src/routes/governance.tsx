@@ -16,6 +16,7 @@ import AppLayout from '../components/appLayout';
 import GovernanceContract from '../stores/governanceContract';
 import EtherscanLink from '../components/etherscanLink';
 import { shortenHex } from '../utils';
+import { Button } from 'antd';
 
 const { Fragment } = React;
 
@@ -118,7 +119,7 @@ export default class Governance extends React.Component<GovernanceProps, any> {
 
   render() { 
     const { governanceContract } = this.props;
-    const { proposals, noGovernance } = governanceContract;
+    const { proposals, noGovernance, canFinalize, finalize } = governanceContract;
     return (
       <AppLayout section="governance">
         <Web3SubmitWarning />
@@ -126,7 +127,6 @@ export default class Governance extends React.Component<GovernanceProps, any> {
         {noGovernance && (<span>No governance set up</span>)}
 
         {proposals && proposals.length === 0 && (<span>No proposals yet</span>)}
-
         {proposals && proposals.length > 0 && (
           <Fragment>
             <h1>Proposals</h1>
@@ -155,6 +155,13 @@ export default class Governance extends React.Component<GovernanceProps, any> {
             />
           </Fragment>
         )}
+        {canFinalize && 
+          <div style={{paddingTop: '1rem'}}>
+            <Button onClick={finalize}>
+              Finalize proposals
+            </Button>
+          </div>
+        }
       </AppLayout>
     );
   }
