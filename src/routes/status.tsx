@@ -22,10 +22,12 @@ import Tokens from '../stores/tokens';
 import TokenValue from '../components/tokenValue';
 import { ColumnProps } from 'antd/lib/table';
 import { EventLog } from 'web3/types';
+import Bridge from '../stores/bridge';
 
 interface StatusProps {
   exitHandler: ExitHandler;
   explorer: Explorer;
+  bridge: Bridge;
   web3: Web3Store;
   tokens: Tokens;
 }
@@ -56,7 +58,7 @@ interface ExitData {
   suspect: boolean
 }
 
-@inject('exitHandler', 'explorer', 'web3', 'tokens')
+@inject('exitHandler', 'explorer', 'web3', 'tokens', 'bridge')
 @observer
 export default class Status extends React.Component<StatusProps, {}> {
   private exitColumns: ColumnProps<any>[] = [
@@ -145,7 +147,7 @@ export default class Status extends React.Component<StatusProps, {}> {
 
   constructor(props) {
     super(props);
-    reaction(() => props.exitHandler.address, this.getData)
+    reaction(() => this.props.exitHandler.address, this.getData, { fireImmediately: true})
   }
 
   @observable exitDetails: ExitData[] = [];
@@ -153,9 +155,11 @@ export default class Status extends React.Component<StatusProps, {}> {
 
   @action
   private getData = async (): Promise<void> => {
-    const { exitHandler, explorer, web3, tokens } = this.props;
+    const { exitHandler, explorer, web3, tokens, bridge } = this.props;
     const exits = []
-    const events = await exitHandler.contract.getPastEvents('ExitStarted', {fromBlock: 0})
+    if (!bridge.address) await new Promise(resolve => reaction(() => bridge.address, resolve))
+    const fromBlock = await bridge.contract.methods.genesisBlockNumber().call()
+    const events = await exitHandler.contract.getPastEvents('ExitStarted', {fromBlock})
     await Promise.all(events.map(async (event) => {
       const utxoId = new Outpoint(event.returnValues.txHash, parseInt(event.returnValues.outIndex)).getUtxoId();
       const exit = await exitHandler.contract.methods.exits(web3.root.instance.utils.toHex(utxoId)).call();

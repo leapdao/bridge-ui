@@ -32,7 +32,7 @@ export default class Bridge extends ContractStore {
     }
     
   }
-
+  
   @autobind
   @action
   private setAddress() {
