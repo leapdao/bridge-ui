@@ -121,12 +121,15 @@ export default class GovernanceContract extends ContractStore {
     );
   }
 
-  public finalize() {
+  finalize = async () => {
     if (!this.iContract) {
       console.error('Need injected web3 to finalize')
       return;
     }
-    const tx = this.iContract.methods.finalize().send();
+    const accounts = await this.web3.injected.instance.eth.getAccounts()
+    const tx = this.iContract.methods.finalize().send({
+      from: accounts[0]
+    });
 
     this.watchTx(tx, 'finalize', {
       message: 'Finalize proposals',
