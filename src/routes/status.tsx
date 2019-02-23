@@ -5,24 +5,24 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
+import { Badge, Button, Spin, Table } from 'antd';
+import { ColumnProps } from 'antd/lib/table';
+import BN from 'bn.js';
+import { Input, Outpoint, Tx } from 'leap-core';
+import { action, observable, reaction, runInAction } from 'mobx';
+import { inject, observer } from 'mobx-react';
 import * as React from 'react';
-import { observer, inject } from 'mobx-react';
-import { action, reaction, runInAction, observable } from 'mobx';
+import { EventLog } from 'web3/types';
 import AppLayout from '../components/appLayout';
 import { default as Monitor } from '../components/monitor';
-import { Table, Spin, Button, Badge } from 'antd';
-
+import TokenValue from '../components/tokenValue';
 import { CONFIG } from '../config';
+import Bridge from '../stores/bridge';
 import ExitHandler from '../stores/exitHandler';
 import Explorer from '../stores/explorer';
-import Web3Store from '../stores/web3';
-import { Input, Outpoint, Tx } from 'leap-core';
-import BN from 'bn.js';
 import Tokens from '../stores/tokens';
-import TokenValue from '../components/tokenValue';
-import { ColumnProps } from 'antd/lib/table';
-import { EventLog } from 'web3/types';
-import Bridge from '../stores/bridge';
+import Web3Store from '../stores/web3';
+
 
 interface StatusProps {
   exitHandler: ExitHandler;
@@ -40,7 +40,7 @@ interface ColorDetails {
 }
 
 interface ExitData {
-  event: EventLog
+  event: EventLog;
   exit: {
     amount: string;
     color: string;
@@ -54,8 +54,8 @@ interface ExitData {
     3: boolean;
     4: string;
     5: string;
-  }
-  suspect: boolean
+  };
+  suspect: boolean;
 }
 
 @inject('exitHandler', 'explorer', 'web3', 'tokens', 'bridge')
@@ -68,12 +68,12 @@ export default class Status extends React.Component<StatusProps, {}> {
       key: 'amount',
       render: (value, record) => (
         <TokenValue value={value} color={record.exit.color} />
-      )
+      ),
     },
     {
       title: 'Owner',
       dataIndex: 'exit.owner',
-      key: 'owner'
+      key: 'owner',
     },
     {
       title: 'PriorityTimestamp',
@@ -81,15 +81,14 @@ export default class Status extends React.Component<StatusProps, {}> {
       key: 'priorityTimestamp',
       render: text => {
         return <p>{new Date(parseInt(text) * 1000).toUTCString()}</p>;
-      }
+      },
     },
     {
       title: 'Stake',
       dataIndex: 'exit.stake',
       key: 'stake',
-      render: (value, record) => (
-        <TokenValue value={value} color={record.exit.color} />
-      )
+      render: (value, record) =>
+        `${this.props.web3.root.instance.utils.fromWei(value, 'ether')} ETH`,
     },
     {
       title: 'Suspicious',
@@ -98,15 +97,15 @@ export default class Status extends React.Component<StatusProps, {}> {
       render: suspect => {
         if (suspect) return <p style={{ color: 'red' }}>Yes</p>;
         else return <p style={{ color: 'green' }}>No</p>;
-      }
-    }
+      },
+    },
   ];
 
   private colorColums: ColumnProps<any>[] = [
     {
       title: 'Color',
       dataIndex: 'color',
-      key: 'color'
+      key: 'color',
     },
     {
       title: 'Plasma balance',
@@ -114,7 +113,7 @@ export default class Status extends React.Component<StatusProps, {}> {
       key: 'plasmaBalance',
       render: (value, record) => (
         <TokenValue value={value} color={record.color} />
-      )
+      ),
     },
     {
       title: 'Utxo Sum',
@@ -122,32 +121,34 @@ export default class Status extends React.Component<StatusProps, {}> {
       key: 'utxoSum',
       render: (value, record) => (
         <TokenValue value={value} color={record.color} />
-      )
+      ),
     },
     {
-      title: 'Exit Sum',
+      title: 'Open Exit Sum',
       dataIndex: 'exitSum',
       key: 'exitSum',
       render: (value, record) => (
         <TokenValue value={value} color={record.color} />
-      )
+      ),
     },
     {
       title: 'Status',
       key: 'status',
       render: (value, record: ColorDetails) => {
         return record.plasmaBalance.gte(record.exitSum.add(record.utxoSum)) ? (
-          <Badge status='success' text='Ok' />
+          <Badge status="success" text="Ok" />
         ) : (
-          <Badge status='warning' text='Invalid' />
+          <Badge status="warning" text="Invalid" />
         );
-      }
-    }
+      },
+    },
   ];
 
   constructor(props) {
     super(props);
-    reaction(() => this.props.exitHandler.address, this.getData, { fireImmediately: true})
+    reaction(() => this.props.exitHandler.address, this.getData, {
+      fireImmediately: true,
+    });
   }
 
   @observable exitDetails: ExitData[] = [];
@@ -156,15 +157,23 @@ export default class Status extends React.Component<StatusProps, {}> {
   @action
   private getData = async (): Promise<void> => {
     const { exitHandler, explorer, web3, tokens, bridge } = this.props;
-    const exits = []
-    if (!bridge.address) await new Promise(resolve => reaction(() => bridge.address, resolve))
-    const fromBlock = await bridge.contract.methods.genesisBlockNumber().call()
-    const events = await exitHandler.contract.getPastEvents('ExitStarted', {fromBlock})
-    await Promise.all(events.map(async (event) => {
-      const utxoId = new Outpoint(event.returnValues.txHash, parseInt(event.returnValues.outIndex)).getUtxoId();
-      const exit = await exitHandler.contract.methods.exits(web3.root.instance.utils.toHex(utxoId)).call();
-      let suspect;
-      if(!exit.finalized) {
+    const exits = [];
+    if (!bridge.address)
+      await new Promise(resolve => reaction(() => bridge.address, resolve));
+    const fromBlock = await bridge.contract.methods.genesisBlockNumber().call();
+    const events = await exitHandler.contract.getPastEvents('ExitStarted', {
+      fromBlock,
+    });
+    await Promise.all(
+      events.map(async event => {
+        const utxoId = new Outpoint(
+          event.returnValues.txHash,
+          parseInt(event.returnValues.outIndex)
+        ).getUtxoId();
+        const exit = await exitHandler.contract.methods
+          .exits(web3.root.instance.utils.toHex(utxoId))
+          .call();
+        let suspect;
         const exitTxHash = Tx.exit(
           new Input(
             new Outpoint(
@@ -177,11 +186,11 @@ export default class Status extends React.Component<StatusProps, {}> {
         if (exitTx === undefined) {
           suspect = true;
         }
-      }
-      exits.push({ event, exit, suspect } );
-    }));
+        exits.push({ event, exit, suspect });
+      })
+    );
 
-    const uTxos = await web3.plasma.instance.getUnspent('0x0'); //TODO: fix when leap web3 extension updated
+    const uTxos = await web3.plasma.instance.getUnspentAll();
     const addresses = await web3.plasma.instance.getColors();
     const colors = await Promise.all(
       addresses.map(async addr => {
@@ -197,7 +206,7 @@ export default class Status extends React.Component<StatusProps, {}> {
         }, web3.root.instance.utils.toBN(0));
 
         const exitSum = exits.reduce((acc, e) => {
-          return parseInt(e.exit.color) === color
+          return parseInt(e.exit.color) === color && !e.exit.finalized
             ? web3.root.instance.utils.toBN(e.exit.amount).add(acc)
             : acc;
         }, web3.root.instance.utils.toBN(0));
@@ -212,7 +221,7 @@ export default class Status extends React.Component<StatusProps, {}> {
           utxoSum,
           exitSum,
           plasmaBalance,
-          color
+          color,
         };
       })
     );
@@ -225,12 +234,29 @@ export default class Status extends React.Component<StatusProps, {}> {
   private exitDetailsRenderer = record => {
     if (!this.exitDetails.length) return 'No open exits';
     const openExits = this.exitDetails.filter(
-      e => parseInt(e.exit.color) === record.color
+      e => !e.exit.finalized && parseInt(e.exit.color) === record.color
     );
-    return openExits.length ? (
-      <Table dataSource={openExits} columns={this.exitColumns} />
-    ) : (
-      'No open exits for this token'
+    console.log('openexits', openExits);
+    const badFinalizedExits = this.exitDetails.filter(
+      e =>
+        parseFloat(e.exit.color) === record.color &&
+        e.exit.finalized &&
+        e.suspect
+    );
+    return (
+      <>
+        <Table
+          dataSource={openExits}
+          columns={this.exitColumns}
+          title={() => <h3>Open exits</h3>}
+        />
+        <Table
+          style={{ paddingTop: '1rem' }}
+          dataSource={badFinalizedExits}
+          columns={this.exitColumns}
+          title={() => <h3>Bad finalized exits</h3>}
+        />
+      </>
     );
   };
 
@@ -238,18 +264,18 @@ export default class Status extends React.Component<StatusProps, {}> {
     let text;
     return (
       <Button onClick={e => props.onExpand(props.record, e)}>
-        {props.expanded ? 'Hide open exits' : 'Show open exits'}
+        {props.expanded ? 'Hide exits' : 'Show exits'}
       </Button>
     );
   };
   render() {
     return (
-      <AppLayout section='status'>
+      <AppLayout section="status">
         <h1>Nodes status</h1>
         <Monitor nodes={CONFIG.nodes} />
         {this.colorDetails.length ? (
           <Table
-            style= {{paddingTop: "2rem"}}
+            style={{ paddingTop: '2rem' }}
             bordered
             dataSource={this.colorDetails}
             columns={this.colorColums}
