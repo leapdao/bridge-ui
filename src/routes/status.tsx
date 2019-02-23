@@ -5,8 +5,9 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { Badge, Button, Spin, Table } from 'antd';
+import { Badge, Button, Spin, Table, List } from 'antd';
 import { ColumnProps } from 'antd/lib/table';
+import { Link } from 'react-router-dom';
 import BN from 'bn.js';
 import { Input, Outpoint, Tx } from 'leap-core';
 import { action, observable, reaction, runInAction } from 'mobx';
@@ -22,7 +23,7 @@ import ExitHandler from '../stores/exitHandler';
 import Explorer from '../stores/explorer';
 import Tokens from '../stores/tokens';
 import Web3Store from '../stores/web3';
-
+import HexString from '../components/hexString';
 
 interface StatusProps {
   exitHandler: ExitHandler;
@@ -61,45 +62,40 @@ interface ExitData {
 @inject('exitHandler', 'explorer', 'web3', 'tokens', 'bridge')
 @observer
 export default class Status extends React.Component<StatusProps, {}> {
-  private exitColumns: ColumnProps<any>[] = [
-    {
-      title: 'Amount',
-      dataIndex: 'exit.amount',
-      key: 'amount',
-      render: (value, record) => (
-        <TokenValue value={value} color={record.exit.color} />
-      ),
-    },
-    {
-      title: 'Owner',
-      dataIndex: 'exit.owner',
-      key: 'owner',
-    },
-    {
-      title: 'PriorityTimestamp',
-      dataIndex: 'exit.priorityTimestamp',
-      key: 'priorityTimestamp',
-      render: text => {
-        return <p>{new Date(parseInt(text) * 1000).toUTCString()}</p>;
-      },
-    },
-    {
-      title: 'Stake',
-      dataIndex: 'exit.stake',
-      key: 'stake',
-      render: (value, record) =>
-        `${this.props.web3.root.instance.utils.fromWei(value, 'ether')} ETH`,
-    },
-    {
-      title: 'Suspicious',
-      dataIndex: 'suspect',
-      key: 'suspect',
-      render: suspect => {
-        if (suspect) return <p style={{ color: 'red' }}>Yes</p>;
-        else return <p style={{ color: 'green' }}>No</p>;
-      },
-    },
-  ];
+  private renderExit(record) {
+    return (
+      <List.Item>
+        <List.Item.Meta
+          title={
+            <div
+              style={{
+                color: record.suspect ? 'red' : 'green',
+              }}
+            >
+              <TokenValue
+                value={record.exit.amount}
+                color={record.exit.color}
+              />
+            </div>
+          }
+          description={
+            <div>
+              <div>
+                <Link to={`/explorer/address/${record.exit.owner}`}>
+                  <HexString>{record.exit.owner}</HexString>
+                </Link>
+              </div>
+              <div>
+                {new Date(
+                  parseInt(record.exit.priorityTimestamp) * 1000
+                ).toUTCString()}
+              </div>
+            </div>
+          }
+        />
+      </List.Item>
+    );
+  }
 
   private colorColums: ColumnProps<any>[] = [
     {
@@ -245,16 +241,19 @@ export default class Status extends React.Component<StatusProps, {}> {
     );
     return (
       <>
-        <Table
+        <h3>Open exits</h3>
+        <List
+          split
+          pagination={{ pageSize: 10 }}
           dataSource={openExits}
-          columns={this.exitColumns}
-          title={() => <h3>Open exits</h3>}
+          renderItem={this.renderExit}
         />
-        <Table
-          style={{ paddingTop: '1rem' }}
+        <h3>Bad finalized exits</h3>
+        <List
+          split
+          pagination={{ pageSize: 10 }}
           dataSource={badFinalizedExits}
-          columns={this.exitColumns}
-          title={() => <h3>Bad finalized exits</h3>}
+          renderItem={this.renderExit}
         />
       </>
     );
