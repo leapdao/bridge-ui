@@ -6,8 +6,12 @@
   "private": true,
   "scripts": {
     "postinstall": "rm -f node_modules/web3/index.d.ts && rm -f node_modules/web3/types.d.ts",
-    "start": "./node_modules/.bin/webpack-dev-server --config webpack.config.dev.js",
+    "start": "webpack-dev-server --config webpack.config.dev.js",
+    "start:testnet": "CONFIG=testnet yarn start",
+    "start:mainnet": "CONFIG=mainnet yarn start",
     "build": "rm -rf dist/ && webpack-cli --config webpack.config.prod.js",
+    "build:testnet": "CONFIG=testnet yarn build",
+    "build:mainnet": "CONFIG=mainnet yarn build",
     "stats": "rm -rf dist/ && webpack-cli --config webpack.config.prod.js --json > stats.json",
     "precommit": "lint-staged",
     "deploy:dev": "aws s3 sync ./dist s3://bridge-dev.leapdao.org/ --acl public-read && aws cloudfront create-invalidation --distribution-id E3UQO39J2ZIILR --paths '/*'",
