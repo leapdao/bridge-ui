@@ -93,6 +93,7 @@
     "babel-plugin-transform-typescript": "^7.0.0-alpha.19",
     "babel-polyfill": "^6.26.0",
     "babel-preset-typescript": "^7.0.0-alpha.19",
+    "bn.js": "^4.11.8",
     "ethereumjs-util": "6.0.0",
     "fork-ts-checker-webpack-plugin": "^0.4.15",
     "jsbi-utils": "^1.0.0",
