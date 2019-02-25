@@ -4,8 +4,7 @@
  * This source code is licensed under the GNU GENERAL PUBLIC LICENSE Version 3
  * found in the LICENSE file in the root directory of this source tree.
  */
-import { reaction, action, computed } from 'mobx';
-import { EventLog } from 'web3/types';
+import { reaction, action, observable } from 'mobx';
 import autobind from 'autobind-decorator';
 
 import { exitHandler as exitHandlerAbi } from '../utils/abis';
@@ -18,9 +17,11 @@ import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import Web3Store from './web3/';
 import PlasmaConfig from './plasmaConfig';
+import { Outpoint, Unspent } from 'leap-core';
+
 
 export default class ExitHandler extends ContractStore {
-
+  
   constructor(
     private account: Account,
     transactions: Transactions,
@@ -35,7 +36,6 @@ export default class ExitHandler extends ContractStore {
     } else {
       reaction(() => plasmaConfig.exitHandlerAddr, this.setAddress);
     }
-    
   }
 
   public exitQueueSize(color: number) {
