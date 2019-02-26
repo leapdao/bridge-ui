@@ -2,10 +2,16 @@ import { observable, reaction, action, when } from 'mobx';
 import autobind from 'autobind-decorator';
 import Web3 from './ts_workaround.js';
 import PlasmaConfig from '../plasmaConfig';
+import ConnectionStatus from './connectionStatus';
+
+const wssfy = (url) => url.replace(/https?(.+)\/?/, 'wss$1/ws');
 
 export default class Web3Root {
   @observable.ref
   public instance: Web3;
+
+  @observable
+  public connectionStatus: ConnectionStatus = ConnectionStatus.DISCONNECTED;
 
   @observable
   public latestBlockNum;
@@ -14,9 +20,9 @@ export default class Web3Root {
     public plasmaConfig: PlasmaConfig,
   ) {
     if (plasmaConfig.rootNetwork) {
-      this.setRootWeb3();
+      this.connect();
     } else {
-      reaction(() => plasmaConfig.rootNetwork, this.setRootWeb3);
+      reaction(() => plasmaConfig.rootNetwork, this.connect);
     }
   
     const updateRootBlock = blockNumber => {
@@ -35,12 +41,32 @@ export default class Web3Root {
       }
     );
   }
-  
+
   @autobind
-  @action
-  private setRootWeb3() {
+  private connect() {
     if (!this.plasmaConfig) return;
-    const wssfy = (url) => url.replace(/https?(.+)\/?/, 'wss$1/ws');
-    this.instance = new Web3(wssfy(this.plasmaConfig.rootNetwork));
+    
+    const wsUrl = wssfy(this.plasmaConfig.rootNetwork);
+    
+    this.connectionStatus = ConnectionStatus.CONNECTING;
+    console.log('[root] Connecting to', wsUrl);
+    const provider = new Web3.providers.WebsocketProvider(wsUrl);
+
+    provider.on('error', () => {
+      console.error('[root] connection error');
+      this.connectionStatus = ConnectionStatus.DISCONNECTED;
+    });
+
+    provider.on('connect', () => {
+      console.log('[root] connected');
+      this.connectionStatus = ConnectionStatus.CONNECTED;
+    });
+
+    provider.on('end', () => {
+      console.error('[root] web3 disconnected. Reconnecting...');
+      return this.connect();
+    });
+
+    this.instance = new Web3(provider);
   }
 }
