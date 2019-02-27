@@ -59,12 +59,13 @@ export default class FinalizeExitButton extends React.Component<
   }
 
   render() {
+    const caption = `Finalize ${this.props.token.symbol} top exit`;
     return (
       <Button
         onClick={this.finalize}
         disabled={this.disabled}
       >
-        Finalize {this.props.token.symbol} top exit
+        {caption}
       </Button>
     );    
   }
