@@ -8,6 +8,7 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Component, Fragment } from 'react';
+import { observable } from 'mobx';
 import { observer, inject } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
@@ -22,7 +23,8 @@ import '../style.css';
 import Tokens from '../stores/tokens';
 import Account from '../stores/account';
 import Web3Store from '../stores/web3/';
-import { observable } from 'mobx';
+
+import ConnectionStatusBadge from './ConnectionStatusBadge';
 
 interface AppLayoutProps {
   tokens?: Tokens;
@@ -187,7 +189,10 @@ class AppLayout extends Component<AppLayoutProps, any> {
             {this.props.children}
           </div>
         </Layout.Content>
-        <Layout.Footer>© Leap DAO {new Date().getFullYear()}</Layout.Footer>
+        <Layout.Footer>
+          <span style={{ verticalAlign: "middle" }}>© Leap DAO {new Date().getFullYear()}</span>
+          <ConnectionStatusBadge connectionStatus={this.props.web3.root.connectionStatus} />
+          </Layout.Footer>
       </Layout>
     );
   }
