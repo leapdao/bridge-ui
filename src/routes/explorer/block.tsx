@@ -4,12 +4,12 @@ import { inject, observer } from 'mobx-react';
 import { Card, Button, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
 
-import TransctionList from '../components/transactionList';
-import NodeStore from '../stores/node';
-import Web3Store from '../stores/web3/';
-import Explorer from '../stores/explorer';
+import TransctionList from '../../components/transactionList';
+import NodeStore from '../../stores/node';
+import Web3Store from '../../stores/web3';
+import Explorer from '../../stores/explorer';
 import { match } from 'react-router';
-import HexString from '../components/hexString';
+import HexString from '../../components/hexString';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',

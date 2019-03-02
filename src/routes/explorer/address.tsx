@@ -1,14 +1,14 @@
 import * as React from 'react';
+import { match } from 'react-router';
 import { Fragment } from 'react';
 import { observable, reaction } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import { Card, Alert, Spin } from 'antd';
 
-import TransctionList from '../components/transactionList';
-import TokenValue from '../components/tokenValue';
-import Explorer from '../stores/explorer';
-import Tokens from '../stores/tokens';
-import { match } from 'react-router';
+import TokenValue from '../../components/tokenValue';
+import Explorer from '../../stores/explorer';
+import Tokens from '../../stores/tokens';
+import TransctionList from './txList';
 
 interface AddressRouteProps {
   explorer: Explorer;
@@ -106,7 +106,15 @@ class Address extends React.Component<AddressRouteProps, any> {
           </Fragment>
         )}
         <h3>Transactions</h3>
-        <TransctionList txs={this.account.txs} />
+        {this.account.token && (
+          <TransctionList color={String(this.account.token.color)} />
+        )}
+        {!this.account.token && (
+          <TransctionList
+            from={this.account.address}
+            to={this.account.address}
+          />
+        )}
       </Card>
     );
   }

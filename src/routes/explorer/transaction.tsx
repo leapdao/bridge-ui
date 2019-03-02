@@ -7,10 +7,10 @@ import { Card, List, Alert, Spin } from 'antd';
 import { match } from 'react-router';
 import { Link } from 'react-router-dom';
 
-import TokenValue from '../components/tokenValue';
-import { swapObject } from '../utils';
-import Explorer from '../stores/explorer';
-import HexString from '../components/hexString';
+import TokenValue from '../../components/tokenValue';
+import { swapObject } from '../../utils';
+import Explorer from '../../stores/explorer';
+import HexString from '../../components/hexString';
 
 const TYPES = swapObject(Type);
 

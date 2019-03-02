@@ -14,18 +14,18 @@ import { observable } from 'mobx';
 
 import { Form, Input, Button, Divider, Alert } from 'antd';
 
-import AppLayout from '../components/appLayout';
-import HexString from '../components/hexString';
-import ExplorerStore from '../stores/explorer';
-import Network from '../stores/network';
-import Tokens from '../stores/tokens';
+import AppLayout from '../../components/appLayout';
+import HexString from '../../components/hexString';
+import ExplorerStore from '../../stores/explorer';
+import Network from '../../stores/network';
+import Tokens from '../../stores/tokens';
 
 import Block from './block';
 import Transaction from './transaction';
 import Address from './address';
-import Operator from '../stores/operator';
-import ExitHandler from '../stores/exitHandler';
-import Bridge from '../stores/bridge';
+import Operator from '../../stores/operator';
+import ExitHandler from '../../stores/exitHandler';
+import Bridge from '../../stores/bridge';
 
 interface ExplorerProps {
   explorer: ExplorerStore;
