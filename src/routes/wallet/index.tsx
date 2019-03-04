@@ -18,6 +18,7 @@ import AppLayout from '../../components/appLayout';
 import Tokens from '../../stores/tokens';
 import Account from '../../stores/account';
 import HexString from '../../components/hexString';
+import TransactionsList from '../../routes/explorer/txList';
 
 interface WalletProps {
   tokens: Tokens;
@@ -73,6 +74,12 @@ export default class Wallet extends React.Component<WalletProps, any> {
         />
         <Transfer color={this.color} />
         <Exit color={this.color} />
+        <h2>Transactions ({this.selectedToken.symbol})</h2>
+        <TransactionsList
+          from={account.address}
+          to={account.address}
+          color={String(this.color)}
+        />
       </AppLayout>
     );
   }
