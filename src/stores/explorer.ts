@@ -5,7 +5,7 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { observable, computed, reaction, when } from 'mobx';
+import { observable, computed, when } from 'mobx';
 import { Tx, TxJSON, LeapTransaction } from 'leap-core';
 import { Block } from 'web3/eth/types';
 import Web3Store from './web3/';
@@ -98,17 +98,14 @@ export default class Explorer {
   public getAddress(address: string) {
     address = address.toLowerCase();
     const token = this.tokens.tokenForAddress(address);
-    return Promise.all([
-      this.web3.plasma.instance.eth.getBalance(address),
-      this.getTransactionsByAddress(address, token),
-    ]).then(([balance, txs]) => {
-      return {
-        address,
-        token,
-        balance,
-        txs,
-      };
-    });
+    return this.web3.plasma.instance.eth.getBalance(address)
+      .then((balance) => {
+        return {
+          address,
+          token,
+          balance,
+        };
+      });
   }
 
   public getTransaction(hash): Promise<PlasmaTransaction> {
@@ -192,10 +189,4 @@ export default class Explorer {
     }
   }
 
-  private getTransactionsByAddress(token, address): Promise<LeapTransaction[]> {
-    // TODO: probably should be fetched from some caching layer
-    // it is infeasible to calculate this on client-side because the chain may be huge
-    console.warn('Not implemented');
-    return Promise.resolve([]);
-  }
 }
