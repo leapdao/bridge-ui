@@ -17,7 +17,6 @@ import { helpers, Tx, Input, Output } from 'leap-core';
 import * as Web3PromiEvent from 'web3-core-promievent';
 import autobind from 'autobind-decorator';
 import { EventLog } from 'web3/types';
-import Contract from 'web3/eth/contract';
 import { erc20, erc721 } from '../utils/abis';
 import { isNFT } from '../utils';
 import { txSuccess } from '../utils/txSuccess';
@@ -28,29 +27,19 @@ import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import { range } from '../utils/range';
 import NodeStore from './node';
-import Web3Store from './web3/';
+import Web3Store from './web3';
+import { tokenInfo, isOurTransfer } from './utils';
 
-import { BigIntType, equal, bi, exponentiate, toNumber, ZERO } from 'jsbi-utils';
+import {
+  BigIntType,
+  equal,
+  bi,
+  exponentiate,
+  toNumber,
+  ZERO,
+} from 'jsbi-utils';
 
 const Big = require('big.js');
-
-const tokenInfo = (
-  token: Contract,
-  color: number
-): Promise<[string, string, string]> => {
-  return Promise.all([
-    token.methods.symbol().call(),
-    isNFT(color) ? Promise.resolve(0) : token.methods.decimals().call(),
-    token.methods.name().call(),
-  ]);
-};
-
-const isOurTransfer = (event: EventLog, ourAccount: Account): boolean => {
-  return (
-    event.returnValues[0].toLowerCase() === ourAccount.address.toLowerCase() ||
-    event.returnValues[1].toLowerCase() === ourAccount.address.toLowerCase()
-  );
-};
 
 export default class Token extends ContractStore {
   @observable
@@ -86,7 +75,7 @@ export default class Token extends ContractStore {
 
     autorun(this.loadBalance.bind(null, false));
     autorun(this.loadBalance.bind(null, true));
-    tokenInfo(this.contract, color).then(this.setInfo);
+    tokenInfo(this.web3, this.contract, color).then(this.setInfo);
 
     if (this.contract) {
       this.contract.events.Transfer({}, (_, event: EventLog) => {
@@ -127,11 +116,16 @@ export default class Token extends ContractStore {
     let valueNum;
     try {
       valueNum = Big(String(tokenValue));
-    } catch(e) {
+    } catch (e) {
       return ZERO;
     }
 
-    return bi(valueNum.mul(10 ** this.decimals).round().toFixed());
+    return bi(
+      valueNum
+        .mul(10 ** this.decimals)
+        .round()
+        .toFixed()
+    );
   }
 
   /**
@@ -141,7 +135,9 @@ export default class Token extends ContractStore {
    */
   public toTokens(tokenCentsValue: BigIntType) {
     if (this.isNft) return toNumber(tokenCentsValue);
-    return Big(tokenCentsValue.toString() || 0).div(10 ** this.decimals).toFixed();
+    return Big(tokenCentsValue.toString() || 0)
+      .div(10 ** this.decimals)
+      .toFixed();
   }
 
   public transfer(to: string, amount: BigIntType): Promise<any> {
@@ -258,19 +254,22 @@ export default class Token extends ContractStore {
     contract.methods
       .balanceOf(this.account.address)
       .call()
-      .then((balance): Promise<BigIntType | BigIntType[]> => {
-        if (this.isNft) {
-          return Promise.all(
-            range(0, balance - 1).map(i =>
-              contract.methods
-                .tokenOfOwnerByIndex(this.account.address, i)
-                .call().then(v => bi(v))
-            )
-          ) as Promise<BigIntType[]>;
-        }
+      .then(
+        (balance): Promise<BigIntType | BigIntType[]> => {
+          if (this.isNft) {
+            return Promise.all(
+              range(0, balance - 1).map(i =>
+                contract.methods
+                  .tokenOfOwnerByIndex(this.account.address, i)
+                  .call()
+                  .then(v => bi(v))
+              )
+            ) as Promise<BigIntType[]>;
+          }
 
-        return Promise.resolve(bi(balance));
-      })
+          return Promise.resolve(bi(balance));
+        }
+      )
       .then(balance => {
         this.updateBalance(balance, plasma);
       });
