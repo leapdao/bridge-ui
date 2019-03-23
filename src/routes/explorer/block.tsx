@@ -4,7 +4,7 @@ import { inject, observer } from 'mobx-react';
 import { Card, Button, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
 
-import TransctionList from '../../components/transactionList';
+import TransactionList from '../../components/transactionList';
 import NodeStore from '../../stores/node';
 import Web3Store from '../../stores/web3';
 import Explorer from '../../stores/explorer';
@@ -117,7 +117,7 @@ class Block extends React.Component<BlockRouteProps, any> {
         <h3>Timestamp:</h3>
         {dateFormat.format(this.block.timestamp * 1000)}
         <h3>Transactions:</h3>
-        <TransctionList txs={this.block.transactions} />
+        <TransactionList txs={this.block.transactions} />
       </Card>
     );
   }

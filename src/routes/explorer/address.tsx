@@ -8,7 +8,7 @@ import { Card, Alert, Spin } from 'antd';
 import TokenValue from '../../components/tokenValue';
 import Explorer from '../../stores/explorer';
 import Tokens from '../../stores/tokens';
-import TransctionList from './txList';
+import TransactionList from './txList';
 
 interface AddressRouteProps {
   explorer: Explorer;
@@ -107,10 +107,10 @@ class Address extends React.Component<AddressRouteProps, any> {
         )}
         <h3>Transactions</h3>
         {this.account.token && (
-          <TransctionList color={String(this.account.token.color)} />
+          <TransactionList color={String(this.account.token.color)} />
         )}
         {!this.account.token && (
-          <TransctionList
+          <TransactionList
             from={this.account.address}
             to={this.account.address}
           />
