@@ -150,6 +150,13 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
             />
           </Fragment>
         )}
+        {!this.tx.outputs ||
+          (this.tx.outputs.length === 0 && (
+            <>
+              <h3>Value:</h3>
+              <TokenValue value={this.tx.value} color={this.tx.color} />
+            </>
+          ))}
         {this.tx.options && (
           <Fragment>
             <h3>Options:</h3>
