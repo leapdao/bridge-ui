@@ -31,8 +31,8 @@ class TransactionList extends React.Component<Props> {
 
   componentDidUpdate(prevProps: Props) {
     if (
-      prevProps.from !== this.props.from &&
-      prevProps.to !== this.props.to &&
+      prevProps.from !== this.props.from ||
+      prevProps.to !== this.props.to ||
       prevProps.color !== this.props.color
     ) {
       this.setState({

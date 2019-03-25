@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Table, List } from 'antd';
+import { Table } from 'antd';
 import { Type } from 'leap-core';
 import { Link } from 'react-router-dom';
 
@@ -16,16 +16,13 @@ const TransactionList = ({ txs }) => {
       hash: tx.hash,
       from: tx.from,
       to: tx.to,
+      value: tx.value,
+      color: tx.color,
       outputs: tx.outputs,
       type: TYPES[tx.type],
     };
   });
   const columns = [
-    {
-      title: '',
-      dataIndex: 'id',
-      key: 'id',
-    },
     {
       title: 'Hash',
       dataIndex: 'hash',
@@ -43,34 +40,28 @@ const TransactionList = ({ txs }) => {
       ),
     },
     {
-      title: 'To',
-      dataIndex: 'to',
-      key: 'to',
-      render: text => (
-        <Link to={`/explorer/address/${text}`}>{shortenHex(text)}</Link>
-      ),
-    },
-    {
       title: 'Outputs',
       dataIndex: 'outputs',
       key: 'outputs',
-      render: outputs => (
-        <List
-          itemLayout="vertical"
-          split={false}
-          dataSource={outputs}
-          renderItem={output => (
-            <List.Item>
-              Address:{' '}
+      render: (outputs, tx) => {
+        if (outputs && outputs.length) {
+          return outputs.map((output, i) => (
+            <div key={i} style={{ margin: '5px 0' }}>
               <Link to={`/explorer/address/${output.address}`}>
                 {shortenHex(output.address)}
               </Link>
               <br />
-              Value: <TokenValue {...output} />
-            </List.Item>
-          )}
-        />
-      ),
+              <TokenValue {...output} />
+            </div>
+          ));
+        } else if (tx.type === 'EXIT') {
+          return (
+            <>
+              Exit <TokenValue value={tx.value} color={tx.color} />
+            </>
+          );
+        }
+      },
     },
     {
       title: 'Type',
