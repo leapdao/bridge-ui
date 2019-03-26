@@ -50,7 +50,7 @@ export const KNOWN_NETWORKS = {
     name: 'Truffle', 
     provider:  {
       http: 'http://localhost:9545',
-      ws: 'ws://localhost:9546',
+      ws: 'ws://localhost:9545',
     },
     etherscanBase: 'https://etherscan.io' 
   },	
