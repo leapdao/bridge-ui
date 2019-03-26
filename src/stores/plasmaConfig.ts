@@ -10,8 +10,12 @@ import Web3Plasma from './web3/plasma';
 import autobind from 'autobind-decorator';
 
 export default class PlasmaConfig {
+  // DEPRECATED. Use rootNetworkId instead
   @observable
   public rootNetwork: string;
+
+  @observable
+  public rootNetworkId: number;
 
   @observable
   public exitHandlerAddr: string;
@@ -38,9 +42,10 @@ export default class PlasmaConfig {
   @autobind
   private fetchConfig() {
     this.plasma.instance.getConfig().then((
-      { rootNetwork, exitHandlerAddr, bridgeAddr, operatorAddr, bridgeDelay }
+      { rootNetwork, rootNetworkId, exitHandlerAddr, bridgeAddr, operatorAddr, bridgeDelay }
     ) => {
       this.rootNetwork = rootNetwork;
+      this.rootNetworkId = rootNetworkId;
       this.exitHandlerAddr = exitHandlerAddr;
       this.bridgeAddr = bridgeAddr;
       this.operatorAddr = operatorAddr;

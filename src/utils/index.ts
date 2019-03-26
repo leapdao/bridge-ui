@@ -3,6 +3,8 @@ export { toArray } from './toArray';
 export { txSuccess } from './txSuccess';
 export { nftDisplayValue, NFT_COLOR_BASE, isNFT } from './nft';
 
+export { KNOWN_NETWORKS } from './knownNetworks';
+
 export const shortenHex = hex =>
   hex && [hex.slice(0, 8), '...', hex.slice(hex.length - 6)].join('');
 

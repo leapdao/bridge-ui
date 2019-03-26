@@ -54,7 +54,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
           type="warning"
           style={{ marginBottom: 10 }}
           message={`To be able to send transactions you need to switch MetaMask to ${
-            network.name
+            web3.root.name
           }`}
         />
       );
