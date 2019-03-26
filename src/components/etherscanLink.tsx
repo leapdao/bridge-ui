@@ -12,7 +12,7 @@ interface EtherscanLinkProps {
 }
 
 const EtherscanLink: React.SFC<EtherscanLinkProps> = ({ value, web3 }) => {
-  if (!value) return (<Fragment/>);
+  if (!value || !web3) return (<Fragment/>);
   
   const { etherscanBase } = web3.root;
   
