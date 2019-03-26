@@ -16,6 +16,7 @@ import AppLayout from '../components/appLayout';
 import requestApi from '../utils/api';
 import Account from '../stores/account';
 import { CONFIG } from '../config';
+import Web3Store from '../stores/web3';
 
 const api = requestApi(CONFIG.tokenFaucet);
 
@@ -23,9 +24,10 @@ const requestFund = tweetUrl => api('post', '', { tweetUrl });
 
 interface FaucetProps {
   account: Account;
+  web3: Web3Store;
 }
 
-@inject('account')
+@inject('account', 'web3')
 @observer
 export default class Faucet extends React.Component<FaucetProps, any> {
   @observable
@@ -77,7 +79,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
   }
 
   render() {
-    const { account } = this.props;
+    const { account, web3 } = this.props;
 
     if (!CONFIG.tokenFaucet) {
       return (
@@ -91,7 +93,8 @@ export default class Faucet extends React.Component<FaucetProps, any> {
       <AppLayout section="faucet">
         <h1>Get tokens</h1>
         <p>
-          Tweet something about @leapdao and get some testnet LEAP tokens on
+          Tweet something about @leapdao and get some 
+          { web3.root.name !== 'Mainnet' ? ' testnet' : '' } LEAP tokens on
           Plasma! Don't forget to include your Ethereum address in the tweet.
         </p>
         <Form onSubmit={this.handleSubmit} layout="inline">
