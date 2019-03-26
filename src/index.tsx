@@ -63,7 +63,7 @@ const exitHandler = new ExitHandler(account, transactions, web3, plasmaConfig);
 const tokens = new Tokens(account, exitHandler, transactions, node, web3);
 const explorer = new ExplorerStore(web3, tokens, plasmaConfig);
 const governanceContract = new GovernanceContract(bridge, operator, exitHandler, transactions, web3);
-const network = new Network(account, web3, plasmaConfig);
+const network = new Network(account, web3);
 const unspents = new Unspents(exitHandler, bridge, operator, account, node, web3, tokens);
 
 ReactDOM.render(

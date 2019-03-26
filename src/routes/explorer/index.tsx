@@ -17,7 +17,6 @@ import { Form, Input, Button, Divider, Alert } from 'antd';
 import AppLayout from '../../components/appLayout';
 import HexString from '../../components/hexString';
 import ExplorerStore from '../../stores/explorer';
-import Network from '../../stores/network';
 import Tokens from '../../stores/tokens';
 
 import Block from './block';
@@ -26,19 +25,20 @@ import Address from './address';
 import Operator from '../../stores/operator';
 import ExitHandler from '../../stores/exitHandler';
 import Bridge from '../../stores/bridge';
+import Web3Store from '../../stores/web3';
 
 interface ExplorerProps {
   explorer: ExplorerStore;
   bridge: Bridge;
   operator: Operator;
   exitHandler: ExitHandler;
-  network: Network;
   tokens: Tokens;
+  web3: Web3Store;
   match: match<any>;
   history: any;
 }
 
-@inject('tokens', 'network', 'explorer', 'exitHandler', 'bridge', 'operator')
+@inject('tokens', 'explorer', 'exitHandler', 'bridge', 'operator', 'web3')
 @observer
 export default class Explorer extends React.Component<ExplorerProps, any> {
   @observable
@@ -51,11 +51,11 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
   public render() {
     const {
       explorer,
-      network,
       match,
       operator,
       exitHandler,
       bridge,
+      web3,
     } = this.props;
 
     return (
@@ -109,7 +109,7 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
         <h1>Chain info</h1>
         <dl className="info">
           <dt>Network</dt>
-          <dd>{network.name}</dd>
+          <dd>{web3.root.name}</dd>
           <dt>Bridge contract</dt>
           <dd>
             <HexString>{bridge.address}</HexString>

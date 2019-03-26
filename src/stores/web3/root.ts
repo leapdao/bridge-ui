@@ -4,9 +4,21 @@ import Web3 from './ts_workaround.js';
 import PlasmaConfig from '../plasmaConfig';
 import ConnectionStatus from './connectionStatus';
 
-const wssfy = (url) => url.replace(/https?(.+)\/?/, 'wss$1/ws');
+import { KNOWN_NETWORKS } from '../../utils/knownNetworks';
 
 export default class Web3Root {
+  @observable
+  public provider: { ws: string, http: string };
+
+  @observable
+  public name: string;
+
+  @observable
+  public etherscanBase: string;
+
+  @observable
+  public networkId: string;
+
   @observable.ref
   public instance: Web3;
 
@@ -19,10 +31,10 @@ export default class Web3Root {
   constructor(
     public plasmaConfig: PlasmaConfig,
   ) {
-    if (plasmaConfig.rootNetwork) {
+    if (plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork) {
       this.connect();
     } else {
-      reaction(() => plasmaConfig.rootNetwork, this.connect);
+      reaction(() => plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork, this.connect);
     }
   
     const updateRootBlock = blockNumber => {
@@ -42,15 +54,41 @@ export default class Web3Root {
     );
   }
 
-  @autobind
-  private connect() {
-    if (!this.plasmaConfig) return;
+  // DEPRECATED. Remove as soon as "rootNetwork" is dropped from NodeConfig
+  private getKnownNetworkByProvider(rootNetwork: string) {
+    if (rootNetwork.startsWith('http')) {
+      const nId = Object.keys(KNOWN_NETWORKS).find(
+        nId => (new URL(KNOWN_NETWORKS[nId].provider.http).host) === (new URL(rootNetwork).host)
+      );
+      return { id: nId, ...KNOWN_NETWORKS[nId] };
+    }
+  }
+
+  private getKnownNetwork(rootNetworkId: number) {
+    if (!KNOWN_NETWORKS[rootNetworkId]) return;
+    return { id: rootNetworkId, ...KNOWN_NETWORKS[rootNetworkId] };
+  }
     
-    const wsUrl = wssfy(this.plasmaConfig.rootNetwork);
+  @autobind
+  @action
+  private connect() {
+    const { rootNetwork, rootNetworkId } = this.plasmaConfig;
+      
+    const network = this.getKnownNetwork(rootNetworkId) || this.getKnownNetworkByProvider(rootNetwork || "");
+    if (!network) {
+      console.error('Unidentified network:', rootNetworkId);
+      return;
+    }
+
+    this.provider = network.provider;
+
+    this.name = network.name;
+    this.etherscanBase = network.etherscanBase;
+    this.networkId = network.id;
     
     this.connectionStatus = ConnectionStatus.CONNECTING;
-    console.log('[root] Connecting to', wsUrl);
-    const provider = new Web3.providers.WebsocketProvider(wsUrl);
+    console.log('[root] Connecting to', this.provider.ws);
+    const provider = new Web3.providers.WebsocketProvider(this.provider.ws);
 
     provider.on('error', () => {
       console.error('[root] connection error');
