@@ -17,16 +17,16 @@ export const KNOWN_NETWORKS = {
   3: {
     name: 'Ropsten',
     provider: {
-      http: 'https://ropsten.infura.io',
-      ws: 'wss://ropsten.infura.io/ws',
+      http: 'https://ropsten.infura.io/v3/f039330d8fb747e48a7ce98f51400d65',
+      ws: 'wss://ropsten.infura.io/ws/v3/f039330d8fb747e48a7ce98f51400d65',
     },
     etherscanBase: 'https://ropsten.etherscan.io',
   },
   4: {
     name: 'Rinkeby',
     provider: {
-      http: 'https://rinkeby.infura.io',
-      ws: 'wss://rinkeby.infura.io/ws',
+      http: 'https://rinkeby.infura.io/v3/f039330d8fb747e48a7ce98f51400d65',
+      ws: 'wss://rinkeby.infura.io/ws/v3/f039330d8fb747e48a7ce98f51400d65',
     },
     etherscanBase: 'https://rinkeby.etherscan.io',
   },
@@ -41,8 +41,8 @@ export const KNOWN_NETWORKS = {
   42: {
     name: 'Kovan',
     provider: {
-      http: 'https://kovan.infura.io',
-      ws: 'wss://kovan.infura.io/ws',
+      http: 'https://kovan.infura.io/v3/f039330d8fb747e48a7ce98f51400d65',
+      ws: 'wss://kovan.infura.io/ws/v3/f039330d8fb747e48a7ce98f51400d65',
     },
     etherscanBase: 'https://kovan.etherscan.io',
   },
