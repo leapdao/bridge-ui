@@ -214,5 +214,5 @@ h2:first-child {
 
 .ant-table-tbody > tr > td, 
 .ant-table-thead > tr > th {
-  padding: 10px;
+  padding: 10px !important;
 }
