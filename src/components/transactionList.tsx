@@ -46,12 +46,10 @@ const TransactionList = ({ txs }) => {
       render: (outputs, tx) => {
         if (outputs && outputs.length) {
           return outputs.map((output, i) => (
-            <div key={i} style={{ margin: '5px 0' }}>
-              <Link to={`/explorer/address/${output.address}`}>
+            <div key={i}>
+              <TokenValue {...output} /> → <Link to={`/explorer/address/${output.address}`}>
                 {shortenHex(output.address)}
               </Link>
-              <br />
-              <TokenValue {...output} />
             </div>
           ));
         } else if (tx.type === 'EXIT') {
