@@ -96,7 +96,7 @@ class Address extends React.Component<AddressRouteProps, any> {
             <ul>
               {Object.entries(this.account.balances).map(([color, value]) => (
                 <li key={color} style={{ listStyle: 'none' }}>
-                  <TokenValue color={Number(color)} value={value} />
+                  <TokenValue color={Number(color)} value={value} tokenLink />
                 </li>
               ))}
             </ul>
