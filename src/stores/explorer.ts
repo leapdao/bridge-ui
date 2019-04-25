@@ -6,17 +6,30 @@
  */
 
 import { observable, computed, when } from 'mobx';
-import { Tx, TxJSON, LeapTransaction } from 'leap-core';
+import { Tx, TxJSON, LeapTransaction, Unspent } from 'leap-core';
 import { Block } from 'web3/eth/types';
 import Web3Store from './web3/';
 import Tokens from './tokens';
 import PlasmaConfig from './plasmaConfig';
+import { bi, BigIntType } from 'jsbi-utils';
+import Token from './token';
 
 export enum Types {
   BLOCK,
   TRANSACTION,
   ADDRESS,
 }
+
+export type ColorsBalances = {
+  [key: string]: BigIntType | BigIntType[];
+};
+
+export type ExplorerAccount = {
+  address: string;
+  balances: ColorsBalances;
+  unspents: Unspent[];
+  token?: Token;
+};
 
 type PlasmaTransaction = LeapTransaction & TxJSON;
 
@@ -26,7 +39,6 @@ type PlasmaBlock = Block & {
 
 export default class Explorer {
   private _cache = {};
-
 
   @observable
   public searching: boolean = false;
@@ -45,12 +57,12 @@ export default class Explorer {
   constructor(
     private web3: Web3Store,
     private tokens: Tokens,
-    plasmaConfig: PlasmaConfig,
+    plasmaConfig: PlasmaConfig
   ) {
     when(
       () => !!plasmaConfig.bridgeAddr,
       () => {
-        this.storageKey = `EXPLORER_CACHE-${plasmaConfig.bridgeAddr}`;    
+        this.storageKey = `EXPLORER_CACHE-${plasmaConfig.bridgeAddr}`;
         this.loadCache();
       }
     );
@@ -95,17 +107,38 @@ export default class Explorer {
     return Explorer.getType(this.current);
   }
 
-  public getAddress(address: string) {
+  public getAddress(address: string): Promise<ExplorerAccount> {
     address = address.toLowerCase();
-    const token = this.tokens.tokenForAddress(address);
-    return this.web3.plasma.instance.eth.getBalance(address)
-      .then((balance) => {
-        return {
-          address,
-          token,
-          balance,
-        };
-      });
+    const token: Token | undefined = this.tokens.tokenForAddress(address);
+    return this.web3.plasma.instance.getUnspent(address).then(unspents => {
+      const colors = Array.from(
+        new Set([0, ...unspents.map(u => u.output.color)])
+      );
+      return Promise.all(
+        colors.map(color => {
+          const token = this.tokens.tokenForColor(color);
+          if (!token) {
+            return Promise.resolve(bi(0));
+          }
+
+          return token.balanceOf(address, true);
+        })
+      )
+        .then(balances => {
+          return colors.reduce<ColorsBalances>((colorsBals, color, i) => {
+            colorsBals[color] = balances[i];
+            return colorsBals;
+          }, {});
+        })
+        .then(balances => {
+          return {
+            address,
+            token,
+            balances,
+            unspents,
+          };
+        });
+    });
   }
 
   public getTransaction(hash): Promise<PlasmaTransaction> {
@@ -136,21 +169,23 @@ export default class Explorer {
       return Promise.resolve(this.cache[hashOrNumber]);
     }
 
-    return this.web3.plasma.instance.eth.getBlock(hashOrNumber, true).then(block => {
-      if (block) {
-        block.transactions = block.transactions.map(tx => ({
-          ...tx,
-          ...Tx.fromRaw((tx as any).raw).toJSON(),
-        }));
-        this.setCache(block.number, block);
-        this.setCache(block.hash, block);
-        block.transactions.forEach(tx => {
-          this.setCache(tx.hash, tx);
-        });
+    return this.web3.plasma.instance.eth
+      .getBlock(hashOrNumber, true)
+      .then(block => {
+        if (block) {
+          block.transactions = block.transactions.map(tx => ({
+            ...tx,
+            ...Tx.fromRaw((tx as any).raw).toJSON(),
+          }));
+          this.setCache(block.number, block);
+          this.setCache(block.hash, block);
+          block.transactions.forEach(tx => {
+            this.setCache(tx.hash, tx);
+          });
 
-        return block as PlasmaBlock;
-      }
-    });
+          return block as PlasmaBlock;
+        }
+      });
   }
 
   public search(hashOrNumber, history) {
@@ -167,14 +202,16 @@ export default class Explorer {
           if (tx) {
             history.push(`/explorer/tx/${hashOrNumber}`);
           } else {
-            return this.web3.plasma.instance.eth.getBlock(hashOrNumber).then(block => {
-              if (block) {
-                history.push(`/explorer/block/${hashOrNumber}`);
-              } else {
-                this.success = false;
-                return Promise.reject('Not found');
-              }
-            });
+            return this.web3.plasma.instance.eth
+              .getBlock(hashOrNumber)
+              .then(block => {
+                if (block) {
+                  history.push(`/explorer/block/${hashOrNumber}`);
+                } else {
+                  this.success = false;
+                  return Promise.reject('Not found');
+                }
+              });
           }
         })
         .then(
@@ -188,5 +225,4 @@ export default class Explorer {
         );
     }
   }
-
 }

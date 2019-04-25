@@ -211,3 +211,8 @@ h2:first-child {
 .explorer-search__button {
   flex: 0 1 auto;
 }
+
+.ant-table-tbody > tr > td, 
+.ant-table-thead > tr > th {
+  padding: 10px;
+}

@@ -1,16 +1,22 @@
 import * as React from 'react';
-import { Fragment } from 'react';
+import { Link } from 'react-router-dom';
 import { inject, observer } from 'mobx-react';
 import Tokens from '../stores/tokens';
-import { BigIntType, isBigInt } from 'jsbi-utils';
+import { BigIntType } from 'jsbi-utils';
 
 interface TokenValueProps {
   value: BigIntType | BigIntType[];
   color: number;
+  tokenLink?: boolean;
   tokens?: Tokens;
 }
 
-const TokenValue: React.SFC<TokenValueProps> = ({ value, color, tokens }) => {
+const TokenValue: React.SFC<TokenValueProps> = ({
+  value,
+  color,
+  tokens,
+  tokenLink,
+}) => {
   const token = tokens && tokens.tokenForColor(color);
 
   if (!token || !token.ready || value === undefined) {
@@ -18,10 +24,15 @@ const TokenValue: React.SFC<TokenValueProps> = ({ value, color, tokens }) => {
   }
 
   return (
-    <Fragment>
-      {token.isNft ? (value as BigIntType[]).length : token.toTokens(value as BigIntType).toString()}{' '}
-      {token.symbol}
-    </Fragment>
+    <React.Fragment>
+      {token.isNft
+        ? (value as BigIntType[]).length
+        : token.toTokens(value as BigIntType).toString()}{' '}
+      {!tokenLink && token.symbol}
+      {tokenLink && (
+        <Link to={`/explorer/address/${token.address}`}>{token.symbol}</Link>
+      )}
+    </React.Fragment>
   );
 };
 

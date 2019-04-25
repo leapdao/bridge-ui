@@ -29,9 +29,7 @@ export default class PlasmaConfig {
   @observable
   public rootEventDelay: number;
 
-  constructor(
-    private readonly plasma: Web3Plasma,
-  ) {
+  constructor(private readonly plasma: Web3Plasma) {
     if (this.plasma.ready) {
       this.fetchConfig();
     } else {
@@ -41,16 +39,24 @@ export default class PlasmaConfig {
 
   @autobind
   private fetchConfig() {
-    this.plasma.instance.getConfig().then((
-      { rootNetwork, rootNetworkId, exitHandlerAddr, bridgeAddr, operatorAddr, bridgeDelay }
-    ) => {
-      this.rootNetwork = rootNetwork;
-      this.rootNetworkId = rootNetworkId;
-      this.exitHandlerAddr = exitHandlerAddr;
-      this.bridgeAddr = bridgeAddr;
-      this.operatorAddr = operatorAddr;
-      this.rootEventDelay = Number(bridgeDelay);
-    });
+    this.plasma.instance
+      .getConfig()
+      .then(
+        ({
+          rootNetwork,
+          rootNetworkId,
+          exitHandlerAddr,
+          bridgeAddr,
+          operatorAddr,
+          bridgeDelay,
+        }: any) => {
+          this.rootNetwork = rootNetwork;
+          this.rootNetworkId = rootNetworkId;
+          this.exitHandlerAddr = exitHandlerAddr;
+          this.bridgeAddr = bridgeAddr;
+          this.operatorAddr = operatorAddr;
+          this.rootEventDelay = Number(bridgeDelay);
+        }
+      );
   }
-
 }

@@ -245,14 +245,10 @@ export default class Token extends ContractStore {
     }
   }
 
-  @autobind
-  private loadBalance(plasma = false) {
-    if (!this.account.address) {
-      return;
-    }
+  public balanceOf(address: string, plasma = false) {
     const contract = plasma ? this.plasmaContract : this.contract;
-    contract.methods
-      .balanceOf(this.account.address)
+    return contract.methods
+      .balanceOf(address)
       .call()
       .then(
         (balance): Promise<BigIntType | BigIntType[]> => {
@@ -260,7 +256,7 @@ export default class Token extends ContractStore {
             return Promise.all(
               range(0, balance - 1).map(i =>
                 contract.methods
-                  .tokenOfOwnerByIndex(this.account.address, i)
+                  .tokenOfOwnerByIndex(address, i)
                   .call()
                   .then(v => bi(v))
               )
@@ -269,10 +265,17 @@ export default class Token extends ContractStore {
 
           return Promise.resolve(bi(balance));
         }
-      )
-      .then(balance => {
-        this.updateBalance(balance, plasma);
-      });
+      );
+  }
+
+  @autobind
+  private loadBalance(plasma = false) {
+    if (!this.account.address) {
+      return;
+    }
+    this.balanceOf(this.account.address, plasma).then(balance => {
+      this.updateBalance(balance, plasma);
+    });
   }
 
   private allowanceOrTokenId(valueOrTokenId: number) {
