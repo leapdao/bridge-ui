@@ -5,8 +5,9 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { EventLog } from 'web3/types';
-import Contract from 'web3/eth/contract';
+import { EventLog } from 'web3-core';
+import { Contract } from 'web3-eth-contract';
+import { AbiItem } from 'web3-utils';
 import { isNFT } from '../utils';
 
 import Account from './account';
@@ -40,7 +41,7 @@ const bytesTokenABI = [
     stateMutability: 'view',
     type: 'function',
   },
-];
+] as AbiItem[];
 
 const tokenValue = (web3: Web3Store, token: Contract, method: string) => {
   return token.methods[method]()

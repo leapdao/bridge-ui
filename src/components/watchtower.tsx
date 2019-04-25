@@ -7,12 +7,13 @@
 
 import { Alert, Button, Spin, List, Row, Col, Card, Collapse } from 'antd';
 import { Link } from 'react-router-dom';
-import { BN } from 'web3-utils';
+import { bi, BigIntType, add, lessThanOrEqual } from 'jsbi-utils';
 import { Input, Outpoint, Tx } from 'leap-core';
-import { action, observable, reaction, runInAction, autorun } from 'mobx';
+import { observable, reaction, autorun } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import * as React from 'react';
-import { EventLog } from 'web3/types';
+import { EventLog } from 'web3-core';
+import { EventData } from 'web3-eth-contract';
 import TokenValue from '../components/tokenValue';
 import HexString from '../components/hexString';
 import Bridge from '../stores/bridge';
@@ -24,9 +25,9 @@ import Web3Store from '../stores/web3';
 interface ColorDetails {
   color: number;
   tokenSymbol: string;
-  plasmaBalance: BN;
-  utxoSum: BN;
-  exitSum: BN;
+  plasmaBalance: BigIntType;
+  utxoSum: BigIntType;
+  exitSum: BigIntType;
   isOk: boolean;
   hasBadFinalizedExits: boolean;
   hasBadOpenExits: boolean;
@@ -153,15 +154,15 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
     const exits = [];
     if (!bridge.address)
       await new Promise(resolve => reaction(() => bridge.address, resolve));
-    const fromBlock = await bridge.contract.methods.genesisBlockNumber().call();
-    const events = await exitHandler.contract.getPastEvents('ExitStarted', {
-      fromBlock,
+    const fromBlock = Number(await bridge.contract.methods.genesisBlockNumber().call());
+    const events: EventData[] = await exitHandler.contract.getPastEvents('ExitStarted', {
+      filter: null, fromBlock,
     });
     await Promise.all(
-      events.map(async event => {
+      events.map(async (event: EventData) => {
         const utxoId = new Outpoint(
-          event.returnValues.txHash,
-          Number(event.returnValues.outIndex)
+          event.returnValues['txHash'],
+          Number(event.returnValues['outIndex'])
         ).getUtxoId();
         const exit = await exitHandler.contract.methods
           .exits(web3.root.instance.utils.toHex(utxoId))
@@ -170,8 +171,8 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
         const exitTxHash = Tx.exit(
           new Input(
             new Outpoint(
-              event.returnValues.txHash,
-              Number(event.returnValues.outIndex)
+              event.returnValues['txHash'],
+              Number(event.returnValues['outIndex'])
             )
           )
         ).hash();
@@ -194,17 +195,17 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
       colors.map(async color => {
         const utxoSum = uTxos.reduce((acc, utXo) => {
           return utXo.output.color === color
-            ? new BN(utXo.output.value).add(acc)
+            ? add(bi(utXo.output.value), acc)
             : acc;
-        }, new BN(0));
+        }, bi(0));
 
         const exitSum = exits.reduce((acc, e) => {
           return Number(e.exit.color) === color && !e.exit.finalized
-            ? new BN(e.exit.amount).add(acc)
+            ? add(bi(e.exit.amount), acc)
             : acc;
-        }, new BN(0));
+        }, bi(0));
 
-        const plasmaBalance = new BN(
+        const plasmaBalance = bi(
           await tokens.list
             .find(token => token.color === color)
             .contract.methods.balanceOf(exitHandler.address)
@@ -225,7 +226,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
           plasmaBalance,
           color,
           tokenSymbol: this.props.tokens.tokenForColor(color).symbol,
-          isOk: plasmaBalance.gte(exitSum.add(utxoSum)),
+          isOk: lessThanOrEqual(add(exitSum, utxoSum), plasmaBalance),
           hasBadFinalizedExits,
           hasBadOpenExits,
           exitDetails,
