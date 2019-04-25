@@ -2,7 +2,7 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { inject, observer } from 'mobx-react';
 import Tokens from '../stores/tokens';
-import { BigIntType, isBigInt } from 'jsbi-utils';
+import { BigIntType } from 'jsbi-utils';
 
 interface TokenValueProps {
   value: BigIntType | BigIntType[];
@@ -19,7 +19,9 @@ const TokenValue: React.SFC<TokenValueProps> = ({ value, color, tokens }) => {
 
   return (
     <Fragment>
-      {token.isNft ? (value as BigIntType[]).length : token.toTokens(value as BigIntType).toString()}{' '}
+      {token.isNft
+        ? (value as BigIntType[]).length
+        : token.toTokens(value as BigIntType).toString()}{' '}
       {token.symbol}
     </Fragment>
   );

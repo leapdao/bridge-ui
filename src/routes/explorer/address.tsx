@@ -8,7 +8,7 @@ import { inject, observer } from 'mobx-react';
 import { Card, Alert, Spin, Table } from 'antd';
 
 import TokenValue from '../../components/tokenValue';
-import Explorer from '../../stores/explorer';
+import Explorer, { ExplorerAccount } from '../../stores/explorer';
 import Tokens from '../../stores/tokens';
 import TransactionList from './txList';
 import { BigInt } from 'jsbi-utils';
@@ -57,7 +57,7 @@ class Address extends React.Component<AddressRouteProps, any> {
   }
 
   @observable.shallow
-  account = null;
+  account: ExplorerAccount = null;
   @observable
   fetching = false;
   @observable
@@ -96,7 +96,7 @@ class Address extends React.Component<AddressRouteProps, any> {
             <ul>
               {Object.entries(this.account.balances).map(([color, value]) => (
                 <li key={color} style={{ listStyle: 'none' }}>
-                  <TokenValue color={Number(color)} value={value as any} />
+                  <TokenValue color={Number(color)} value={value} />
                 </li>
               ))}
             </ul>

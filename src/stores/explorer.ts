@@ -6,18 +6,30 @@
  */
 
 import { observable, computed, when } from 'mobx';
-import { Tx, TxJSON, LeapTransaction } from 'leap-core';
+import { Tx, TxJSON, LeapTransaction, Unspent } from 'leap-core';
 import { Block } from 'web3/eth/types';
 import Web3Store from './web3/';
 import Tokens from './tokens';
 import PlasmaConfig from './plasmaConfig';
-import { bi } from 'jsbi-utils';
+import { bi, BigIntType } from 'jsbi-utils';
+import Token from './token';
 
 export enum Types {
   BLOCK,
   TRANSACTION,
   ADDRESS,
 }
+
+export type ColorsBalances = {
+  [key: string]: BigIntType | BigIntType[];
+};
+
+export type ExplorerAccount = {
+  address: string;
+  balances: ColorsBalances;
+  unspents: Unspent[];
+  token?: Token;
+};
 
 type PlasmaTransaction = LeapTransaction & TxJSON;
 
@@ -95,9 +107,9 @@ export default class Explorer {
     return Explorer.getType(this.current);
   }
 
-  public getAddress(address: string) {
+  public getAddress(address: string): Promise<ExplorerAccount> {
     address = address.toLowerCase();
-    const token = this.tokens.tokenForAddress(address);
+    const token: Token | undefined = this.tokens.tokenForAddress(address);
     return this.web3.plasma.instance.getUnspent(address).then(unspents => {
       const colors = Array.from(
         new Set([0, ...unspents.map(u => u.output.color)])
@@ -113,13 +125,10 @@ export default class Explorer {
         })
       )
         .then(balances => {
-          return colors.reduce<{ [key: string]: any }>(
-            (colorsBals, color, i) => {
-              colorsBals[color] = balances[i];
-              return colorsBals;
-            },
-            {}
-          );
+          return colors.reduce<ColorsBalances>((colorsBals, color, i) => {
+            colorsBals[color] = balances[i];
+            return colorsBals;
+          }, {});
         })
         .then(balances => {
           return {
