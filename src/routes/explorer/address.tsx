@@ -1,14 +1,18 @@
 import * as React from 'react';
+import { bufferToHex } from 'ethereumjs-util';
+import { Link } from 'react-router-dom';
 import { match } from 'react-router';
 import { Fragment } from 'react';
 import { observable, reaction } from 'mobx';
 import { inject, observer } from 'mobx-react';
-import { Card, Alert, Spin } from 'antd';
+import { Card, Alert, Spin, Table } from 'antd';
 
 import TokenValue from '../../components/tokenValue';
 import Explorer from '../../stores/explorer';
 import Tokens from '../../stores/tokens';
 import TransactionList from './txList';
+import { BigInt } from 'jsbi-utils';
+import { shortenHex } from '../../utils';
 
 interface AddressRouteProps {
   explorer: Explorer;
@@ -52,7 +56,7 @@ class Address extends React.Component<AddressRouteProps, any> {
     }
   }
 
-  @observable
+  @observable.shallow
   account = null;
   @observable
   fetching = false;
@@ -88,8 +92,14 @@ class Address extends React.Component<AddressRouteProps, any> {
       <Card title={`Address ${this.account.address}`}>
         {!this.account.token && (
           <Fragment>
-            <h3>Balance</h3>
-            <TokenValue value={this.account.balance} color={0} />
+            <h3>Balances</h3>
+            <ul>
+              {Object.entries(this.account.balances).map(([color, value]) => (
+                <li key={color} style={{ listStyle: 'none' }}>
+                  <TokenValue color={Number(color)} value={value as any} />
+                </li>
+              ))}
+            </ul>
           </Fragment>
         )}
         {this.account.token && (
@@ -114,6 +124,40 @@ class Address extends React.Component<AddressRouteProps, any> {
             from={this.account.address}
             to={this.account.address}
           />
+        )}
+        {!this.account.token && (
+          <Fragment>
+            <h3>Unspents</h3>
+            <Table
+              style={{ marginTop: 15 }}
+              columns={[
+                { title: 'Value', dataIndex: 'value', key: 'value' },
+                { title: 'Input', dataIndex: 'input', key: 'input' },
+              ]}
+              dataSource={this.account.unspents.map(u => {
+                const inputHash = bufferToHex(u.outpoint.hash);
+                return {
+                  key: u.outpoint.hex(),
+                  value: (
+                    <TokenValue
+                      {...{
+                        color: u.output.color,
+                        value: BigInt(u.output.value),
+                      }}
+                    />
+                  ),
+                  input: (
+                    <Fragment>
+                      <Link to={`/explorer/tx/${inputHash}`}>
+                        {shortenHex(inputHash)}
+                      </Link>{' '}
+                      ({u.outpoint.index})
+                    </Fragment>
+                  ),
+                };
+              })}
+            />
+          </Fragment>
         )}
       </Card>
     );
