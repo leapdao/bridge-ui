@@ -61,7 +61,7 @@ export default class RegisterToken extends React.Component<
   private tokenAddr = '';
 
   @autobind
-  handleSubmit(e) {
+  private handleSubmit(e) {
     e.preventDefault();
     const { exitHandler } = this.props;
 
@@ -73,16 +73,15 @@ export default class RegisterToken extends React.Component<
   }
 
   @autobind
-  handleChange(e) {
+  private handleChange(e) {
     this.tokenAddr = e.target.value;
   }
 
-  render() {
+  public render() {
     const { network, tokens } = this.props;
 
     return (
       <AppLayout section="registerToken">
-
         <h1 style={{ marginBottom: 16, marginTop: 32 }}>Registered tokens:</h1>
         <List
           itemLayout="vertical"
@@ -91,9 +90,12 @@ export default class RegisterToken extends React.Component<
           renderItem={item => <Item item={item} />}
         />
 
-        <h1 style={{ marginBottom: 16, marginTop: 32 }}>Propose a new ERC20/ERC721 token:</h1>
+        <h1 style={{ marginBottom: 16, marginTop: 32 }}>
+          Propose a new ERC20/ERC721 token:
+        </h1>
         <div>
-          <Iframe url={CONFIG.tokenFormUrl}
+          <Iframe
+            url={CONFIG.tokenFormUrl}
             position="relative"
             height="997px"
             width="100%"

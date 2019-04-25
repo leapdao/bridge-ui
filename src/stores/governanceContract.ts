@@ -7,10 +7,13 @@
 import { reaction, observable, IObservableArray, computed } from 'mobx';
 
 import Web3Store from './web3/';
-import { ABIDefinition, EthAbiDecodeParametersResultObject } from 'web3/eth/abi';
+import {
+  ABIDefinition,
+  EthAbiDecodeParametersResultObject,
+} from 'web3/eth/abi';
 
 import { range, toArray } from '../utils';
-import { 
+import {
   governance as governanceAbi,
   governable as governableAbi,
 } from '../utils/abis';
@@ -19,26 +22,27 @@ import Bridge from './bridge';
 import Transactions from '../components/txNotification/transactions';
 import ExitHandler from './exitHandler';
 import Operator from './operator';
+import autobind from 'autobind-decorator';
 
-type ABIDefinitionBySig = Map<String, ABIDefinition>;
+type ABIDefinitionBySig = Map<string, ABIDefinition>;
 
-type DecodedMessage = { 
-  abi?: ABIDefinition,
-  params?: EthAbiDecodeParametersResultObject, 
-  raw: string
+type DecodedMessage = {
+  abi?: ABIDefinition;
+  params?: EthAbiDecodeParametersResultObject;
+  raw: string;
 };
 
 type Proposal = {
-  num: number,
-  cancelled: boolean,
-  created: number,
-  effectiveDate: number,
-  msg: DecodedMessage,
-  subject,
-  methodStr: string,
-  summaryStr: string,
-  newValue?: Array<string>,
-  currentValue?: string,
+  num: number;
+  cancelled: boolean;
+  created: number;
+  effectiveDate: number;
+  msg: DecodedMessage;
+  subject;
+  methodStr: string;
+  summaryStr: string;
+  newValue?: string[];
+  currentValue?: string;
 };
 
 const governanceParams = {
@@ -68,34 +72,39 @@ const governanceParams = {
   },
   upgradeTo: {
     name: 'Upgrade contract logic',
-    contract: 'proxy'
+    contract: 'proxy',
   },
   changeAdmin: {
     name: 'Introduce new governance process',
     contract: 'proxy',
-    getter: 'admin'
+    getter: 'admin',
   },
   setSlot: {
     name: 'Set validating slot to PoA node',
     contract: 'operator',
-    getter: (contract, params) => 
-      contract.methods.slots(params[0]).call()
+    getter: (contract, params) =>
+      contract.methods
+        .slots(params[0])
+        .call()
         .then(res => `${res.signer}, ${res.tendermint}`),
-  }
+  },
 };
 
 export default class GovernanceContract extends ContractStore {
-  private funcBySignature: Map<String, ABIDefinition>;
+  private funcBySignature: Map<string, ABIDefinition>;
 
   @observable
   public proposals: IObservableArray<Proposal>;
 
   @computed
-  public get canFinalize() : boolean {
-    return this.proposals && this.proposals.filter(proposal => {
-      const date = new Date();
-      return proposal.effectiveDate <= date.getTime() 
-    }).length > 0
+  public get canFinalize(): boolean {
+    return (
+      this.proposals &&
+      this.proposals.filter(proposal => {
+        const date = new Date();
+        return proposal.effectiveDate <= date.getTime();
+      }).length > 0
+    );
   }
 
   @observable
@@ -106,29 +115,34 @@ export default class GovernanceContract extends ContractStore {
     private operator: Operator,
     private exitHandler: ExitHandler,
     transactions: Transactions,
-    web3: Web3Store) {
+    web3: Web3Store
+  ) {
     super(governanceAbi, null, transactions, web3);
 
     reaction(
       () => bridge.contract,
       () => {
-        bridge.contract.methods.admin().call().then((owner) => {
-          this.address = owner;
-          this.funcBySignature = this.calculateAbiSignatures();
-          this.fetch();
-        })
+        bridge.contract.methods
+          .admin()
+          .call()
+          .then(owner => {
+            this.address = owner;
+            this.funcBySignature = this.calculateAbiSignatures();
+            this.fetch();
+          });
       }
     );
   }
 
-  finalize = async () => {
+  @autobind
+  public async finalize() {
     if (!this.iContract) {
-      console.error('Need injected web3 to finalize')
+      console.error('Need injected web3 to finalize');
       return;
     }
-    const accounts = await this.web3.injected.instance.eth.getAccounts()
+    const accounts = await this.web3.injected.instance.eth.getAccounts();
     const tx = this.iContract.methods.finalize().send({
-      from: accounts[0]
+      from: accounts[0],
     });
 
     this.watchTx(tx, 'finalize', {
@@ -141,34 +155,52 @@ export default class GovernanceContract extends ContractStore {
   private readCurrentValue(proposal, governanceChange) {
     if (governanceChange.getter) {
       if (governanceChange.contract === 'proxy') {
-        const proxy = new this.web3.root.instance.eth.Contract(governableAbi, proposal.subject);
+        const proxy = new this.web3.root.instance.eth.Contract(
+          governableAbi,
+          proposal.subject
+        );
         return proxy.methods[governanceChange.getter]().call();
       }
       if (typeof governanceChange.getter === 'function') {
-        return governanceChange.getter(this[governanceChange.contract].contract, proposal.msg.params);
+        return governanceChange.getter(
+          this[governanceChange.contract].contract,
+          proposal.msg.params
+        );
       } else {
-        return this[governanceChange.contract].contract.methods[governanceChange.getter]().call();
+        return this[governanceChange.contract].contract.methods[
+          governanceChange.getter
+        ]().call();
       }
     }
     return Promise.resolve('');
   }
 
-  private proposalParamsStr(params: EthAbiDecodeParametersResultObject): string {
+  private proposalParamsStr(
+    params: EthAbiDecodeParametersResultObject
+  ): string {
     return toArray(params).join(', ');
   }
 
   private proposalMethodStr(msg: DecodedMessage): string {
-    if (!msg.abi) return msg.raw;
+    if (!msg.abi) {
+      return msg.raw;
+    }
     return `${msg.abi.name}(${this.proposalParamsStr(msg.params)})`;
   }
 
   private lookupContractType(subject): string {
     const normalizedSubject = subject.toLowerCase();
-    if (this.exitHandler.address.toLowerCase() === normalizedSubject) return 'ExitHandler';
-    if (this.bridge.address.toLowerCase() === normalizedSubject) return 'Bridge';
-    if (this.operator.address.toLowerCase() === normalizedSubject) return 'Operator';
+    if (this.exitHandler.address.toLowerCase() === normalizedSubject) {
+      return 'ExitHandler';
+    }
+    if (this.bridge.address.toLowerCase() === normalizedSubject) {
+      return 'Bridge';
+    }
+    if (this.operator.address.toLowerCase() === normalizedSubject) {
+      return 'Operator';
+    }
     return 'Unknown';
-  } 
+  }
 
   private enrichProposal(data, index, proposalTime): Promise<Proposal> {
     const msg = this.decodeMsgData(data.msgData);
@@ -184,25 +216,31 @@ export default class GovernanceContract extends ContractStore {
       subjectType: this.lookupContractType(data.subject),
     };
 
-    if (!msg.abi) return Promise.resolve({
-      ...proposal,
-      summaryStr: 'Unrecognized proposal',
-    });
+    if (!msg.abi) {
+      return Promise.resolve({
+        ...proposal,
+        summaryStr: 'Unrecognized proposal',
+      });
+    }
 
     const governanceChange = governanceParams[msg.abi.name];
 
-    if (!governanceChange) return Promise.resolve({
-      ...proposal,
-      summaryStr: msg.abi.name,
-      newValue: toArray(msg.params),
-    });
+    if (!governanceChange) {
+      return Promise.resolve({
+        ...proposal,
+        summaryStr: msg.abi.name,
+        newValue: toArray(msg.params),
+      });
+    }
 
-    return this.readCurrentValue(proposal, governanceChange).then(currentValue => ({
-      ...proposal,
-      summaryStr: governanceChange.name,
-      newValue: toArray(msg.params),
-      currentValue,
-    }));
+    return this.readCurrentValue(proposal, governanceChange).then(
+      currentValue => ({
+        ...proposal,
+        summaryStr: governanceChange.name,
+        newValue: toArray(msg.params),
+        currentValue,
+      })
+    );
   }
 
   private fetch() {
@@ -210,41 +248,55 @@ export default class GovernanceContract extends ContractStore {
       this.contract.methods.first().call(),
       this.contract.methods.size().call(),
       this.contract.methods.proposalTime().call(),
-    ]).then(([first, size, proposalTime]) => {
-      return Promise.all(
-        (range(Number(first), Number(first) - 1 + Number(size)) as number[]).map(index => {
-          return this.contract.methods
-            .proposals(`${index}`)
-            .call()
-            .then(proposalData => this.enrichProposal(proposalData, index, proposalTime));
-        })  
-      ).then(proposals => {
-        this.proposals = observable.array(proposals);
+    ])
+      .then(([first, size, proposalTime]) => {
+        return Promise.all(
+          (range(
+            Number(first),
+            Number(first) - 1 + Number(size)
+          ) as number[]).map(index => {
+            return this.contract.methods
+              .proposals(`${index}`)
+              .call()
+              .then(proposalData =>
+                this.enrichProposal(proposalData, index, proposalTime)
+              );
+          })
+        ).then(proposals => {
+          this.proposals = observable.array(proposals);
+        });
+      })
+      .catch(e => {
+        console.error('err', e);
+        // TODO: add better "no governance" detection
+        this.noGovernance = true;
       });
-    }).catch(e => {
-      console.error('err', e);
-      // TODO: add better "no governance" detection
-      this.noGovernance = true;
-    });
   }
 
   private decodeMsgData(msgData: string): DecodedMessage {
     const sig = msgData.substring(0, 10);
     const abiDef = this.funcBySignature[sig];
-    if (!abiDef) return { raw: msgData }; // unsupported method, probably ABI mismatch
+    if (!abiDef) {
+      return { raw: msgData }; // unsupported method, probably ABI mismatch
+    }
     return {
       abi: abiDef,
-      params: this.web3.root.instance.eth.abi.decodeParameters(abiDef.inputs, msgData.substring(10)),
+      params: this.web3.root.instance.eth.abi.decodeParameters(
+        abiDef.inputs,
+        msgData.substring(10)
+      ),
       raw: msgData,
     };
   }
 
-  private calculateAbiSignatures(): Map<String, ABIDefinition> {
+  private calculateAbiSignatures(): Map<string, ABIDefinition> {
     return (governableAbi as ABIDefinition[])
       .filter(m => m.type === 'function')
       .reduce<ABIDefinitionBySig>(
         (m: ABIDefinitionBySig, def: ABIDefinition) => {
-          const sig = this.web3.root.instance.eth.abi.encodeFunctionSignature(def);
+          const sig = this.web3.root.instance.eth.abi.encodeFunctionSignature(
+            def
+          );
           m[sig] = def;
           return m;
         },

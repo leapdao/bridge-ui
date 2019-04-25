@@ -8,7 +8,7 @@ import { KNOWN_NETWORKS } from '../../utils/knownNetworks';
 
 export default class Web3Root {
   @observable
-  public provider: { ws: string, http: string };
+  public provider: { ws: string; http: string };
 
   @observable
   public name: string;
@@ -28,15 +28,16 @@ export default class Web3Root {
   @observable
   public latestBlockNum;
 
-  constructor(
-    public plasmaConfig: PlasmaConfig,
-  ) {
+  constructor(public plasmaConfig: PlasmaConfig) {
     if (plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork) {
       this.connect();
     } else {
-      reaction(() => plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork, this.connect);
+      reaction(
+        () => plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork,
+        this.connect
+      );
     }
-  
+
     const updateRootBlock = blockNumber => {
       this.latestBlockNum = Number(blockNumber);
     };
@@ -57,24 +58,30 @@ export default class Web3Root {
   // DEPRECATED. Remove as soon as "rootNetwork" is dropped from NodeConfig
   private getKnownNetworkByProvider(rootNetwork: string) {
     if (rootNetwork.startsWith('http')) {
-      const nId = Object.keys(KNOWN_NETWORKS).find(
-        nId => (new URL(KNOWN_NETWORKS[nId].provider.http).host) === (new URL(rootNetwork).host)
+      const id = Object.keys(KNOWN_NETWORKS).find(
+        nId =>
+          new URL(KNOWN_NETWORKS[nId].provider.http).host ===
+          new URL(rootNetwork).host
       );
-      return { id: nId, ...KNOWN_NETWORKS[nId] };
+      return { id, ...KNOWN_NETWORKS[id] };
     }
   }
 
   private getKnownNetwork(rootNetworkId: number) {
-    if (!KNOWN_NETWORKS[rootNetworkId]) return;
+    if (!KNOWN_NETWORKS[rootNetworkId]) {
+      return;
+    }
     return { id: rootNetworkId, ...KNOWN_NETWORKS[rootNetworkId] };
   }
-    
+
   @autobind
   @action
   private connect() {
     const { rootNetwork, rootNetworkId } = this.plasmaConfig;
-      
-    const network = this.getKnownNetwork(rootNetworkId) || this.getKnownNetworkByProvider(rootNetwork || "");
+
+    const network =
+      this.getKnownNetwork(rootNetworkId) ||
+      this.getKnownNetworkByProvider(rootNetwork || '');
     if (!network) {
       console.error('Unidentified network:', rootNetworkId);
       return;
@@ -85,7 +92,7 @@ export default class Web3Root {
     this.name = network.name;
     this.etherscanBase = network.etherscanBase;
     this.networkId = network.id;
-    
+
     this.connectionStatus = ConnectionStatus.CONNECTING;
     console.log('[root] Connecting to', this.provider.ws);
     const provider = new Web3.providers.WebsocketProvider(this.provider.ws);

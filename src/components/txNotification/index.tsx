@@ -54,7 +54,7 @@ const TxNotification: React.SFC<{
       message: txChange.newValue.message || '',
       icon: statusDetails[status].icon,
       duration: 0,
-      description: description,
+      description,
     };
 
     notification.open(msg);

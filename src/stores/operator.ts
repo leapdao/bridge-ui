@@ -81,7 +81,9 @@ export default class Operator extends ContractStore {
   @autobind
   @action
   private setAddress() {
-    if (!this.plasmaConfig.operatorAddr) return;
+    if (!this.plasmaConfig.operatorAddr) {
+      return;
+    }
     this.address = this.plasmaConfig.operatorAddr;
   }
 
@@ -92,7 +94,7 @@ export default class Operator extends ContractStore {
 
   @autobind
   @action
-  private updateData([slots, lastCompleteEpoch]: [Array<Slot>, string]) {
+  private updateData([slots, lastCompleteEpoch]: [Slot[], string]) {
     this.slots = observable.array(slots);
     this.lastCompleteEpoch = Number(lastCompleteEpoch);
   }

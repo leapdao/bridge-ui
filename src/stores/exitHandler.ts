@@ -19,9 +19,7 @@ import Web3Store from './web3/';
 import PlasmaConfig from './plasmaConfig';
 import { Outpoint, Unspent } from 'leap-core';
 
-
 export default class ExitHandler extends ContractStore {
-  
   constructor(
     private account: Account,
     transactions: Transactions,
@@ -39,7 +37,9 @@ export default class ExitHandler extends ContractStore {
   }
 
   public exitQueueSize(color: number) {
-    return this.contract.methods.tokens(color).call()
+    return this.contract.methods
+      .tokens(color)
+      .call()
       .then(queue => queue.currentSize);
   }
 
@@ -82,13 +82,18 @@ export default class ExitHandler extends ContractStore {
   }
 
   public startExit(
-    youngestInputProof: string[], proof: string[], outIndex: number, inputIndex: number
+    youngestInputProof: string[],
+    proof: string[],
+    outIndex: number,
+    inputIndex: number
   ) {
     return this.getExitStake().then(exitStake => {
-      const tx = this.iContract.methods.startExit(youngestInputProof, proof, outIndex, inputIndex).send({
-        from: this.account.address,
-        value: String(exitStake)
-      });
+      const tx = this.iContract.methods
+        .startExit(youngestInputProof, proof, outIndex, inputIndex)
+        .send({
+          from: this.account.address,
+          value: String(exitStake),
+        });
 
       this.watchTx(tx, 'startExit', {
         message: 'Exit',
@@ -113,7 +118,9 @@ export default class ExitHandler extends ContractStore {
   @autobind
   @action
   private setAddress() {
-    if (!this.plasmaConfig.exitHandlerAddr) return;
+    if (!this.plasmaConfig.exitHandlerAddr) {
+      return;
+    }
     this.address = this.plasmaConfig.exitHandlerAddr;
   }
 }

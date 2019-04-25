@@ -37,7 +37,7 @@ export default class Wallet extends React.Component<WalletProps, any> {
   @observable
   private color = 0;
 
-  render() {
+  public render() {
     const { account, tokens } = this.props;
 
     if (!account.address) {

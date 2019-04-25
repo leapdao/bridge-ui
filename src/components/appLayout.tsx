@@ -38,13 +38,13 @@ interface AppLayoutProps {
 class AppLayout extends Component<AppLayoutProps, any> {
   private dropdown: any = null;
 
-  @observable menuVisible = false;
+  @observable private menuVisible = false;
 
   constructor(props) {
     super(props);
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     document.addEventListener('click', e => {
       if (
         !(
@@ -61,7 +61,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
     return this.props.tokens.list && this.props.tokens.list[0];
   }
 
-  render() {
+  public render() {
     const { account, web3, section } = this.props;
 
     if (web3.plasma.ready === false) {
@@ -190,9 +190,13 @@ class AppLayout extends Component<AppLayoutProps, any> {
           </div>
         </Layout.Content>
         <Layout.Footer>
-          <span style={{ verticalAlign: "middle" }}>© Leap DAO {new Date().getFullYear()}</span>
-          <ConnectionStatusBadge connectionStatus={this.props.web3.root.connectionStatus} />
-          </Layout.Footer>
+          <span style={{ verticalAlign: 'middle' }}>
+            © Leap DAO {new Date().getFullYear()}
+          </span>
+          <ConnectionStatusBadge
+            connectionStatus={this.props.web3.root.connectionStatus}
+          />
+        </Layout.Footer>
       </Layout>
     );
   }

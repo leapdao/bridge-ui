@@ -28,7 +28,7 @@ export default class AmountInput extends React.Component<
   AmountInputProps & HTMLPropsWithoutColor,
   any
 > {
-  componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps) {
     const { color: nextColor, onChange } = nextProps;
     const { color } = this.props;
     if (color !== nextColor) {
@@ -48,7 +48,7 @@ export default class AmountInput extends React.Component<
   }
 
   @autobind
-  handleChange(e) {
+  private handleChange(e) {
     const { onChange } = this.props;
     if (typeof onChange === 'function') {
       onChange(e.target.value);
@@ -56,7 +56,7 @@ export default class AmountInput extends React.Component<
   }
 
   @autobind
-  handleNFTChange(tokenId) {
+  private handleNFTChange(tokenId) {
     const { onChange } = this.props;
     if (typeof onChange === 'function') {
       onChange(tokenId);
@@ -64,7 +64,7 @@ export default class AmountInput extends React.Component<
   }
 
   @autobind
-  handleBlur(e) {
+  private handleBlur(e) {
     const { onChange, onBlur, value } = this.props;
     if (!this.token.isNft && typeof onChange === 'function') {
       const numVal = Number(value) && Number(value) > 0;
@@ -77,14 +77,14 @@ export default class AmountInput extends React.Component<
   }
 
   @autobind
-  handleColorChange(newColor) {
+  private handleColorChange(newColor) {
     const { onColorChange } = this.props;
     if (typeof onColorChange === 'function') {
       onColorChange(newColor);
     }
   }
 
-  renderColorsSelect() {
+  private renderColorsSelect() {
     const { tokens, color } = this.props;
     return (
       <Select
@@ -103,7 +103,7 @@ export default class AmountInput extends React.Component<
     );
   }
 
-  render() {
+  public render() {
     const { onColorChange, value, width = 250, plasma, ...rest } = this.props;
     const balance = plasma ? this.token.plasmaBalance : this.token.balance;
 

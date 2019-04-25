@@ -38,7 +38,10 @@ export default class Tokens {
     reaction(
       () => this.exitHandler.contract,
       () => {
-        this.exitHandler.contract.events.NewToken({}, this.loadTokens.bind(this));
+        this.exitHandler.contract.events.NewToken(
+          {},
+          this.loadTokens.bind(this)
+        );
       }
     );
   }
@@ -50,7 +53,7 @@ export default class Tokens {
 
   @autobind
   @action
-  private addTokens(tokens: Array<Token>) {
+  private addTokens(tokens: Token[]) {
     if (!this.list) {
       this.list = observable.array([]);
     }
@@ -105,7 +108,7 @@ export default class Tokens {
     return this.list[index];
   }
 
-  private loadTokenColorRange(from: number, to: number): Promise<Token>[] {
+  private loadTokenColorRange(from: number, to: number): Array<Promise<Token>> {
     return (range(from, to) as number[]).map(color => {
       return this.exitHandler.contract.methods
         .tokens(color)
