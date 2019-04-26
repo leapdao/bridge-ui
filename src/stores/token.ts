@@ -228,7 +228,7 @@ export default class Token extends ContractStore {
         to,
         data,
       });
-      return { futureReceipt }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
+      return { futureReceipt } as any; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
     });
   }
 
