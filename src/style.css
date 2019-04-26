@@ -212,7 +212,12 @@ h2:first-child {
   flex: 0 1 auto;
 }
 
-.ant-table-tbody > tr > td, 
+.ant-table-tbody > tr > td,
 .ant-table-thead > tr > th {
   padding: 10px !important;
+}
+
+.tokens-list .ant-list-item-meta-title,
+.tokens-list .ant-list-item-meta {
+  margin-bottom: 0;
 }
