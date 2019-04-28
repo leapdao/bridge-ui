@@ -45,7 +45,7 @@ const nodeIcons = {
 const getStatus = info => info && info.status;
 
 interface MonitorProps {
-  nodes: Array<NamedNodeEntry>;
+  nodes: NamedNodeEntry[];
 }
 
 interface MonitorState {
@@ -70,13 +70,13 @@ export default class Monitor extends React.Component<
     this.loadInfo = this.loadInfo.bind(this);
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this.loadInfo();
 
     setInterval(this.loadInfo, 10000);
   }
 
-  setNodeInfo(node, status) {
+  private setNodeInfo(node, status) {
     this.setState(state => ({
       nodesInfo: Object.assign({}, state.nodesInfo, {
         [node]: status,
@@ -84,7 +84,7 @@ export default class Monitor extends React.Component<
     }));
   }
 
-  loadInfo() {
+  private loadInfo() {
     this.props.nodes.forEach(node => {
       Promise.all([getNodeStatus(node.url), getBlockNumber(node.url)]).then(
         ([status, blockNumber]) => {
@@ -97,7 +97,7 @@ export default class Monitor extends React.Component<
     });
   }
 
-  render() {
+  public render() {
     const { nodes } = this.props;
     const { nodesInfo } = this.state;
 
@@ -108,7 +108,7 @@ export default class Monitor extends React.Component<
         renderItem={node => (
           <List.Item key={node.url}>
             <span className="monitor-node">
-              {node.label && (<strong>{node.label}:</strong>)} {node.url}
+              {node.label && <strong>{node.label}:</strong>} {node.url}
             </span>
             <span
               className={`monitor-status monitor-status-${getStatus(

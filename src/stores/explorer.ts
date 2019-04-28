@@ -74,7 +74,9 @@ export default class Explorer {
       if (lsCache) {
         this._cache = JSON.parse(lsCache);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error(e);
+    }
   }
 
   private get cache() {
@@ -82,7 +84,9 @@ export default class Explorer {
   }
 
   private setCache(key, value) {
-    if (!this.storageKey) return;
+    if (!this.storageKey) {
+      return;
+    }
     this._cache[key] = value;
     localStorage.setItem(this.storageKey, JSON.stringify(this._cache));
   }
@@ -109,19 +113,21 @@ export default class Explorer {
 
   public getAddress(address: string): Promise<ExplorerAccount> {
     address = address.toLowerCase();
-    const token: Token | undefined = this.tokens.tokenForAddress(address);
+    const addressToken: Token | undefined = this.tokens.tokenForAddress(
+      address
+    );
     return this.web3.plasma.instance.getUnspent(address).then(unspents => {
       const colors = Array.from(
         new Set([0, ...unspents.map(u => u.output.color)])
       );
       return Promise.all(
         colors.map(color => {
-          const token = this.tokens.tokenForColor(color);
-          if (!token) {
+          const colorToken = this.tokens.tokenForColor(color);
+          if (!colorToken) {
             return Promise.resolve(bi(0));
           }
 
-          return token.balanceOf(address, true);
+          return colorToken.balanceOf(address, true);
         })
       )
         .then(balances => {
@@ -133,7 +139,7 @@ export default class Explorer {
         .then(balances => {
           return {
             address,
-            token,
+            token: addressToken,
             balances,
             unspents,
           };
@@ -151,10 +157,10 @@ export default class Explorer {
 
     return this.web3.plasma.instance.eth.getTransaction(hash).then(tx => {
       if (tx) {
-        const result = {
+        const result: PlasmaTransaction = {
           ...tx,
           ...Tx.fromRaw((tx as any).raw).toJSON(),
-        } as PlasmaTransaction;
+        } as any;
         this.setCache(hash, result);
         return result;
       }

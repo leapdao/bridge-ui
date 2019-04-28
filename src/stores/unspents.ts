@@ -34,27 +34,29 @@ import storage from '../utils/storage';
 
 const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
 
-type UnspentWithTx = Unspent & { 
-  transaction: LeapTransaction,
-  pendingFastExit?: boolean,
+type UnspentWithTx = Unspent & {
+  transaction: LeapTransaction;
+  pendingFastExit?: boolean;
 };
 
 const objectify = (unspent: UnspentWithTx): UnspentWithTx => {
   if (!unspent.outpoint.toJSON) {
-    unspent.outpoint = Outpoint.fromJSON(unspent.outpoint as any as OutpointJSON);
+    unspent.outpoint = Outpoint.fromJSON(
+      (unspent.outpoint as any) as OutpointJSON
+    );
   }
   return unspent;
 };
 
 export default class Unspents {
   @observable
-  public list: Array<UnspentWithTx> = observable.array([]);
-
-  @observable
-  private latestBlock: number;
+  public list: UnspentWithTx[] = observable.array([]);
 
   @observable
   public pendingFastExits: {};
+
+  @observable
+  private latestBlock: number;
 
   constructor(
     private exitHandler: ExitHandler,
@@ -71,7 +73,7 @@ export default class Unspents {
       () => exitHandler.contract,
       () => {
         exitHandler.contract.events.NewDeposit({}, this.fetchUnspents);
-        exitHandler.contract.events.ExitStarted({}, this.fetchUnspents); 
+        exitHandler.contract.events.ExitStarted({}, this.fetchUnspents);
       }
     );
     reaction(
@@ -81,8 +83,11 @@ export default class Unspents {
       }
     );
     reaction(() => this.node.latestBlock, this.fetchUnspents);
-    when(() => (this.latestBlock && !!this.operator.slots[0]), () => this.finalizeFastExits(null, {}));
-    
+    when(
+      () => this.latestBlock && !!this.operator.slots[0],
+      () => this.finalizeFastExits(null, {})
+    );
+
     this.pendingFastExits = storage.load('pendingFastExits');
   }
 
@@ -107,7 +112,6 @@ export default class Unspents {
 
   @autobind
   private fetchUnspents() {
-    
     if (!this.account.address || this.latestBlock === this.node.latestBlock) {
       return;
     }
@@ -117,33 +121,29 @@ export default class Unspents {
       .getUnspent(this.account.address)
       .then((unspent: UnspentWithTx[]) => {
         return Promise.all(
-          unspent.map((u : UnspentWithTx) =>
-            this.web3.plasma.instance.eth.getTransaction(
-              bufferToHex(u.outpoint.hash)
-            ).then((tx: LeapTransaction) => {
-              u.transaction = tx;
-              return u;
-            })
+          unspent.map((u: UnspentWithTx) =>
+            this.web3.plasma.instance.eth
+              .getTransaction(bufferToHex(u.outpoint.hash))
+              .then((tx: LeapTransaction) => {
+                u.transaction = tx;
+                return u;
+              })
           )
-        )
-      }).then((unspent: UnspentWithTx[]) => {
+        );
+      })
+      .then((unspent: UnspentWithTx[]) => {
         this.list = observable.array(unspent);
       });
   }
 
   private exitDeposit(unspentDeposit: UnspentWithTx, signer: string) {
     return getProof(
-      this.web3.plasma.instance, 
+      this.web3.plasma.instance,
       unspentDeposit.transaction,
       0, // TODO: get this some-how
       signer
     ).then(txProof =>
-      this.exitHandler.startExit(
-        [],
-        txProof,
-        unspentDeposit.outpoint.index,
-        0,
-      )
+      this.exitHandler.startExit([], txProof, unspentDeposit.outpoint.index, 0)
     );
   }
 
@@ -154,49 +154,52 @@ export default class Unspents {
     const { signer } = this.operator.slots[0];
 
     if (tx.type === Type.DEPOSIT) {
-      return this.exitDeposit(unspent, signer)
+      return this.exitDeposit(unspent, signer);
     }
 
-    getYoungestInputTx(
-      this.web3.plasma.instance, tx
-    ).then((inputTx) => 
-      Promise.all([
-        getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
-        getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
-        inputTx.index,
-      ])
-    ).then(([txProof, inputProof, inputIndex]) =>
-      this.exitHandler.startExit(
-        inputProof,
-        txProof,
-        unspent.outpoint.index,
-        inputIndex,
+    getYoungestInputTx(this.web3.plasma.instance, tx)
+      .then(inputTx =>
+        Promise.all([
+          getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
+          getProof(this.web3.plasma.instance, inputTx.tx, 0, signer),
+          inputTx.index,
+        ])
       )
-    );
+      .then(([txProof, inputProof, inputIndex]) =>
+        this.exitHandler.startExit(
+          inputProof,
+          txProof,
+          unspent.outpoint.index,
+          inputIndex
+        )
+      );
   }
 
   private postData(url = '', data = {}) {
     // Default options are marked with *
-      return fetch(url, {
-          method: "POST", // *GET, POST, PUT, DELETE, etc.
-          mode: "cors", // no-cors, cors, *same-origin
-          cache: "no-cache", // *default, no-cache, reload, force-cache, only-if-cached
-          headers: {
-              "Content-Type": "application/json",
-          },
-          redirect: "error", // manual, *follow, error
-          referrer: "no-referrer", // no-referrer, *client
-          body: JSON.stringify(data), // body data type must match "Content-Type" header
-      })
-      .then(response => response.json()); // parses response to JSON
+    return fetch(url, {
+      method: 'POST', // *GET, POST, PUT, DELETE, etc.
+      mode: 'cors', // no-cors, cors, *same-origin
+      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      redirect: 'error', // manual, *follow, error
+      referrer: 'no-referrer', // no-referrer, *client
+      body: JSON.stringify(data), // body data type must match "Content-Type" header
+    }).then(response => response.json()); // parses response to JSON
   }
 
   @autobind
   private finalizeFastExits(_, period) {
     console.log('period received', period);
-    if (Object.keys(this.pendingFastExits).length < 1) return;
+    if (Object.keys(this.pendingFastExits).length < 1) {
+      return;
+    }
     Object.values(this.pendingFastExits)
-      .filter((e:any) => e.effectiveBlock < this.periodBlocksRange[1] && e.sig !== '')
+      .filter(
+        (e: any) => e.effectiveBlock < this.periodBlocksRange[1] && e.sig !== ''
+      )
       .forEach(this.finalizeFastExit.bind(this));
   }
 
@@ -208,28 +211,34 @@ export default class Unspents {
     const vBuff = Buffer.alloc(32);
     vBuff.writeInt8(sig.v, 31);
     const signedData = Exit.bufferToBytes32Array(
-      Buffer.concat([toBuffer(sigHashBuff), Buffer.from(sig.r), Buffer.from(sig.s), vBuff])
+      Buffer.concat([
+        toBuffer(sigHashBuff),
+        Buffer.from(sig.r),
+        Buffer.from(sig.s),
+        vBuff,
+      ])
     );
     return Promise.all([
       getProof(this.web3.plasma.instance, rawTx, 0, signer),
       getProof(this.web3.plasma.instance, unspent.transaction, 0, signer),
       0,
-      signedData
-    ]).then(([txProof, inputProof, inputIndex, signedData]) => {
-      //call api
+    ]).then(([txProof, inputProof, inputIndex]) => {
+      // call api
       this.postData(CONFIG.exitMarketMaker, {
-        inputProof: inputProof,
+        inputProof,
         transferProof: txProof,
-        inputIndex: inputIndex,
-        outputIndex: 0,    // output of spending tx that we want to exit
-        signedData: signedData
-      }).then(rsp => {
-        console.log(rsp);
-        delete this.pendingFastExits[bufferToHex(unspent.outpoint.hash)];
-        this.storePendingFastExits();
-      }).catch(err => {
-        console.log(err);
-      });
+        inputIndex,
+        outputIndex: 0, // output of spending tx that we want to exit
+        signedData,
+      })
+        .then(rsp => {
+          console.log(rsp);
+          delete this.pendingFastExits[bufferToHex(unspent.outpoint.hash)];
+          this.storePendingFastExits();
+        })
+        .catch(err => {
+          console.log(err);
+        });
     });
   }
 
@@ -241,47 +250,54 @@ export default class Unspents {
 
     const amount = bi(unspent.output.value);
 
-    let tx, sigHashBuff, rawTx;
+    let tx;
+    let sigHashBuff;
+    let rawTx;
 
     const unspentHash = bufferToHex(unspent.outpoint.hash);
-    return token.transfer(this.exitHandler.address, amount)
-    .then(data => data.futureReceipt)
-    .then(txObj => {
-      rawTx = txObj;
-      tx = Tx.fromRaw(txObj.raw);
-      const utxoId = (new Outpoint(tx.hash(), 0)).getUtxoId();
-      sigHashBuff = Exit.sigHashBuff(utxoId, amount);
+    return token
+      .transfer(this.exitHandler.address, amount)
+      .then(data => data.futureReceipt)
+      .then(txObj => {
+        rawTx = txObj;
+        tx = Tx.fromRaw(txObj.raw);
+        const utxoId = new Outpoint(tx.hash(), 0).getUtxoId();
+        sigHashBuff = Exit.sigHashBuff(utxoId, amount);
 
-      // create pending exit after the first sig, so that we can continue
-      // the process if the user mistakingly rejects the second sig or closes the browser
-      this.pendingFastExits[unspentHash] = {
-        unspent,
-        sig: '',
-        rawTx,
-        effectiveBlock: periodBlockRange(rawTx.blockNumber)[1],
-        sigHashBuff: `0x${sigHashBuff.toString('hex')}`,
-      };
-      this.storePendingFastExits();
-      return this.signFastExit(unspent);
-    });
+        // create pending exit after the first sig, so that we can continue
+        // the process if the user mistakingly rejects the second sig or closes the browser
+        this.pendingFastExits[unspentHash] = {
+          unspent,
+          sig: '',
+          rawTx,
+          effectiveBlock: periodBlockRange(rawTx.blockNumber)[1],
+          sigHashBuff: `0x${sigHashBuff.toString('hex')}`,
+        };
+        this.storePendingFastExits();
+        return this.signFastExit(unspent);
+      });
   }
 
   public signFastExit(unspent: UnspentWithTx) {
     const unspentHash = bufferToHex(unspent.outpoint.hash);
     const sigHashBuff = this.pendingFastExits[unspentHash].sigHashBuff;
-    return Tx.signMessageWithWeb3(this.web3.injected.instance, sigHashBuff)
-      .then(sig => {
-        this.pendingFastExits[unspentHash].sig = sig;
-        this.storePendingFastExits();
-      });
+    return Tx.signMessageWithWeb3(
+      this.web3.injected.instance,
+      sigHashBuff
+    ).then(sig => {
+      this.pendingFastExits[unspentHash].sig = sig;
+      this.storePendingFastExits();
+    });
   }
 
   public listForColor(color: number) {
-    return this.list.filter(u => u.output.color === color).concat(
-      Object.values(this.pendingFastExits)
-        .filter((v: any) => v.unspent.transaction.color === color)
-        .map((v: any) => ({ ...objectify(v.unspent), pendingFastExit: true }))
-    );
+    return this.list
+      .filter(u => u.output.color === color)
+      .concat(
+        Object.values(this.pendingFastExits)
+          .filter((v: any) => v.unspent.transaction.color === color)
+          .map((v: any) => ({ ...objectify(v.unspent), pendingFastExit: true }))
+      );
   }
 
   @autobind
@@ -303,27 +319,26 @@ export default class Unspents {
     const consolidates = chunks.reduce(
       (txs, chunk) => {
         const inputs = chunk.reduce(
-          (inputs, u) => {
-            const index = inputs.findIndex(
+          (acc, u) => {
+            const index = acc.findIndex(
               input =>
                 input.prevout.hash.compare(u.outpoint.hash) === 0 &&
                 input.prevout.index === u.outpoint.index
             );
 
             if (index === -1) {
-              inputs.push(new Input(u.outpoint));
+              acc.push(new Input(u.outpoint));
             }
 
-            return inputs;
+            return acc;
           },
           [] as Input[]
         );
         const value = chunk.reduce((v, u) => add(v, bi(u.output.value)), ZERO);
         txs.push(
-          Tx.transfer(
-            inputs,
-            [new Output(value, this.account.address, Number(color))]
-          )
+          Tx.transfer(inputs, [
+            new Output(value, this.account.address, Number(color)),
+          ])
         );
         return txs;
       },
@@ -331,9 +346,12 @@ export default class Unspents {
     );
 
     consolidates.forEach(tx =>
-      tx.signWeb3(this.web3.injected.instance as any)
-        .then(signedTx => 
-          this.web3.plasma.instance.eth.sendSignedTransaction(signedTx.hex() as any)
+      tx
+        .signWeb3(this.web3.injected.instance as any)
+        .then(signedTx =>
+          this.web3.plasma.instance.eth.sendSignedTransaction(
+            signedTx.hex() as any
+          )
         )
     );
   }

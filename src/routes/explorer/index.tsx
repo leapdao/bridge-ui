@@ -51,7 +51,7 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
   public render() {
     const {
       explorer,
-      match,
+      match: routerMatch,
       operator,
       exitHandler,
       bridge,
@@ -80,7 +80,7 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
                   () => {
                     this.value = '';
                   },
-                  () => {}
+                  () => null
                 );
               }}
             >
@@ -101,10 +101,13 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
 
         <Divider />
 
-        <Route path={`${match.path}/`} exact component={Block} />
-        <Route path={`${match.path}/block/:hashOrNumber`} component={Block} />
-        <Route path={`${match.path}/tx/:hash`} component={Transaction} />
-        <Route path={`${match.path}/address/:addr`} component={Address} />
+        <Route path={`${routerMatch.path}/`} exact component={Block} />
+        <Route
+          path={`${routerMatch.path}/block/:hashOrNumber`}
+          component={Block}
+        />
+        <Route path={`${routerMatch.path}/tx/:hash`} component={Transaction} />
+        <Route path={`${routerMatch.path}/address/:addr`} component={Address} />
 
         <h1>Chain info</h1>
         <dl className="info">

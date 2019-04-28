@@ -16,7 +16,6 @@ import Web3Store from './web3/';
 import PlasmaConfig from './plasmaConfig';
 
 export default class Bridge extends ContractStore {
-
   constructor(
     transactions: Transactions,
     web3: Web3Store,
@@ -30,14 +29,14 @@ export default class Bridge extends ContractStore {
     } else {
       reaction(() => plasmaConfig.bridgeAddr, this.setAddress);
     }
-    
   }
-  
+
   @autobind
   @action
   private setAddress() {
-    if (!this.plasmaConfig.bridgeAddr) return;
+    if (!this.plasmaConfig.bridgeAddr) {
+      return;
+    }
     this.address = this.plasmaConfig.bridgeAddr;
   }
-
 }

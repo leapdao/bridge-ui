@@ -39,7 +39,7 @@ class Address extends React.Component<AddressRouteProps, any> {
     }
   }
 
-  componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps) {
     const {
       match: {
         params: { addr: param },
@@ -57,13 +57,13 @@ class Address extends React.Component<AddressRouteProps, any> {
   }
 
   @observable.shallow
-  account: ExplorerAccount = null;
+  private account: ExplorerAccount = null;
   @observable
-  fetching = false;
+  private fetching = false;
   @observable
-  success = false;
+  private success = false;
 
-  fetch(address) {
+  private fetch(address) {
     const { explorer } = this.props;
     this.fetching = true;
 
@@ -74,7 +74,7 @@ class Address extends React.Component<AddressRouteProps, any> {
     });
   }
 
-  render() {
+  public render() {
     if (!this.success && !this.fetching && this.props.tokens.ready) {
       return (
         <Alert

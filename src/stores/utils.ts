@@ -15,7 +15,7 @@ import Web3Store from './web3/';
 function hexToAscii(hex) {
   hex = hex.replace('0x', '');
   let result = '';
-  for (var n = 0; n < hex.length; n += 2) {
+  for (let n = 0; n < hex.length; n += 2) {
     result += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
   }
   return result;

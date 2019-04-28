@@ -94,7 +94,8 @@ export default class Slots extends React.Component<SlotsProps, any> {
 
   private handleBet(slotId) {
     const { operator } = this.props;
-    const { signerAddr, tenderPubKey } = this;
+    const signerAddr = this.signerAddr;
+    const tenderPubKey = this.tenderPubKey;
     const stake = this.psc.toCents(this.stakes[slotId]);
 
     operator
@@ -107,7 +108,7 @@ export default class Slots extends React.Component<SlotsProps, any> {
       });
   }
 
-  renderRow(
+  private renderRow(
     title: string,
     key: string,
     newKey?: string,
@@ -145,8 +146,10 @@ export default class Slots extends React.Component<SlotsProps, any> {
     );
   }
 
-  renderSlots() {
-    const { signerAddr, stakes, tenderPubKey } = this;
+  private renderSlots() {
+    const signerAddr = this.signerAddr;
+    const stakes = this.stakes;
+    const tenderPubKey = this.tenderPubKey;
     const { account, network, operator } = this.props;
 
     return (
@@ -238,8 +241,7 @@ export default class Slots extends React.Component<SlotsProps, any> {
     );
   }
 
-  render() {
-    const { signerAddr, tenderPubKey } = this;
+  public render() {
     const { operator } = this.props;
 
     const slotsTable = this.renderSlots();
@@ -253,7 +255,7 @@ export default class Slots extends React.Component<SlotsProps, any> {
           <Form.Item>
             <Input
               addonBefore="Validator address"
-              value={signerAddr}
+              value={this.signerAddr}
               onChange={this.handleSignerChange}
               style={{ width: 500 }}
             />
@@ -261,7 +263,7 @@ export default class Slots extends React.Component<SlotsProps, any> {
           <Form.Item>
             <Input
               addonBefore="Validator ID"
-              value={tenderPubKey}
+              value={this.tenderPubKey}
               onChange={this.handleTenderPubKeyChange}
               style={{ width: 620 }}
             />

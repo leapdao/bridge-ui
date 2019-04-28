@@ -56,7 +56,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   @observable
-  value: number | string = 0;
+  private value: number | string = 0;
 
   @observable
   public pendingDeposits: { [key: string]: PendingDeposit };
@@ -98,7 +98,9 @@ export default class Deposit extends React.Component<DepositProps, any> {
   private checkPendingDeposits() {
     const { rootEventDelay } = this.props.plasmaConfig;
     const maturedDeposits = Object.values(this.pendingDeposits)
-      .filter(pending => this.blocksSince(pending.blockNumber) >= rootEventDelay)
+      .filter(
+        pending => this.blocksSince(pending.blockNumber) >= rootEventDelay
+      )
       .sort((a, b) => b.blockNumber - a.blockNumber);
 
     const utxos = this.props.unspents.list;
@@ -114,7 +116,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   @autobind
-  handleNewDeposit(_, event: EventLog) {
+  private handleNewDeposit(_, event: EventLog) {
     const pending = this.pendingDeposits[event.transactionHash];
     if (pending) {
       pending.blockNumber = event.blockNumber;
@@ -122,7 +124,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   @autobind
-  handleSubmit(e) {
+  private handleSubmit(e) {
     e.preventDefault();
     const { exitHandler, color } = this.props;
     const value = this.selectedToken.toCents(this.value);
@@ -140,7 +142,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
       });
   }
 
-  canSubmitValue(value: BigIntType) {
+  private canSubmitValue(value: BigIntType) {
     const { network } = this.props;
     return (
       network.canSubmit &&
@@ -152,15 +154,17 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   private blocksSince(blockNumber: number) {
-    if (blockNumber === undefined) return 0;
+    if (blockNumber === undefined) {
+      return 0;
+    }
     const blocksSince = Math.min(
-      this.props.plasmaConfig.rootEventDelay, 
+      this.props.plasmaConfig.rootEventDelay,
       this.props.web3.root.latestBlockNum - blockNumber
     );
     return Math.max(0, blocksSince);
   }
 
-  render() {
+  public render() {
     const { tokens, color, onColorChange, plasmaConfig } = this.props;
 
     const { rootEventDelay } = plasmaConfig;

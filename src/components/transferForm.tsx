@@ -65,19 +65,19 @@ class TransferForm extends React.Component<TransferFormProps, any> {
   }
 
   @observable
-  value = this.token.isNft ? '' : 0;
+  private value = this.token.isNft ? '' : 0;
 
   @observable
-  receiver = '';
+  private receiver = '';
 
   @observable
-  submitting = false;
+  private submitting = false;
 
   @observable
-  showErrors = false;
+  private showErrors = false;
 
   @autobind
-  handleSubmit(e) {
+  private handleSubmit(e) {
     e.preventDefault();
     const { onSubmit } = this.props;
 
@@ -100,16 +100,16 @@ class TransferForm extends React.Component<TransferFormProps, any> {
   }
 
   @autobind
-  handleChange(value) {
+  private handleChange(value) {
     this.value = value;
   }
 
   @autobind
-  handleReceiverChange(e) {
+  private handleReceiverChange(e) {
     this.receiver = e.target.value;
   }
 
-  render() {
+  public render() {
     const { color, tokens } = this.props;
 
     if (!tokens) {

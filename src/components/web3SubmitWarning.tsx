@@ -15,7 +15,7 @@ interface Web3SubmitWarningProps {
 @inject('network', 'account', 'web3')
 @observer
 class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
-  render() {
+  public render() {
     const { network, account, web3 } = this.props;
 
     if (!web3.injected.available) {
