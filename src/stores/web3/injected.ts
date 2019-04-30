@@ -62,6 +62,8 @@ export default class Web3Injected {
         this.instance = new Web3(ethereum);
         this.approved = true;
       })
-      .catch(() => {});
+      .catch(err => {
+        console.error(err);
+      });
   }
 }

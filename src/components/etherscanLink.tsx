@@ -12,26 +12,31 @@ interface EtherscanLinkProps {
 }
 
 const EtherscanLink: React.SFC<EtherscanLinkProps> = ({ value, web3 }) => {
-  if (!value || !web3) return (<Fragment/>);
-  
-  const { etherscanBase } = web3.root;
-  
-  if (!etherscanBase) {
-    return (
-      <Fragment>
-        {shortenHex(value)}
-      </Fragment>
-    )
+  if (!value || !web3) {
+    return <Fragment />;
   }
 
-  const etherscanLink = (ref) => {
-    if (ref.length == 42) return `${etherscanBase}/address/${ref}`;
+  const { etherscanBase } = web3.root;
+
+  if (!etherscanBase) {
+    return <Fragment>{shortenHex(value)}</Fragment>;
+  }
+
+  const etherscanLink = ref => {
+    if (ref.length === 42) {
+      return `${etherscanBase}/address/${ref}`;
+    }
 
     return `${etherscanBase}/tx/${value}`;
-  }
+  };
 
   return (
-    <a href={etherscanLink(value)} title={value} target="_blank" rel="noopener noreferrer">
+    <a
+      href={etherscanLink(value)}
+      title={value}
+      target="_blank"
+      rel="noopener noreferrer"
+    >
       {shortenHex(value)}
     </a>
   );

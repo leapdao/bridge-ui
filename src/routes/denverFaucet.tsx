@@ -29,17 +29,17 @@ interface FaucetProps {
 @observer
 export default class Faucet extends React.Component<FaucetProps, any> {
   @observable
-  value = '';
+  private value = '';
   @observable
-  sending = false;
+  private sending = false;
   @observable
-  error = null;
+  private error = null;
   @observable
-  success = null;
+  private success = null;
 
   @autobind
   @action
-  handleSuccess(data) {
+  private handleSuccess(data) {
     this.sending = false;
     if (data.errorMessage) {
       this.error = data.errorMessage;
@@ -53,14 +53,14 @@ export default class Faucet extends React.Component<FaucetProps, any> {
 
   @autobind
   @action
-  handleError(err) {
+  private handleError(err) {
     this.sending = false;
     this.error = err.message;
   }
 
   @autobind
   @action
-  handleChange(e) {
+  private handleChange(e) {
     this.value = e.target.value;
     this.success = null;
     this.error = null;
@@ -68,7 +68,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
 
   @autobind
   @action
-  handleSubmit(e) {
+  private handleSubmit(e) {
     e.preventDefault();
     this.sending = true;
     requestFund(this.props.account.address)
@@ -76,7 +76,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
       .catch(this.handleError);
   }
 
-  render() {
+  public render() {
     const { account } = this.props;
 
     if (!CONFIG.denverFaucet) {
@@ -90,9 +90,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
     return (
       <AppLayout section="faucet">
         <h1>Welcome to ETHDenver 2019!</h1>
-        <p>
-          Get some tokens to test Plasma here!
-        </p>
+        <p>Get some tokens to test Plasma here!</p>
         <Form onSubmit={this.handleSubmit} layout="inline">
           {this.success && <Alert type="success" message={this.success} />}
           {this.error && <Alert type="error" message={this.error} />}

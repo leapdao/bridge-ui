@@ -36,7 +36,10 @@ export default class ContractStore {
   @computed
   public get iContract(): Contract | undefined {
     if (this.web3.injected.instance) {
-      return new this.web3.injected.instance.eth.Contract(this.abi, this.address);
+      return new this.web3.injected.instance.eth.Contract(
+        this.abi,
+        this.address
+      );
     }
   }
 

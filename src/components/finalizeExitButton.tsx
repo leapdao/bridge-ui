@@ -28,23 +28,22 @@ export default class FinalizeExitButton extends React.Component<
   FinalizeExitButtonProps,
   FinalizeExitButtonState
 > {
-
   @observable
   private exitQueueSize: number = 0;
 
   constructor(props) {
     super(props);
-    
+
     reaction(() => this.props.token, this.loadQueueSize);
     this.loadQueueSize();
   }
 
   @autobind
-  loadQueueSize() {
+  private loadQueueSize() {
     const { exitHandler, token } = this.props;
     exitHandler.exitQueueSize(token.color).then(size => {
       this.exitQueueSize = Number(size);
-    })
+    });
   }
 
   @computed
@@ -53,20 +52,17 @@ export default class FinalizeExitButton extends React.Component<
   }
 
   @autobind
-  finalize() {
+  private finalize() {
     const { exitHandler, token } = this.props;
     return exitHandler.finalizeExits(token.color);
   }
 
-  render() {
+  public render() {
     const caption = `Finalize ${this.props.token.symbol} top exit`;
     return (
-      <Button
-        onClick={this.finalize}
-        disabled={this.disabled}
-      >
+      <Button onClick={this.finalize} disabled={this.disabled}>
         {caption}
       </Button>
-    );    
+    );
   }
-};
+}

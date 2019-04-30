@@ -47,7 +47,7 @@ class Block extends React.Component<BlockRouteProps, any> {
     );
   }
 
-  componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps) {
     const {
       match: {
         params: { hashOrNumber: param },
@@ -65,13 +65,13 @@ class Block extends React.Component<BlockRouteProps, any> {
   }
 
   @observable
-  block = null;
+  private block = null;
   @observable
-  fetching = false;
+  private fetching = false;
   @observable
-  success = false;
+  private success = false;
 
-  fetch(hashOrNumber?: string | number) {
+  private fetch(hashOrNumber?: string | number) {
     const { explorer, web3 } = this.props;
     this.fetching = true;
 
@@ -87,7 +87,7 @@ class Block extends React.Component<BlockRouteProps, any> {
     });
   }
 
-  render() {
+  public render() {
     const { node } = this.props;
 
     if (!this.success && !this.fetching) {

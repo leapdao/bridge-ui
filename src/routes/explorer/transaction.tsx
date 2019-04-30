@@ -42,7 +42,7 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
     this.fetch(props.match.params.hash);
   }
 
-  componentWillReceiveProps(nextProps) {
+  public componentWillReceiveProps(nextProps) {
     const {
       match: {
         params: { hash: param },
@@ -60,13 +60,13 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
   }
 
   @observable
-  tx = null;
+  private tx = null;
   @observable
-  fetching = false;
+  private fetching = false;
   @observable
-  success = false;
+  private success = false;
 
-  fetch(hash) {
+  private fetch(hash) {
     const { explorer } = this.props;
     this.fetching = true;
 
@@ -77,7 +77,7 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
     });
   }
 
-  render() {
+  public render() {
     if (!this.success && !this.fetching) {
       return (
         <Alert

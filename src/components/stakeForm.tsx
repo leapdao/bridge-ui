@@ -5,7 +5,17 @@ import { observable, computed } from 'mobx';
 import { Input, Button } from 'antd';
 import autobind from 'autobind-decorator';
 import Token from '../stores/token';
-import { BigIntType, BigInt, bi, biMax, biEqual, greaterThan, lessThan, add, ZERO } from 'jsbi-utils';
+import {
+  BigIntType,
+  BigInt,
+  bi,
+  biMax,
+  biEqual,
+  greaterThan,
+  lessThan,
+  add,
+  ZERO,
+} from 'jsbi-utils';
 
 const fieldValue = (v: BigIntType) => biMax(v, ZERO);
 
@@ -22,10 +32,11 @@ interface StakeFormProps {
 
 @observer
 class StakeForm extends React.Component<StakeFormProps, any> {
-  static defaultProps = {
+  public static defaultProps = {
     minValue: 0,
   };
-  componentWillReceiveProps(nextProps) {
+
+  public componentWillReceiveProps(nextProps) {
     if (!biEqual(nextProps.value, this.props.value)) {
       this.value = fieldValue(nextProps.value);
     }
@@ -34,7 +45,7 @@ class StakeForm extends React.Component<StakeFormProps, any> {
   @computed
   get disabled() {
     const { minValue, maxValue, disabled, ownStake } = this.props;
-    const { value } = this;
+    const value = this.value;
 
     if (biEqual(value, 0)) {
       return false;
@@ -49,21 +60,21 @@ class StakeForm extends React.Component<StakeFormProps, any> {
   }
 
   @observable
-  value: BigIntType = fieldValue(this.props.value);
+  private value: BigIntType = fieldValue(this.props.value);
 
   @autobind
-  handleUpdate() {
+  private handleUpdate() {
     const { minValue, onChange } = this.props;
     const zero = biEqual(this.value, 0);
     onChange(zero ? ZERO : biMax(minValue, this.value));
   }
 
   @autobind
-  handleChange(e) {
+  private handleChange(e) {
     this.value = e.target.value;
   }
 
-  render() {
+  public render() {
     const { token, minValue, onSubmit } = this.props;
 
     return (
@@ -85,7 +96,9 @@ class StakeForm extends React.Component<StakeFormProps, any> {
           />
           &nbsp;
           <span style={{ fontSize: 11 }}>{`${
-            greaterThan(bi(minValue), ZERO) ? `>= ${token.toTokens(minValue)}` : ''
+            greaterThan(bi(minValue), ZERO)
+              ? `>= ${token.toTokens(minValue)}`
+              : ''
           }`}</span>
         </div>
         <Button type="primary" disabled={this.disabled} onClick={onSubmit}>

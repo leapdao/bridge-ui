@@ -39,23 +39,28 @@ export default class Network {
   }
 
   protected isSameNetwork(root, mm) {
-    return String(root) === this.mmNetwork ||
-      root === 5777 && Number(this.mmNetwork) > 1000000; // workaround for random network id for ganache
+    return (
+      String(root) === this.mmNetwork ||
+      (root === 5777 && Number(this.mmNetwork) > 1000000)
+    ); // workaround for random network id for ganache
   }
 
   @computed
   public get canSubmit() {
     return (
       (!!(window as any).web3 || !!(window as any).ethereum) &&
-      !!this.account.address && this.web3.root && 
+      !!this.account.address &&
+      this.web3.root &&
       this.isSameNetwork(this.web3.root.networkId, this.mmNetwork)
     );
   }
 
   @computed
   public get wrongNetwork() {
-    return this.mmNetwork && this.web3.root &&
-           !this.isSameNetwork(this.web3.root.networkId, this.mmNetwork);
+    return (
+      this.mmNetwork &&
+      this.web3.root &&
+      !this.isSameNetwork(this.web3.root.networkId, this.mmNetwork)
+    );
   }
-
 }

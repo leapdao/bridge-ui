@@ -25,11 +25,11 @@ class TransactionList extends React.Component<Props> {
     };
   }
 
-  componentDidMount() {
+  public componentDidMount() {
     this.fetchStuff(this.props);
   }
 
-  componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: Props) {
     if (
       prevProps.from !== this.props.from ||
       prevProps.to !== this.props.to ||
@@ -42,7 +42,7 @@ class TransactionList extends React.Component<Props> {
     }
   }
 
-  fetchStuff({ from, to, color }: Props) {
+  private fetchStuff({ from, to, color }: Props) {
     if (!CONFIG.txStorage) {
       return;
     }
@@ -68,7 +68,7 @@ class TransactionList extends React.Component<Props> {
       });
   }
 
-  render() {
+  public render() {
     return (
       <>
         <TransactionListComponent txs={this.state.txs} />

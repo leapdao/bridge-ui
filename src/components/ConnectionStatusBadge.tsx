@@ -21,19 +21,20 @@ const STATUSES = {
 };
 
 @observer
-export default class ConnectionStatusBadge extends React.Component<ConnectionStatusProps> {
-
+export default class ConnectionStatusBadge extends React.Component<
+  ConnectionStatusProps
+> {
   constructor(props) {
     super(props);
   }
 
-  render() {
+  public render() {
     const { connectionStatus } = this.props;
 
     const { status, text } = STATUSES[connectionStatus];
 
     return (
-      <Badge status={status as any} text={text} style={{ float: "right" }}/>
-    );    
+      <Badge status={status as any} text={text} style={{ float: 'right' }} />
+    );
   }
-};
+}

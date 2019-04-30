@@ -31,17 +31,17 @@ interface FaucetProps {
 @observer
 export default class Faucet extends React.Component<FaucetProps, any> {
   @observable
-  value = '';
+  private value = '';
   @observable
-  sending = false;
+  private sending = false;
   @observable
-  error = null;
+  private error = null;
   @observable
-  success = null;
+  private success = null;
 
   @autobind
   @action
-  handleSuccess(data) {
+  private handleSuccess(data) {
     this.sending = false;
     if (data.errorMessage) {
       this.error = data.errorMessage;
@@ -55,14 +55,14 @@ export default class Faucet extends React.Component<FaucetProps, any> {
 
   @autobind
   @action
-  handleError(err) {
+  private handleError(err) {
     this.sending = false;
     this.error = err.message;
   }
 
   @autobind
   @action
-  handleChange(e) {
+  private handleChange(e) {
     this.value = e.target.value;
     this.success = null;
     this.error = null;
@@ -70,7 +70,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
 
   @autobind
   @action
-  handleSubmit(e) {
+  private handleSubmit(e) {
     e.preventDefault();
     this.sending = true;
     requestFund(this.value)
@@ -78,7 +78,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
       .catch(this.handleError);
   }
 
-  render() {
+  public render() {
     const { account, web3 } = this.props;
 
     if (!CONFIG.tokenFaucet) {
@@ -93,8 +93,8 @@ export default class Faucet extends React.Component<FaucetProps, any> {
       <AppLayout section="faucet">
         <h1>Get tokens</h1>
         <p>
-          Tweet something about @leapdao and get some 
-          { web3.root.name !== 'Mainnet' ? ' testnet' : '' } LEAP tokens on
+          Tweet something about @leapdao and get some
+          {web3.root.name !== 'Mainnet' ? ' testnet' : ''} LEAP tokens on
           Plasma! Don't forget to include your Ethereum address in the tweet.
         </p>
         <Form onSubmit={this.handleSubmit} layout="inline">

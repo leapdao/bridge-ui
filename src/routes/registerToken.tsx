@@ -18,7 +18,6 @@ import HexString from '../components/hexString';
 import CopyToClipboard from '../components/copyToClipboard';
 import AppLayout from '../components/appLayout';
 import ExitHandler from '../stores/exitHandler';
-import Network from '../stores/network';
 import Tokens from '../stores/tokens';
 import { CONFIG } from '../config';
 import Token from '../stores/token';
@@ -56,11 +55,10 @@ const Item: React.FC<{ item: Token }> = observer(({ item }) => (
 
 interface RegisterTokenProps {
   exitHandler: ExitHandler;
-  network: Network;
   tokens: Tokens;
 }
 
-@inject('tokens', 'exitHandler', 'network')
+@inject('tokens', 'exitHandler')
 @observer
 export default class RegisterToken extends React.Component<
   RegisterTokenProps,
@@ -70,7 +68,7 @@ export default class RegisterToken extends React.Component<
   private tokenAddr = '';
 
   @autobind
-  handleSubmit(e) {
+  private handleSubmit(e) {
     e.preventDefault();
     const { exitHandler } = this.props;
 
@@ -82,7 +80,7 @@ export default class RegisterToken extends React.Component<
   }
 
   @autobind
-  handleChange(e) {
+  private handleChange(e) {
     this.tokenAddr = e.target.value;
   }
 

@@ -112,7 +112,9 @@ export default class Token extends ContractStore {
    * @param tokenValue Amount of tokens to convert to token cents or token Id for NFT token
    */
   public toCents(tokenValue: BigIntType | number | string): BigIntType {
-    if (this.isNft) return bi(tokenValue);
+    if (this.isNft) {
+      return bi(tokenValue);
+    }
     let valueNum;
     try {
       valueNum = Big(String(tokenValue));
@@ -134,7 +136,9 @@ export default class Token extends ContractStore {
    * @param tokenValue Amount of token cents to convert to tokens or token Id for NFT token
    */
   public toTokens(tokenCentsValue: BigIntType) {
-    if (this.isNft) return toNumber(tokenCentsValue);
+    if (this.isNft) {
+      return toNumber(tokenCentsValue);
+    }
     return Big(tokenCentsValue.toString() || 0)
       .div(10 ** this.decimals)
       .toFixed();
@@ -155,9 +159,10 @@ export default class Token extends ContractStore {
               Number(output.color) === Number(this.color) &&
               equal(bi(output.value), bi(amount))
           );
-          const inputs = [new Input(outpoint)];
-          const outputs = [new Output(amount as any, to, this.color)];
-          return Tx.transfer(inputs, outputs);
+          return Tx.transfer(
+            [new Input(outpoint)],
+            [new Output(amount as any, to, this.color)]
+          );
         }
 
         const inputs = helpers.calcInputs(
@@ -223,7 +228,7 @@ export default class Token extends ContractStore {
         to,
         data,
       });
-      return { futureReceipt }; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
+      return { futureReceipt } as any; // wrapping, otherwise PromiEvent will be returned upstream only when resolved
     });
   }
 
@@ -279,12 +284,14 @@ export default class Token extends ContractStore {
   }
 
   private allowanceOrTokenId(valueOrTokenId: number) {
-    if (this.isNft) return valueOrTokenId;
+    if (this.isNft) {
+      return valueOrTokenId;
+    }
 
     return `0x${exponentiate(bi(2), bi(255)).toString(16)}`;
   }
 
-  private hasEnoughAllowance(spender: string, value: number): Promise<Boolean> {
+  private hasEnoughAllowance(spender: string, value: number): Promise<boolean> {
     if (this.isNft) {
       return this.iContract.methods
         .getApproved(value)
@@ -308,7 +315,9 @@ export default class Token extends ContractStore {
    */
   private maybeApprove(spender: string, value: number) {
     return this.hasEnoughAllowance(spender, value).then(hasEnoughAllowance => {
-      if (hasEnoughAllowance) return;
+      if (hasEnoughAllowance) {
+        return;
+      }
 
       const tx = this.iContract.methods
         .approve(spender, String(this.allowanceOrTokenId(value)))

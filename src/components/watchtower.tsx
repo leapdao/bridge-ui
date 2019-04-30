@@ -7,9 +7,9 @@
 
 import { Alert, Button, Spin, List, Row, Col, Card, Collapse } from 'antd';
 import { Link } from 'react-router-dom';
-import { BN } from 'web3-utils';
+import * as utils from 'web3-utils';
 import { Input, Outpoint, Tx } from 'leap-core';
-import { action, observable, reaction, runInAction, autorun } from 'mobx';
+import { observable, reaction, runInAction, autorun } from 'mobx';
 import { inject, observer } from 'mobx-react';
 import * as React from 'react';
 import { EventLog } from 'web3/types';
@@ -20,13 +20,14 @@ import ExitHandler from '../stores/exitHandler';
 import Explorer from '../stores/explorer';
 import Tokens from '../stores/tokens';
 import Web3Store from '../stores/web3';
+import autobind from 'autobind-decorator';
 
 interface ColorDetails {
   color: number;
   tokenSymbol: string;
-  plasmaBalance: BN;
-  utxoSum: BN;
-  exitSum: BN;
+  plasmaBalance: any; // proper types needed here
+  utxoSum: any; // proper types needed here
+  exitSum: any; // proper types needed here
   isOk: boolean;
   hasBadFinalizedExits: boolean;
   hasBadOpenExits: boolean;
@@ -146,13 +147,15 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
     autorun(this.getData);
   }
 
-  @observable colorDetails: ColorDetails[] = [];
+  @observable
+  private colorDetails: ColorDetails[] = [];
 
   private getData = async (): Promise<void> => {
     const { exitHandler, explorer, web3, tokens, bridge } = this.props;
     const exits = [];
-    if (!bridge.address)
+    if (!bridge.address) {
       await new Promise(resolve => reaction(() => bridge.address, resolve));
+    }
     const fromBlock = await bridge.contract.methods.genesisBlockNumber().call();
     const events = await exitHandler.contract.getPastEvents('ExitStarted', {
       fromBlock,
@@ -194,17 +197,17 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
       colors.map(async color => {
         const utxoSum = uTxos.reduce((acc, utXo) => {
           return utXo.output.color === color
-            ? new BN(utXo.output.value).add(acc)
+            ? utils.toBN(utXo.output.value).add(acc)
             : acc;
-        }, new BN(0));
+        }, utils.toBN(0));
 
         const exitSum = exits.reduce((acc, e) => {
           return Number(e.exit.color) === color && !e.exit.finalized
-            ? new BN(e.exit.amount).add(acc)
+            ? utils.toBN(e.exit.amount).add(acc)
             : acc;
-        }, new BN(0));
+        }, utils.toBN(0));
 
-        const plasmaBalance = new BN(
+        const plasmaBalance = utils.toBN(
           await tokens.list
             .find(token => token.color === color)
             .contract.methods.balanceOf(exitHandler.address)
@@ -256,15 +259,16 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
     );
   };
 
-  expandRenderer = props => {
-    let text;
+  @autobind
+  private expandRenderer(props) {
     return (
       <Button onClick={e => props.onExpand(props.record, e)}>
         {props.expanded ? 'Hide exits' : 'Show exits'}
       </Button>
     );
-  };
-  render() {
+  }
+
+  public render() {
     return (
       <>
         {this.colorDetails.length ? (
@@ -312,7 +316,10 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
                     </Col>
                   )}
                 </Row>
-                <Row style={{paddingTop: '1rem', paddingBottom: '1rem'}} gutter={2}>
+                <Row
+                  style={{ paddingTop: '1rem', paddingBottom: '1rem' }}
+                  gutter={2}
+                >
                   <Col span={8}>
                     <h3>Plasma Balance</h3>
                     <TokenValue
@@ -345,7 +352,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
                       split
                       pagination={{ pageSize: 10 }}
                       dataSource={detail.exitDetails.filter(
-                        e=> e.exit.finalized && e.suspect
+                        e => e.exit.finalized && e.suspect
                       )}
                       renderItem={this.renderExit}
                     />

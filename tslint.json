@@ -1,0 +1,28 @@
+{
+  "extends": [
+    "tslint:latest",
+    "tslint-config-prettier"
+  ],
+  "rules": {
+    "ordered-imports": false,
+    "no-duplicate-imports": false,
+    "no-var-requires": false,
+    "object-literal-sort-keys": false,
+    "no-submodule-imports": false,
+    "interface-name": false,
+    "prefer-object-spread": false,
+    "no-console": false,
+    "member-ordering": false,
+    "variable-name": false,
+    "interface-over-type-literal": false,
+    "no-string-literal": false,
+    "no-empty-interface": false
+  },
+  "linterOptions": {
+    "exclude": [
+      "./webpack.config.dev.js",
+      "./webpack.config.prod.js",
+      "./dist/**/*.js"
+    ]
+  }
+}
