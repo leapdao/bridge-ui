@@ -15,13 +15,14 @@ import { List, Icon } from 'antd';
 
 import autobind from 'autobind-decorator';
 import HexString from '../components/hexString';
+import CopyToClipboard from '../components/copyToClipboard';
 import AppLayout from '../components/appLayout';
 import ExitHandler from '../stores/exitHandler';
-import Network from '../stores/network';
 import Tokens from '../stores/tokens';
 import { CONFIG } from '../config';
+import Token from '../stores/token';
 
-const Item = observer(({ item }) => (
+const Item: React.FC<{ item: Token }> = observer(({ item }) => (
   <List.Item key={item.address}>
     <List.Item.Meta
       title={
@@ -37,9 +38,16 @@ const Item = observer(({ item }) => (
         </Fragment>
       }
       description={
-        <Link to={`/explorer/address/${item.address}`}>
-          <HexString>{item.address}</HexString>
-        </Link>
+        <Fragment>
+          <Link to={`/explorer/address/${item.address}`}>
+            <HexString>{item.address}</HexString>
+          </Link>
+          <br />
+          Color:{' '}
+          <CopyToClipboard copyString={item.color}>
+            {item.color}
+          </CopyToClipboard>
+        </Fragment>
       }
     />
   </List.Item>
@@ -47,11 +55,10 @@ const Item = observer(({ item }) => (
 
 interface RegisterTokenProps {
   exitHandler: ExitHandler;
-  network: Network;
   tokens: Tokens;
 }
 
-@inject('tokens', 'exitHandler', 'network')
+@inject('tokens', 'exitHandler')
 @observer
 export default class RegisterToken extends React.Component<
   RegisterTokenProps,
@@ -77,8 +84,8 @@ export default class RegisterToken extends React.Component<
     this.tokenAddr = e.target.value;
   }
 
-  public render() {
-    const { network, tokens } = this.props;
+  render() {
+    const { tokens } = this.props;
 
     return (
       <AppLayout section="registerToken">
@@ -86,6 +93,7 @@ export default class RegisterToken extends React.Component<
         <List
           itemLayout="vertical"
           size="small"
+          className="tokens-list"
           dataSource={tokens.ready ? tokens.list : undefined}
           renderItem={item => <Item item={item} />}
         />
