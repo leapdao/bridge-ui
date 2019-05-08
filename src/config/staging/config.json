@@ -1,0 +1,8 @@
+{
+  "name": "testnet🐯",
+  "title": "LeapDAO Testnet - The one with Distributed Breeding",
+  "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
+  "consensus": "poa",
+  "nodes": ["https://staging-testnet.leapdao.org/rpc"],
+  "txStorage": "https://khkh64c86f.execute-api.eu-west-1.amazonaws.com/v0"
+}
