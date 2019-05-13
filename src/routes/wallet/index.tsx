@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { observable, computed } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 
 import Web3SubmitWarning from '../../components/web3SubmitWarning';
 
@@ -19,19 +19,12 @@ import HexString from '../../components/hexString';
 import TransactionsList from '../../routes/explorer/txList';
 import { tokensStore } from '../../stores/tokens';
 import { accountStore } from '../../stores/account';
+import { selectedTokenStore } from '../../stores/selectedToken';
 
 interface WalletProps {}
 
 @observer
 export default class Wallet extends React.Component<WalletProps, any> {
-  @computed
-  private get selectedToken() {
-    return tokensStore.tokenForColor(this.color);
-  }
-
-  @observable
-  private color = 0;
-
   public render() {
     if (!accountStore.address) {
       return (
@@ -43,8 +36,8 @@ export default class Wallet extends React.Component<WalletProps, any> {
 
     if (
       !tokensStore.ready ||
-      !this.selectedToken ||
-      !this.selectedToken.ready
+      !selectedTokenStore.token ||
+      !selectedTokenStore.token.ready
     ) {
       return <AppLayout section="wallet" />;
     }
@@ -64,18 +57,18 @@ export default class Wallet extends React.Component<WalletProps, any> {
         <Web3SubmitWarning />
         My address: <HexString>{accountStore.address}</HexString>
         <Deposit
-          color={this.color}
+          color={selectedTokenStore.color}
           onColorChange={color => {
-            this.color = color;
+            selectedTokenStore.color = color;
           }}
         />
-        <Transfer color={this.color} />
-        <Exit color={this.color} />
-        <h2>Transactions ({this.selectedToken.symbol})</h2>
+        <Transfer color={selectedTokenStore.color} />
+        <Exit color={selectedTokenStore.color} />
+        <h2>Transactions ({selectedTokenStore.token.symbol})</h2>
         <TransactionsList
           from={accountStore.address}
           to={accountStore.address}
-          color={String(this.color)}
+          color={String(selectedTokenStore.color)}
         />
       </AppLayout>
     );
