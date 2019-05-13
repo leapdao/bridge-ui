@@ -27,6 +27,7 @@ import { web3PlasmaStore } from '../stores/web3/plasma';
 import { accountStore } from '../stores/account';
 import { web3InjectedStore } from '../stores/web3/injected';
 import { web3RootStore } from '../stores/web3/root';
+import { selectedTokenStore } from '../stores/selectedToken';
 
 interface AppLayoutProps {
   section: string;
@@ -120,17 +121,6 @@ class AppLayout extends Component<AppLayoutProps, any> {
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
-              {this.leap && this.leap.balance && this.leap.ready && (
-                <Fragment>
-                  Balance:{' '}
-                  <strong>
-                    <TokenValue
-                      value={this.leap.balance}
-                      color={this.leap.color}
-                    />
-                  </strong>
-                </Fragment>
-              )}
               {web3InjectedStore.available && !web3InjectedStore.instance && (
                 <Button
                   onClick={() => {
