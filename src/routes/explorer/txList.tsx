@@ -6,18 +6,18 @@ import { Tx } from 'leap-core';
 import TransactionListComponent from '../../components/transactionList';
 import { CONFIG } from '../../config';
 
-type Props = {
+type TransactionListProps = {
   from?: string;
   to?: string;
   color?: string;
 };
 
-class TransactionList extends React.Component<Props> {
+class TransactionList extends React.Component<TransactionListProps> {
   public state: {
     txs: any[];
     nextToken?: string;
   };
-  constructor(props) {
+  constructor(props: TransactionListProps) {
     super(props);
     this.state = {
       txs: [],
@@ -29,7 +29,7 @@ class TransactionList extends React.Component<Props> {
     this.fetchStuff(this.props);
   }
 
-  public componentDidUpdate(prevProps: Props) {
+  public componentDidUpdate(prevProps: TransactionListProps) {
     if (
       prevProps.from !== this.props.from ||
       prevProps.to !== this.props.to ||
@@ -42,7 +42,7 @@ class TransactionList extends React.Component<Props> {
     }
   }
 
-  private fetchStuff({ from, to, color }: Props) {
+  private fetchStuff({ from, to, color }: TransactionListProps) {
     if (!CONFIG.txStorage) {
       return;
     }

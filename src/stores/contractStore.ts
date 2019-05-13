@@ -9,34 +9,32 @@ import { computed, observable } from 'mobx';
 import { TransactionReceipt } from 'web3/types';
 import Contract from 'web3/eth/contract';
 import PromiEvent from 'web3/promiEvent';
-import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
-import Web3Store from './web3/';
 
-export default class ContractStore {
+import { web3RootStore } from './web3/root';
+import { web3InjectedStore } from './web3/injected';
+import { web3PlasmaStore } from './web3/plasma';
+import { transactionsStore } from '../components/txNotification/transactions';
+
+export class ContractStore {
   @observable
   public address: string;
 
-  constructor(
-    public abi: any[],
-    address: string,
-    public transactions: Transactions,
-    public web3: Web3Store
-  ) {
+  constructor(public abi: any[], address: string) {
     this.address = address;
   }
 
   @computed
   public get contract(): Contract {
     if (this.address) {
-      return new this.web3.root.instance.eth.Contract(this.abi, this.address);
+      return new web3RootStore.instance.eth.Contract(this.abi, this.address);
     }
   }
 
   @computed
   public get iContract(): Contract | undefined {
-    if (this.web3.injected.instance) {
-      return new this.web3.injected.instance.eth.Contract(
+    if (web3InjectedStore.instance) {
+      return new web3InjectedStore.instance.eth.Contract(
         this.abi,
         this.address
       );
@@ -45,7 +43,7 @@ export default class ContractStore {
 
   @computed
   public get plasmaContract(): Contract | undefined {
-    return new this.web3.plasma.instance.eth.Contract(this.abi, this.address);
+    return new web3PlasmaStore.instance.eth.Contract(this.abi, this.address);
   }
 
   public watchTx(
@@ -60,7 +58,7 @@ export default class ContractStore {
       : txReceiptPromise) as Promise<InflightTxReceipt>;
 
     promise.then(inflightTxReceipt => {
-      this.transactions.update({
+      transactionsStore.update({
         ...metadata,
         key,
         futureReceipt: inflightTxReceipt.futureReceipt,

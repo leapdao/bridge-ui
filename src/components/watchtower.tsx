@@ -5,22 +5,23 @@
  * found in the LICENSE file in the root directory of this source tree.
  */
 
-import { Alert, Button, Spin, List, Row, Col, Card, Collapse } from 'antd';
-import { Link } from 'react-router-dom';
-import * as utils from 'web3-utils';
-import { Input, Outpoint, Tx } from 'leap-core';
-import { observable, reaction, runInAction, autorun } from 'mobx';
-import { inject, observer } from 'mobx-react';
 import * as React from 'react';
+import { observable, reaction, autorun } from 'mobx';
+import { Input, Outpoint, Tx } from 'leap-core';
+import { observer } from 'mobx-react';
+import { Link } from 'react-router-dom';
 import { EventLog } from 'web3/types';
+import autobind from 'autobind-decorator';
+import { Alert, Button, Spin, List, Row, Col, Card, Collapse } from 'antd';
+
 import TokenValue from '../components/tokenValue';
 import HexString from '../components/hexString';
-import Bridge from '../stores/bridge';
-import ExitHandler from '../stores/exitHandler';
-import Explorer from '../stores/explorer';
-import Tokens from '../stores/tokens';
-import Web3Store from '../stores/web3';
-import autobind from 'autobind-decorator';
+import { bridgeStore } from '../stores/bridge';
+import { exitHandlerStore } from '../stores/exitHandler';
+import { web3RootStore } from '../stores/web3/root';
+import { explorerStore } from '../stores/explorer';
+import { web3PlasmaStore } from '../stores/web3/plasma';
+import { tokensStore } from '../stores/tokens';
 
 interface ColorDetails {
   color: number;
@@ -53,15 +54,8 @@ interface ExitData {
   suspect: boolean;
 }
 
-interface WatchtowerProps {
-  exitHandler?: ExitHandler;
-  explorer?: Explorer;
-  bridge?: Bridge;
-  web3?: Web3Store;
-  tokens?: Tokens;
-}
+interface WatchtowerProps {}
 
-@inject('exitHandler', 'explorer', 'web3', 'tokens', 'bridge', 'tokens')
 @observer
 export default class Watchtower extends React.Component<WatchtowerProps, {}> {
   private renderExit(record) {
@@ -142,7 +136,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
     },
   ]; */
 
-  constructor(props) {
+  constructor(props: WatchtowerProps) {
     super(props);
     autorun(this.getData);
   }
@@ -151,23 +145,29 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
   private colorDetails: ColorDetails[] = [];
 
   private getData = async (): Promise<void> => {
-    const { exitHandler, explorer, web3, tokens, bridge } = this.props;
     const exits = [];
-    if (!bridge.address) {
-      await new Promise(resolve => reaction(() => bridge.address, resolve));
+    if (!bridgeStore.address) {
+      await new Promise(resolve =>
+        reaction(() => bridgeStore.address, resolve)
+      );
     }
-    const fromBlock = await bridge.contract.methods.genesisBlockNumber().call();
-    const events = await exitHandler.contract.getPastEvents('ExitStarted', {
-      fromBlock,
-    });
+    const fromBlock = await bridgeStore.contract.methods
+      .genesisBlockNumber()
+      .call();
+    const events = await exitHandlerStore.contract.getPastEvents(
+      'ExitStarted',
+      {
+        fromBlock,
+      }
+    );
     await Promise.all(
       events.map(async event => {
         const utxoId = new Outpoint(
           event.returnValues.txHash,
           Number(event.returnValues.outIndex)
         ).getUtxoId();
-        const exit = await exitHandler.contract.methods
-          .exits(web3.root.instance.utils.toHex(utxoId))
+        const exit = await exitHandlerStore.contract.methods
+          .exits(web3RootStore.instance.utils.toHex(utxoId))
           .call();
         let suspect;
         const exitTxHash = Tx.exit(
@@ -178,7 +178,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
             )
           )
         ).hash();
-        const exitTx = await explorer.getTransaction(exitTxHash);
+        const exitTx = await explorerStore.getTransaction(exitTxHash);
         if (exitTx === undefined) {
           suspect = true;
         }
@@ -186,31 +186,32 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
       })
     );
 
-    const uTxos = await web3.plasma.instance.getUnspentAll();
-    const addresses = await web3.plasma.instance.getColors();
+    const uTxos = await web3PlasmaStore.instance.getUnspentAll();
+    const addresses = await web3PlasmaStore.instance.getColors();
     const colors = await Promise.all(
       addresses.map(async addr => {
-        return web3.plasma.instance.getColor(addr);
+        return web3PlasmaStore.instance.getColor(addr);
       })
     );
+    const { toBN } = web3RootStore.instance.utils;
     const colorDetails = await Promise.all(
       colors.map(async color => {
         const utxoSum = uTxos.reduce((acc, utXo) => {
           return utXo.output.color === color
-            ? utils.toBN(utXo.output.value).add(acc)
+            ? toBN(utXo.output.value).add(acc)
             : acc;
-        }, utils.toBN(0));
+        }, toBN(0));
 
         const exitSum = exits.reduce((acc, e) => {
           return Number(e.exit.color) === color && !e.exit.finalized
-            ? utils.toBN(e.exit.amount).add(acc)
+            ? toBN(e.exit.amount).add(acc)
             : acc;
-        }, utils.toBN(0));
+        }, toBN(0));
 
-        const plasmaBalance = utils.toBN(
-          await tokens.list
+        const plasmaBalance = toBN(
+          await tokensStore.list
             .find(token => token.color === color)
-            .contract.methods.balanceOf(exitHandler.address)
+            .contract.methods.balanceOf(exitHandlerStore.address)
             .call()
         );
         const exitDetails = exits.filter(e => Number(e.exit.color) === color);
@@ -227,7 +228,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
           exitSum,
           plasmaBalance,
           color,
-          tokenSymbol: this.props.tokens.tokenForColor(color).symbol,
+          tokenSymbol: tokensStore.tokenForColor(color).symbol,
           isOk: plasmaBalance.gte(exitSum.add(utxoSum)),
           hasBadFinalizedExits,
           hasBadOpenExits,

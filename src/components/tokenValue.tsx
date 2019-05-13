@@ -1,23 +1,21 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { inject, observer } from 'mobx-react';
-import Tokens from '../stores/tokens';
+import { observer } from 'mobx-react';
 import { BigIntType } from 'jsbi-utils';
+import { tokensStore } from '../stores/tokens';
 
 interface TokenValueProps {
   value: BigIntType | BigIntType[];
   color: number;
   tokenLink?: boolean;
-  tokens?: Tokens;
 }
 
 const TokenValue: React.SFC<TokenValueProps> = ({
   value,
   color,
-  tokens,
   tokenLink,
 }) => {
-  const token = tokens && tokens.tokenForColor(color);
+  const token = tokensStore.tokenForColor(color);
 
   if (!token || !token.ready || value === undefined) {
     return null;
@@ -36,4 +34,4 @@ const TokenValue: React.SFC<TokenValueProps> = ({
   );
 };
 
-export default inject('tokens')(observer(TokenValue));
+export default observer(TokenValue);

@@ -4,34 +4,31 @@ import { Link } from 'react-router-dom';
 import { match } from 'react-router';
 import { Fragment } from 'react';
 import { observable, reaction } from 'mobx';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Card, Alert, Spin, Table } from 'antd';
 
 import TokenValue from '../../components/tokenValue';
-import Explorer, { ExplorerAccount } from '../../stores/explorer';
-import Tokens from '../../stores/tokens';
+import { ExplorerAccount, explorerStore } from '../../stores/explorer';
 import TransactionList from './txList';
 import { BigInt } from 'jsbi-utils';
 import { shortenHex } from '../../utils';
+import { tokensStore } from '../../stores/tokens';
 
 interface AddressRouteProps {
-  explorer: Explorer;
-  tokens: Tokens;
   match: match<{
     addr: string;
   }>;
 }
 
-@inject('explorer', 'tokens')
 @observer
 class Address extends React.Component<AddressRouteProps, any> {
-  constructor(props) {
+  constructor(props: AddressRouteProps) {
     super(props);
-    if (props.tokens.ready) {
+    if (tokensStore.ready) {
       this.fetch(props.match.params.addr);
     } else {
       reaction(
-        () => props.tokens.ready,
+        () => tokensStore.ready,
         () => {
           this.fetch(props.match.params.addr);
         }
@@ -64,10 +61,9 @@ class Address extends React.Component<AddressRouteProps, any> {
   private success = false;
 
   private fetch(address) {
-    const { explorer } = this.props;
     this.fetching = true;
 
-    explorer.getAddress(address).then(account => {
+    explorerStore.getAddress(address).then(account => {
       this.fetching = false;
       this.success = !!account;
       this.account = account;
@@ -75,7 +71,7 @@ class Address extends React.Component<AddressRouteProps, any> {
   }
 
   public render() {
-    if (!this.success && !this.fetching && this.props.tokens.ready) {
+    if (!this.success && !this.fetching && tokensStore.ready) {
       return (
         <Alert
           type="error"
@@ -84,7 +80,7 @@ class Address extends React.Component<AddressRouteProps, any> {
       );
     }
 
-    if (!this.account || this.fetching || !this.props.tokens.ready) {
+    if (!this.account || this.fetching || !tokensStore.ready) {
       return <Spin />;
     }
 

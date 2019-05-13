@@ -8,21 +8,18 @@
 import * as React from 'react';
 import { Fragment } from 'react';
 import Iframe from 'react-iframe';
-import { observable } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import { List, Icon } from 'antd';
 
-import autobind from 'autobind-decorator';
 import HexString from '../components/hexString';
 import CopyToClipboard from '../components/copyToClipboard';
 import AppLayout from '../components/appLayout';
-import ExitHandler from '../stores/exitHandler';
-import Tokens from '../stores/tokens';
 import { CONFIG } from '../config';
-import Token from '../stores/token';
+import { TokenStore } from '../stores/token';
+import { tokensStore } from '../stores/tokens';
 
-const Item: React.FC<{ item: Token }> = observer(({ item }) => (
+const Item: React.FC<{ item: TokenStore }> = observer(({ item }) => (
   <List.Item key={item.address}>
     <List.Item.Meta
       title={
@@ -44,7 +41,7 @@ const Item: React.FC<{ item: Token }> = observer(({ item }) => (
           </Link>
           <br />
           Color:{' '}
-          <CopyToClipboard copyString={item.color}>
+          <CopyToClipboard copyString={String(item.color)}>
             {item.color}
           </CopyToClipboard>
         </Fragment>
@@ -53,40 +50,11 @@ const Item: React.FC<{ item: Token }> = observer(({ item }) => (
   </List.Item>
 ));
 
-interface RegisterTokenProps {
-  exitHandler: ExitHandler;
-  tokens: Tokens;
-}
+interface RegisterTokenProps {}
 
-@inject('tokens', 'exitHandler')
 @observer
-export default class RegisterToken extends React.Component<
-  RegisterTokenProps,
-  any
-> {
-  @observable
-  private tokenAddr = '';
-
-  @autobind
-  private handleSubmit(e) {
-    e.preventDefault();
-    const { exitHandler } = this.props;
-
-    exitHandler
-      .registerToken(this.tokenAddr)
-      .on('transactionHash', registerTxHash => {
-        this.tokenAddr = '';
-      });
-  }
-
-  @autobind
-  private handleChange(e) {
-    this.tokenAddr = e.target.value;
-  }
-
-  render() {
-    const { tokens } = this.props;
-
+export default class RegisterToken extends React.Component<RegisterTokenProps> {
+  public render() {
     return (
       <AppLayout section="registerToken">
         <h1 style={{ marginBottom: 16, marginTop: 32 }}>Registered tokens:</h1>
@@ -94,7 +62,7 @@ export default class RegisterToken extends React.Component<
           itemLayout="vertical"
           size="small"
           className="tokens-list"
-          dataSource={tokens.ready ? tokens.list : undefined}
+          dataSource={tokensStore.ready ? tokensStore.list : undefined}
           renderItem={item => <Item item={item} />}
         />
 

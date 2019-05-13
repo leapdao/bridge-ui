@@ -8,32 +8,27 @@
 import * as React from 'react';
 import { Fragment } from 'react';
 import { computed } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 
 import TransferForm from '../../components/transferForm';
-import Tokens from '../../stores/tokens';
-import Network from '../../stores/network';
 
 import { bi } from 'jsbi-utils';
+import { tokensStore } from '../../stores/tokens';
+import { networkStore } from '../../stores/network';
 
 interface TransferProps {
-  tokens?: Tokens;
-  network?: Network;
   color: number;
 }
 
-@inject('tokens', 'network')
 @observer
 export default class Transfer extends React.Component<TransferProps, any> {
   @computed
   private get selectedToken() {
-    const { tokens, color } = this.props;
-    return tokens && tokens.tokenForColor(color);
+    const { color } = this.props;
+    return tokensStore.tokenForColor(color);
   }
 
   public render() {
-    const { network } = this.props;
-
     return (
       <Fragment>
         <h2>Transfer tokens</h2>
@@ -49,7 +44,7 @@ export default class Transfer extends React.Component<TransferProps, any> {
               )
               .then(a => a.futureReceipt)
           }
-          disabled={!network || !network.canSubmit}
+          disabled={!networkStore.canSubmit}
         />
       </Fragment>
     );

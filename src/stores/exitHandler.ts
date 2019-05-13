@@ -8,31 +8,20 @@ import { reaction, action, observable } from 'mobx';
 import autobind from 'autobind-decorator';
 
 import { exitHandler as exitHandlerAbi } from '../utils/abis';
-
-import Token from './token';
-import Account from './account';
-import ContractStore from './contractStore';
-import Transactions from '../components/txNotification/transactions';
-
 import { InflightTxReceipt } from '../utils/types';
-import Web3Store from './web3/';
-import PlasmaConfig from './plasmaConfig';
-import { Outpoint, Unspent } from 'leap-core';
+import { ContractStore } from './contractStore';
+import { plasmaConfigStore } from './plasmaConfig';
+import { accountStore } from './account';
+import { TokenStore } from './token';
 
-export default class ExitHandler extends ContractStore {
-  constructor(
-    private account: Account,
-    transactions: Transactions,
-    web3: Web3Store,
-    private readonly plasmaConfig: PlasmaConfig,
-    address?: string
-  ) {
-    super(exitHandlerAbi, address, transactions, web3);
+export class ExitHandlerStore extends ContractStore {
+  constructor(address?: string) {
+    super(exitHandlerAbi, address);
 
-    if (plasmaConfig.exitHandlerAddr) {
+    if (plasmaConfigStore.exitHandlerAddr) {
       this.setAddress();
     } else {
-      reaction(() => plasmaConfig.exitHandlerAddr, this.setAddress);
+      reaction(() => plasmaConfigStore.exitHandlerAddr, this.setAddress);
     }
   }
 
@@ -43,13 +32,13 @@ export default class ExitHandler extends ContractStore {
       .then(queue => queue.currentSize);
   }
 
-  public deposit(token: Token, amount: any): Promise<InflightTxReceipt> {
+  public deposit(token: TokenStore, amount: any): Promise<InflightTxReceipt> {
     if (!this.iContract) {
       throw new Error('No metamask');
     }
-    console.log(this.account.address, String(amount), token.color);
+    console.log(accountStore.address, String(amount), token.color);
     const data = this.contract.methods
-      .deposit(this.account.address, String(amount), token.color)
+      .deposit(accountStore.address, String(amount), token.color)
       .encodeABI();
 
     const inflightTxReceiptPromise = token.approveAndCall(
@@ -67,7 +56,7 @@ export default class ExitHandler extends ContractStore {
 
   public registerToken(tokenAddr: string) {
     const tx = this.iContract.methods.registerToken(tokenAddr).send({
-      from: this.account.address,
+      from: accountStore.address,
     });
 
     this.watchTx(tx, 'registerToken', {
@@ -91,7 +80,7 @@ export default class ExitHandler extends ContractStore {
       const tx = this.iContract.methods
         .startExit(youngestInputProof, proof, outIndex, inputIndex)
         .send({
-          from: this.account.address,
+          from: accountStore.address,
           value: String(exitStake),
         });
 
@@ -105,7 +94,7 @@ export default class ExitHandler extends ContractStore {
 
   public finalizeExits(color: number) {
     const tx = this.iContract.methods.finalizeTopExit(color).send({
-      from: this.account.address,
+      from: accountStore.address,
     });
 
     this.watchTx(tx, 'finalizeTopExit', {
@@ -118,9 +107,11 @@ export default class ExitHandler extends ContractStore {
   @autobind
   @action
   private setAddress() {
-    if (!this.plasmaConfig.exitHandlerAddr) {
+    if (!plasmaConfigStore.exitHandlerAddr) {
       return;
     }
-    this.address = this.plasmaConfig.exitHandlerAddr;
+    this.address = plasmaConfigStore.exitHandlerAddr;
   }
 }
+
+export const exitHandlerStore = new ExitHandlerStore();

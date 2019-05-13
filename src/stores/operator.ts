@@ -9,16 +9,13 @@ import { observable, action, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 import Contract from 'web3/eth/contract';
 import { operator as operatorAbi } from '../utils/abis';
-
-import Token from './token';
-import Slot from './slot';
-import ContractStore from './contractStore';
-import Transactions from '../components/txNotification/transactions';
-
 import { range } from '../utils';
 import { InflightTxReceipt } from '../utils/types';
-import Web3Store from './web3/';
-import PlasmaConfig from './plasmaConfig';
+
+import { ContractStore } from './contractStore';
+import { plasmaConfigStore } from './plasmaConfig';
+import { Slot } from './slot';
+import { TokenStore } from './token';
 
 const poaDefaults = { owner: '0x', stake: 0, newOwner: '0x', newStake: 0 };
 
@@ -46,25 +43,20 @@ const readSlots = (operator: Contract) => {
     .then(slots => slots.map(mapSlot));
 };
 
-export default class Operator extends ContractStore {
+export class OperatorStore extends ContractStore {
   @observable
   public slots: IObservableArray<Slot> = observable.array([]);
 
   @observable
   public lastCompleteEpoch: number;
 
-  constructor(
-    transactions: Transactions,
-    web3: Web3Store,
-    private readonly plasmaConfig: PlasmaConfig,
-    address?: string
-  ) {
-    super(operatorAbi, address, transactions, web3);
+  constructor(address?: string) {
+    super(operatorAbi, address);
 
-    if (plasmaConfig.operatorAddr) {
+    if (plasmaConfigStore.operatorAddr) {
       this.setAddress();
     } else {
-      reaction(() => plasmaConfig.operatorAddr, this.setAddress);
+      reaction(() => plasmaConfigStore.operatorAddr, this.setAddress);
     }
 
     reaction(() => {
@@ -81,10 +73,10 @@ export default class Operator extends ContractStore {
   @autobind
   @action
   private setAddress() {
-    if (!this.plasmaConfig.operatorAddr) {
+    if (!plasmaConfigStore.operatorAddr) {
       return;
     }
-    this.address = this.plasmaConfig.operatorAddr;
+    this.address = plasmaConfigStore.operatorAddr;
   }
 
   @autobind
@@ -108,7 +100,7 @@ export default class Operator extends ContractStore {
   }
 
   public bet(
-    token: Token,
+    token: TokenStore,
     slotId: number,
     stake: any,
     signerAddr: string,
@@ -131,3 +123,5 @@ export default class Operator extends ContractStore {
     return inflightTxReceiptPromise;
   }
 }
+
+export const operatorStore = new OperatorStore();

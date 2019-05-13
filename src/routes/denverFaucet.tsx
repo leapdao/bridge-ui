@@ -14,18 +14,15 @@ import autobind from 'autobind-decorator';
 import AppLayout from '../components/appLayout';
 
 import requestApi from '../utils/api';
-import Account from '../stores/account';
 import { CONFIG } from '../config';
+import { accountStore } from '../stores/account';
 
 const api = requestApi(CONFIG.denverFaucet);
 
 const requestFund = address => api('post', '', { address });
 
-interface FaucetProps {
-  account: Account;
-}
+interface FaucetProps {}
 
-@inject('account')
 @observer
 export default class Faucet extends React.Component<FaucetProps, any> {
   @observable
@@ -71,14 +68,12 @@ export default class Faucet extends React.Component<FaucetProps, any> {
   private handleSubmit(e) {
     e.preventDefault();
     this.sending = true;
-    requestFund(this.props.account.address)
+    requestFund(accountStore.address)
       .then(this.handleSuccess)
       .catch(this.handleError);
   }
 
   public render() {
-    const { account } = this.props;
-
     if (!CONFIG.denverFaucet) {
       return (
         <AppLayout section="faucet">
@@ -96,7 +91,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
           {this.error && <Alert type="error" message={this.error} />}
           {(this.success || this.error) && <Divider />}
 
-          {account.address && (
+          {accountStore.address && (
             <Button htmlType="submit" type="primary" loading={this.sending}>
               Request tokens
             </Button>

@@ -6,28 +6,20 @@ import { observer, inject } from 'mobx-react';
 import { Input, Button, Form } from 'antd';
 import autobind from 'autobind-decorator';
 import AmountInput from './amountInput';
-import Tokens from '../stores/tokens';
-import {
-  BigIntType,
-  lessThanOrEqual,
-  greaterThan,
-  biMax,
-  ZERO,
-} from 'jsbi-utils';
+import { BigIntType, greaterThan } from 'jsbi-utils';
+import { tokensStore } from '../stores/tokens';
 
 interface TransferFormProps {
-  tokens?: Tokens;
   color: number;
   disabled: boolean;
   onSubmit: (address: string, value: string | number) => Promise<any>;
 }
 
-@inject('tokens')
 @observer
 class TransferForm extends React.Component<TransferFormProps, any> {
   public get token() {
-    const { tokens, color } = this.props;
-    return tokens && tokens.tokenForColor(color);
+    const { color } = this.props;
+    return tokensStore.tokenForColor(color);
   }
 
   get valueError() {
@@ -110,11 +102,7 @@ class TransferForm extends React.Component<TransferFormProps, any> {
   }
 
   public render() {
-    const { color, tokens } = this.props;
-
-    if (!tokens) {
-      return null;
-    }
+    const { color } = this.props;
 
     if (!this.token || !this.token.ready) {
       return null;

@@ -1,15 +1,15 @@
 import * as React from 'react';
 import { observable, reaction } from 'mobx';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Card, Button, Alert, Spin } from 'antd';
 import { Link } from 'react-router-dom';
 
 import TransactionList from '../../components/transactionList';
-import NodeStore from '../../stores/node';
-import Web3Store from '../../stores/web3';
-import Explorer from '../../stores/explorer';
 import { match } from 'react-router';
 import HexString from '../../components/hexString';
+import { nodeStore } from '../../stores/node';
+import { web3PlasmaStore } from '../../stores/web3/plasma';
+import { explorerStore } from '../../stores/explorer';
 
 const dateFormat = new Intl.DateTimeFormat('en-US', {
   year: 'numeric',
@@ -22,23 +22,19 @@ const dateFormat = new Intl.DateTimeFormat('en-US', {
 });
 
 interface BlockRouteProps {
-  node: NodeStore;
-  web3: Web3Store;
-  explorer: Explorer;
   match: match<{
     hashOrNumber: string;
   }>;
 }
 
-@inject('explorer', 'node', 'web3')
 @observer
 class Block extends React.Component<BlockRouteProps, any> {
-  constructor(props) {
+  constructor(props: BlockRouteProps) {
     super(props);
     this.fetch(props.match.params.hashOrNumber);
 
     reaction(
-      () => this.props.node.latestBlock,
+      () => nodeStore.latestBlock,
       () => {
         if (!props.match.params.hashOrNumber) {
           this.fetch();
@@ -72,14 +68,13 @@ class Block extends React.Component<BlockRouteProps, any> {
   private success = false;
 
   private fetch(hashOrNumber?: string | number) {
-    const { explorer, web3 } = this.props;
     this.fetching = true;
 
     (hashOrNumber
       ? Promise.resolve(hashOrNumber)
-      : web3.plasma.instance.eth.getBlockNumber()
+      : web3PlasmaStore.instance.eth.getBlockNumber()
     ).then(param => {
-      explorer.getBlock(param).then(block => {
+      explorerStore.getBlock(param).then(block => {
         this.fetching = false;
         this.success = !!block;
         this.block = block;
@@ -88,8 +83,6 @@ class Block extends React.Component<BlockRouteProps, any> {
   }
 
   public render() {
-    const { node } = this.props;
-
     if (!this.success && !this.fetching) {
       return <Alert type="error" message="Block not found" />;
     }
@@ -106,7 +99,7 @@ class Block extends React.Component<BlockRouteProps, any> {
               <Link to={`/explorer/block/${this.block.number - 1}`}>Prev</Link>
             </Button>
           )}
-          {this.block.number < node.latestBlock && (
+          {this.block.number < nodeStore.latestBlock && (
             <Button>
               <Link to={`/explorer/block/${this.block.number + 1}`}>Next</Link>
             </Button>

@@ -9,7 +9,7 @@ import * as React from 'react';
 import * as ReactDOM from 'react-dom';
 import { Component, Fragment } from 'react';
 import { observable } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
 import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
@@ -20,29 +20,23 @@ import Message from './message';
 import TokenValue from './tokenValue';
 
 import '../style.css';
-import Tokens from '../stores/tokens';
-import Account from '../stores/account';
-import Web3Store from '../stores/web3/';
 
 import ConnectionStatusBadge from './ConnectionStatusBadge';
+import { tokensStore } from '../stores/tokens';
+import { web3PlasmaStore } from '../stores/web3/plasma';
+import { accountStore } from '../stores/account';
+import { web3InjectedStore } from '../stores/web3/injected';
+import { web3RootStore } from '../stores/web3/root';
 
 interface AppLayoutProps {
-  tokens?: Tokens;
-  account?: Account;
-  web3?: Web3Store;
   section: string;
 }
 
-@inject('tokens', 'account', 'web3')
 @observer
 class AppLayout extends Component<AppLayoutProps, any> {
   private dropdown: any = null;
 
   @observable private menuVisible = false;
-
-  constructor(props) {
-    super(props);
-  }
 
   public componentDidMount() {
     document.addEventListener('click', e => {
@@ -57,18 +51,18 @@ class AppLayout extends Component<AppLayoutProps, any> {
     });
   }
 
-  private get psc() {
-    return this.props.tokens.list && this.props.tokens.list[0];
+  private get leap() {
+    return tokensStore.tokenForColor(0);
   }
 
   public render() {
-    const { account, web3, section } = this.props;
+    const { section } = this.props;
 
-    if (web3.plasma.ready === false) {
+    if (web3PlasmaStore.ready === false) {
       return <Message>No connection to Leap node</Message>;
     }
 
-    if (!account.ready) {
+    if (!accountStore.ready) {
       return (
         <Message hideBg>
           <Spin size="large" />
@@ -126,21 +120,21 @@ class AppLayout extends Component<AppLayoutProps, any> {
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
-              {this.psc && this.psc.balance && this.psc.ready && (
+              {this.leap && this.leap.balance && this.leap.ready && (
                 <Fragment>
                   Balance:{' '}
                   <strong>
                     <TokenValue
-                      value={this.psc.balance}
-                      color={this.psc.color}
+                      value={this.leap.balance}
+                      color={this.leap.color}
                     />
                   </strong>
                 </Fragment>
               )}
-              {web3 && web3.injected.available && !web3.injected.instance && (
+              {web3InjectedStore.available && !web3InjectedStore.instance && (
                 <Button
                   onClick={() => {
-                    web3.injected.enable();
+                    web3InjectedStore.enable();
                   }}
                 >
                   <span
@@ -194,7 +188,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
             © Leap DAO {new Date().getFullYear()}
           </span>
           <ConnectionStatusBadge
-            connectionStatus={this.props.web3.root.connectionStatus}
+            connectionStatus={web3RootStore.connectionStatus}
           />
         </Layout.Footer>
       </Layout>

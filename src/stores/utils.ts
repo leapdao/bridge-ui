@@ -9,8 +9,8 @@ import { EventLog } from 'web3/types';
 import Contract from 'web3/eth/contract';
 import { isNFT } from '../utils';
 
-import Account from './account';
-import Web3Store from './web3/';
+import { web3RootStore } from './web3/root';
+import { AccountStore } from './account';
 
 function hexToAscii(hex) {
   hex = hex.replace('0x', '');
@@ -42,13 +42,13 @@ const bytesTokenABI = [
   },
 ];
 
-const tokenValue = (web3: Web3Store, token: Contract, method: string) => {
+const tokenValue = (token: Contract, method: string) => {
   return token.methods[method]()
     .call()
     .then(
       a => a,
       () => {
-        const bytesToken = new web3.root.instance.eth.Contract(
+        const bytesToken = new web3RootStore.instance.eth.Contract(
           bytesTokenABI,
           token.options.address
         );
@@ -60,20 +60,19 @@ const tokenValue = (web3: Web3Store, token: Contract, method: string) => {
 };
 
 export const tokenInfo = (
-  web3: Web3Store,
   token: Contract,
   color: number
 ): Promise<[string, string, string]> => {
   return Promise.all([
-    tokenValue(web3, token, 'symbol'),
+    tokenValue(token, 'symbol'),
     isNFT(color) ? Promise.resolve(0) : token.methods.decimals().call(),
-    tokenValue(web3, token, 'name'),
+    tokenValue(token, 'name'),
   ]);
 };
 
 export const isOurTransfer = (
   event: EventLog,
-  ourAccount: Account
+  ourAccount: AccountStore
 ): boolean => {
   return (
     event.returnValues[0].toLowerCase() === ourAccount.address.toLowerCase() ||

@@ -1,7 +1,7 @@
 import { observable, action } from 'mobx';
 import Web3 from './ts_workaround.js';
 
-export default class Web3Injected {
+export class Web3InjectedStore {
   @observable.ref
   public instance: Web3 | null = null;
 
@@ -67,3 +67,5 @@ export default class Web3Injected {
       });
   }
 }
+
+export const web3InjectedStore = new Web3InjectedStore();

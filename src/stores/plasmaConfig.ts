@@ -6,10 +6,10 @@
  */
 
 import { observable, reaction } from 'mobx';
-import Web3Plasma from './web3/plasma';
+import { web3PlasmaStore } from './web3/plasma';
 import autobind from 'autobind-decorator';
 
-export default class PlasmaConfig {
+export class PlasmaConfigStore {
   // DEPRECATED. Use rootNetworkId instead
   @observable
   public rootNetwork: string;
@@ -29,17 +29,17 @@ export default class PlasmaConfig {
   @observable
   public rootEventDelay: number;
 
-  constructor(private readonly plasma: Web3Plasma) {
-    if (this.plasma.ready) {
+  constructor() {
+    if (web3PlasmaStore.ready) {
       this.fetchConfig();
     } else {
-      reaction(() => this.plasma.ready, this.fetchConfig);
+      reaction(() => web3PlasmaStore.ready, this.fetchConfig);
     }
   }
 
   @autobind
   private fetchConfig() {
-    this.plasma.instance
+    web3PlasmaStore.instance
       .getConfig()
       .then(
         ({
@@ -60,3 +60,5 @@ export default class PlasmaConfig {
       );
   }
 }
+
+export const plasmaConfigStore = new PlasmaConfigStore();

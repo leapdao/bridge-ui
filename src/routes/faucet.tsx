@@ -14,20 +14,16 @@ import autobind from 'autobind-decorator';
 import AppLayout from '../components/appLayout';
 
 import requestApi from '../utils/api';
-import Account from '../stores/account';
 import { CONFIG } from '../config';
-import Web3Store from '../stores/web3';
+import { web3RootStore } from '../stores/web3/root';
+import { accountStore } from '../stores/account';
 
 const api = requestApi(CONFIG.tokenFaucet);
 
 const requestFund = tweetUrl => api('post', '', { tweetUrl });
 
-interface FaucetProps {
-  account: Account;
-  web3: Web3Store;
-}
+interface FaucetProps {}
 
-@inject('account', 'web3')
 @observer
 export default class Faucet extends React.Component<FaucetProps, any> {
   @observable
@@ -79,8 +75,6 @@ export default class Faucet extends React.Component<FaucetProps, any> {
   }
 
   public render() {
-    const { account, web3 } = this.props;
-
     if (!CONFIG.tokenFaucet) {
       return (
         <AppLayout section="faucet">
@@ -94,7 +88,7 @@ export default class Faucet extends React.Component<FaucetProps, any> {
         <h1>Get tokens</h1>
         <p>
           Tweet something about @leapdao and get some
-          {web3.root.name !== 'Mainnet' ? ' testnet' : ''} LEAP tokens on
+          {web3RootStore.name !== 'Mainnet' ? ' testnet' : ''} LEAP tokens on
           Plasma! Don't forget to include your Ethereum address in the tweet.
         </p>
         <Form onSubmit={this.handleSubmit} layout="inline">
@@ -116,12 +110,12 @@ export default class Faucet extends React.Component<FaucetProps, any> {
               Request tokens
             </Button>
           </Form.Item>
-          {account.address && (
+          {accountStore.address && (
             <Fragment>
               <Divider />
               <Button
                 href={`https://twitter.com/intent/tweet?text=${`Requesting faucet funds into ${
-                  account.address
+                  accountStore.address
                 } on the @leapdao test network.`}`}
                 target="_blank"
                 className="twitter-share-button"

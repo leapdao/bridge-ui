@@ -9,7 +9,7 @@ import { action, observable, ObservableMap, runInAction } from 'mobx';
 import autobind from 'autobind-decorator';
 import { TxStatus, DetailedInflightTxReceipt } from './types';
 
-export default class Transactions {
+export class TransactionsStore {
   @observable
   public map: ObservableMap<string, DetailedInflightTxReceipt>;
 
@@ -65,3 +65,5 @@ export default class Transactions {
     }, 2000);
   }
 }
+
+export const transactionsStore = new TransactionsStore();
