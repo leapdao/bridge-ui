@@ -4,5 +4,7 @@
   "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
   "consensus": "poa",
   "nodes": ["https://staging-testnet.leapdao.org/rpc"],
-  "txStorage": "https://khkh64c86f.execute-api.eu-west-1.amazonaws.com/v0"
+  "txStorage": "https://khkh64c86f.execute-api.eu-west-1.amazonaws.com/v0",
+  "tokenFaucet": "https://dlsb7da2r7.execute-api.eu-west-1.amazonaws.com/staging",
+  "denverFaucet": "https://dlsb7da2r7.execute-api.eu-west-1.amazonaws.com/staging/address"
 }
