@@ -43,9 +43,6 @@ const bytesTokenABI = [
 ];
 
 const tokenValue = (token: Contract, method: string) => {
-  if (!token.methods[method]) {
-    return;
-  }
   return token.methods[method]()
     .call()
     .then(
@@ -59,7 +56,13 @@ const tokenValue = (token: Contract, method: string) => {
           .call()
           .then(hexToAscii);
       }
-    );
+    )
+    .catch(e => {
+      console.warn(
+        `Error executing method '${method}'. Probably ABI mismatches the bytecode`
+      );
+      return Promise.reject();
+    });
 };
 
 export const tokenInfo = (
@@ -67,9 +70,11 @@ export const tokenInfo = (
   color: number
 ): Promise<[string, string, string]> => {
   return Promise.all([
-    tokenValue(token, 'symbol') || token.options.address.substring(0, 5),
+    tokenValue(token, 'symbol').catch(_ =>
+      token.options.address.substring(0, 5)
+    ),
     isNFT(color) ? Promise.resolve(0) : token.methods.decimals().call(),
-    tokenValue(token, 'name') || `Token ${color}`,
+    tokenValue(token, 'name').catch(_ => `Token ${color}`),
   ]);
 };
 
