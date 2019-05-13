@@ -43,6 +43,9 @@ const bytesTokenABI = [
 ];
 
 const tokenValue = (token: Contract, method: string) => {
+  if (!token.methods[method]) {
+    return;
+  }
   return token.methods[method]()
     .call()
     .then(
@@ -64,9 +67,9 @@ export const tokenInfo = (
   color: number
 ): Promise<[string, string, string]> => {
   return Promise.all([
-    tokenValue(token, 'symbol'),
+    tokenValue(token, 'symbol') || token.options.address.substring(0, 5),
     isNFT(color) ? Promise.resolve(0) : token.methods.decimals().call(),
-    tokenValue(token, 'name'),
+    tokenValue(token, 'name') || `Token ${color}`,
   ]);
 };
 
