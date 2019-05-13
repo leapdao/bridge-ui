@@ -7,7 +7,7 @@
 
 import { EventLog } from 'web3/types';
 import Contract from 'web3/eth/contract';
-import { isNFT } from '../utils';
+import { isNFT, isNST } from '../utils';
 
 import { web3RootStore } from './web3/root';
 import { AccountStore } from './account';
@@ -20,6 +20,18 @@ function hexToAscii(hex) {
   }
   return result;
 }
+
+const defaultSymbol = (color, addr) => {
+  if (isNST(color)) {
+    return `NST${addr.substring(2, 5)}`;
+  }
+
+  if (isNFT(color)) {
+    return `NFT${addr.substring(2, 5)}`;
+  }
+
+  return `T${addr.substring(2, 5)}`;
+};
 
 const bytesTokenABI = [
   {
@@ -71,10 +83,12 @@ export const tokenInfo = (
 ): Promise<[string, string, string]> => {
   return Promise.all([
     tokenValue(token, 'symbol').catch(_ =>
-      token.options.address.substring(0, 5)
+      defaultSymbol(color, token.options.address)
     ),
     isNFT(color) ? Promise.resolve(0) : token.methods.decimals().call(),
-    tokenValue(token, 'name').catch(_ => `Token ${color}`),
+    tokenValue(token, 'name').catch(_ =>
+      defaultSymbol(color, token.options.address)
+    ),
   ]);
 };
 

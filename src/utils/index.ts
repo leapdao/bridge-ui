@@ -2,6 +2,7 @@ export { range } from './range';
 export { toArray } from './toArray';
 export { txSuccess } from './txSuccess';
 export { nftDisplayValue, NFT_COLOR_BASE, isNFT } from './nft';
+export { nstDisplayValue, NST_COLOR_BASE, isNST } from './nst';
 
 export { KNOWN_NETWORKS } from './knownNetworks';
 
