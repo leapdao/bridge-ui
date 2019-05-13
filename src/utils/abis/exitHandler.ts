@@ -2,6 +2,38 @@ import { ABIDefinition } from 'web3/eth/abi';
 
 export default [
   {
+    constant: false,
+    inputs: [
+      {
+        name: '_amountOrTokenId',
+        type: 'uint256',
+      },
+      {
+        name: '_color',
+        type: 'uint16',
+      },
+    ],
+    name: 'depositBySender',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_token',
+        type: 'address',
+      },
+    ],
+    name: 'registerNST',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
     constant: true,
     inputs: [],
     name: 'depositCount',
@@ -9,6 +41,44 @@ export default [
       {
         name: '',
         type: 'uint32',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    name: 'exitsTokenData',
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: '',
+        type: 'uint32',
+      },
+    ],
+    name: 'tokenData',
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
       },
     ],
     payable: false,
@@ -61,6 +131,20 @@ export default [
     type: 'function',
   },
   {
+    constant: true,
+    inputs: [],
+    name: 'nstExitCounter',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
     constant: false,
     inputs: [
       {
@@ -100,6 +184,20 @@ export default [
       {
         name: '',
         type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'nstTokenCount',
+    outputs: [
+      {
+        name: '',
+        type: 'uint16',
       },
     ],
     payable: false,
@@ -357,6 +455,47 @@ export default [
     ],
     name: 'ExitStarted',
     type: 'event',
+    signature:
+      '0xaace06690e02011b548d8c5a74e1a678833d4136a56e657909fc6354bfb7c31f',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'txHash',
+        type: 'bytes32',
+      },
+      {
+        indexed: true,
+        name: 'outIndex',
+        type: 'uint8',
+      },
+      {
+        indexed: true,
+        name: 'color',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        name: 'exitor',
+        type: 'address',
+      },
+      {
+        indexed: false,
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        name: 'data',
+        type: 'bytes32',
+      },
+    ],
+    name: 'ExitStartedV2',
+    type: 'event',
+    signature:
+      '0x30924909ab00e149ea3c4b2ca611cbd244a3ac033163919000ccedf093fb4bf4',
   },
   {
     anonymous: false,
@@ -384,6 +523,8 @@ export default [
     ],
     name: 'NewDeposit',
     type: 'event',
+    signature:
+      '0x3fb288e5672e5fbbac19c54a77d8c562a521b069b922e16736f69e648ceb13a3',
   },
   {
     anonymous: false,
@@ -396,6 +537,42 @@ export default [
     ],
     name: 'MinGasPrice',
     type: 'event',
+    signature:
+      '0x85feea100eda69e1c4fe1b228ed4d7229f3e9e9ebf7d30893d71de8165c46abb',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        name: 'depositId',
+        type: 'uint32',
+      },
+      {
+        indexed: true,
+        name: 'depositor',
+        type: 'address',
+      },
+      {
+        indexed: true,
+        name: 'color',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        name: 'amount',
+        type: 'uint256',
+      },
+      {
+        indexed: false,
+        name: 'data',
+        type: 'bytes32',
+      },
+    ],
+    name: 'NewDepositV2',
+    type: 'event',
+    signature:
+      '0xfc7d4a724aae4a4fa0536a988ae3a4e31bfeffd022c2aa2a5d5eef40758b8ac4',
   },
   {
     anonymous: false,
@@ -413,6 +590,8 @@ export default [
     ],
     name: 'NewToken',
     type: 'event',
+    signature:
+      '0xfe74dea79bde70d1990ddb655bac45735b14f495ddc508cfab80b7729aa9d668',
   },
   {
     constant: false,
@@ -502,6 +681,20 @@ export default [
     outputs: [],
     payable: true,
     stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_color',
+        type: 'uint16',
+      },
+    ],
+    name: 'finalizeExits',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
     type: 'function',
   },
   {
