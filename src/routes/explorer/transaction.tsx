@@ -9,8 +9,8 @@ import { Link } from 'react-router-dom';
 
 import TokenValue from '../../components/tokenValue';
 import { swapObject } from '../../utils';
-import Explorer from '../../stores/explorer';
 import HexString from '../../components/hexString';
+import { explorerStore } from '../../stores/explorer';
 
 const TYPES = swapObject(Type);
 
@@ -19,7 +19,6 @@ interface MatchParams {
 }
 
 interface TransactionRouteProps {
-  explorer: Explorer;
   match: match<MatchParams>;
 }
 
@@ -34,10 +33,9 @@ const InputItem = observer(({ input }) => {
   );
 });
 
-@inject('explorer')
 @observer
 class Transaction extends React.Component<TransactionRouteProps, any> {
-  constructor(props) {
+  constructor(props: TransactionRouteProps) {
     super(props);
     this.fetch(props.match.params.hash);
   }
@@ -67,10 +65,9 @@ class Transaction extends React.Component<TransactionRouteProps, any> {
   private success = false;
 
   private fetch(hash) {
-    const { explorer } = this.props;
     this.fetching = true;
 
-    explorer.getTransaction(hash).then(tx => {
+    explorerStore.getTransaction(hash).then(tx => {
       this.fetching = false;
       this.success = !!tx;
       this.tx = tx;

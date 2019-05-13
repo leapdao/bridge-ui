@@ -24,10 +24,6 @@ const STATUSES = {
 export default class ConnectionStatusBadge extends React.Component<
   ConnectionStatusProps
 > {
-  constructor(props) {
-    super(props);
-  }
-
   public render() {
     const { connectionStatus } = this.props;
 

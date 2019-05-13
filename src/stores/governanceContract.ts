@@ -6,23 +6,23 @@
  */
 import { reaction, observable, IObservableArray, computed } from 'mobx';
 
-import Web3Store from './web3/';
 import {
   ABIDefinition,
   EthAbiDecodeParametersResultObject,
 } from 'web3/eth/abi';
+import autobind from 'autobind-decorator';
 
 import { range, toArray } from '../utils';
 import {
   governance as governanceAbi,
   governable as governableAbi,
 } from '../utils/abis';
-import ContractStore from './contractStore';
-import Bridge from './bridge';
-import Transactions from '../components/txNotification/transactions';
-import ExitHandler from './exitHandler';
-import Operator from './operator';
-import autobind from 'autobind-decorator';
+import { ContractStore } from './contractStore';
+import { bridgeStore } from './bridge';
+import { web3InjectedStore } from './web3/injected';
+import { web3RootStore } from './web3/root';
+import { exitHandlerStore } from './exitHandler';
+import { operatorStore } from './operator';
 
 type ABIDefinitionBySig = Map<string, ABIDefinition>;
 
@@ -90,7 +90,7 @@ const governanceParams = {
   },
 };
 
-export default class GovernanceContract extends ContractStore {
+export class GovernanceContractStore extends ContractStore {
   private funcBySignature: Map<string, ABIDefinition>;
 
   @observable
@@ -110,19 +110,13 @@ export default class GovernanceContract extends ContractStore {
   @observable
   public noGovernance: boolean;
 
-  constructor(
-    private bridge: Bridge,
-    private operator: Operator,
-    private exitHandler: ExitHandler,
-    transactions: Transactions,
-    web3: Web3Store
-  ) {
-    super(governanceAbi, null, transactions, web3);
+  constructor() {
+    super(governanceAbi, null);
 
     reaction(
-      () => bridge.contract,
+      () => bridgeStore.contract,
       () => {
-        bridge.contract.methods
+        bridgeStore.contract.methods
           .admin()
           .call()
           .then(owner => {
@@ -140,7 +134,7 @@ export default class GovernanceContract extends ContractStore {
       console.error('Need injected web3 to finalize');
       return;
     }
-    const accounts = await this.web3.injected.instance.eth.getAccounts();
+    const accounts = await web3InjectedStore.instance.eth.getAccounts();
     const tx = this.iContract.methods.finalize().send({
       from: accounts[0],
     });
@@ -155,7 +149,7 @@ export default class GovernanceContract extends ContractStore {
   private readCurrentValue(proposal, governanceChange) {
     if (governanceChange.getter) {
       if (governanceChange.contract === 'proxy') {
-        const proxy = new this.web3.root.instance.eth.Contract(
+        const proxy = new web3RootStore.instance.eth.Contract(
           governableAbi,
           proposal.subject
         );
@@ -190,13 +184,13 @@ export default class GovernanceContract extends ContractStore {
 
   private lookupContractType(subject): string {
     const normalizedSubject = subject.toLowerCase();
-    if (this.exitHandler.address.toLowerCase() === normalizedSubject) {
+    if (exitHandlerStore.address.toLowerCase() === normalizedSubject) {
       return 'ExitHandler';
     }
-    if (this.bridge.address.toLowerCase() === normalizedSubject) {
+    if (bridgeStore.address.toLowerCase() === normalizedSubject) {
       return 'Bridge';
     }
-    if (this.operator.address.toLowerCase() === normalizedSubject) {
+    if (operatorStore.address.toLowerCase() === normalizedSubject) {
       return 'Operator';
     }
     return 'Unknown';
@@ -281,7 +275,7 @@ export default class GovernanceContract extends ContractStore {
     }
     return {
       abi: abiDef,
-      params: this.web3.root.instance.eth.abi.decodeParameters(
+      params: web3RootStore.instance.eth.abi.decodeParameters(
         abiDef.inputs,
         msgData.substring(10)
       ),
@@ -294,7 +288,7 @@ export default class GovernanceContract extends ContractStore {
       .filter(m => m.type === 'function')
       .reduce<ABIDefinitionBySig>(
         (m: ABIDefinitionBySig, def: ABIDefinition) => {
-          const sig = this.web3.root.instance.eth.abi.encodeFunctionSignature(
+          const sig = web3RootStore.instance.eth.abi.encodeFunctionSignature(
             def
           );
           m[sig] = def;
@@ -304,3 +298,5 @@ export default class GovernanceContract extends ContractStore {
       );
   }
 }
+
+export const governanceContractStore = new GovernanceContractStore();

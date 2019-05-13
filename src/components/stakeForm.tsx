@@ -4,7 +4,6 @@ import { observer } from 'mobx-react';
 import { observable, computed } from 'mobx';
 import { Input, Button } from 'antd';
 import autobind from 'autobind-decorator';
-import Token from '../stores/token';
 import {
   BigIntType,
   BigInt,
@@ -16,6 +15,7 @@ import {
   add,
   ZERO,
 } from 'jsbi-utils';
+import { TokenStore } from '../stores/token';
 
 const fieldValue = (v: BigIntType) => biMax(v, ZERO);
 
@@ -25,7 +25,7 @@ interface StakeFormProps {
   maxValue: BigIntType;
   ownStake: BigIntType;
   disabled: boolean;
-  token: Token;
+  token: TokenStore;
   onChange: (newValue: BigIntType) => void;
   onSubmit: () => void;
 }

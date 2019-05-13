@@ -1,12 +1,12 @@
 import { observable, reaction, action, when } from 'mobx';
 import autobind from 'autobind-decorator';
 import Web3 from './ts_workaround.js';
-import PlasmaConfig from '../plasmaConfig';
+import { plasmaConfigStore } from '../plasmaConfig';
 import ConnectionStatus from './connectionStatus';
 
 import { KNOWN_NETWORKS } from '../../utils/knownNetworks';
 
-export default class Web3Root {
+export class Web3RootStore {
   @observable
   public provider: { ws: string; http: string };
 
@@ -28,12 +28,12 @@ export default class Web3Root {
   @observable
   public latestBlockNum;
 
-  constructor(public plasmaConfig: PlasmaConfig) {
-    if (plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork) {
+  constructor() {
+    if (plasmaConfigStore.rootNetworkId || plasmaConfigStore.rootNetwork) {
       this.connect();
     } else {
       reaction(
-        () => plasmaConfig.rootNetworkId || plasmaConfig.rootNetwork,
+        () => plasmaConfigStore.rootNetworkId || plasmaConfigStore.rootNetwork,
         this.connect
       );
     }
@@ -77,7 +77,7 @@ export default class Web3Root {
   @autobind
   @action
   private connect() {
-    const { rootNetwork, rootNetworkId } = this.plasmaConfig;
+    const { rootNetwork, rootNetworkId } = plasmaConfigStore;
 
     const network =
       this.getKnownNetwork(rootNetworkId) ||
@@ -115,3 +115,5 @@ export default class Web3Root {
     this.instance = new Web3(provider);
   }
 }
+
+export const web3RootStore = new Web3RootStore();

@@ -6,17 +6,17 @@
  */
 
 import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { List, Collapse, Icon } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 
 import AppLayout from '../components/appLayout';
-import GovernanceContract from '../stores/governanceContract';
 import EtherscanLink from '../components/etherscanLink';
 import { shortenHex } from '../utils';
 import { Button } from 'antd';
+import { governanceContractStore } from '../stores/governanceContract';
 
 const { Fragment } = React;
 
@@ -51,9 +51,7 @@ const renderDate = ({ effectiveDate, cancelled }) => {
   );
 };
 
-interface GovernanceProps {
-  governanceContract: GovernanceContract;
-}
+interface GovernanceProps {}
 
 const isEtherscannable = (value: string) =>
   value.startsWith &&
@@ -63,13 +61,8 @@ const isEtherscannable = (value: string) =>
 const isLengthyHex = (value: string) =>
   value.startsWith && value.startsWith('0x') && value.length > 20;
 
-@inject('governanceContract')
 @observer
 export default class Governance extends React.Component<GovernanceProps, any> {
-  constructor(props) {
-    super(props);
-  }
-
   private formatValue(value) {
     if (isEtherscannable(value)) {
       return <EtherscanLink key={value} value={value} />;
@@ -128,7 +121,7 @@ export default class Governance extends React.Component<GovernanceProps, any> {
   }
 
   public render() {
-    const { governanceContract } = this.props;
+    const governanceContract = governanceContractStore;
     const {
       proposals,
       noGovernance,

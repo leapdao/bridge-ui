@@ -1,12 +1,11 @@
-import Web3Plasma from './plasma';
-import Web3Root from './root';
-import Web3Injected from './injected';
+import { web3PlasmaStore } from './plasma';
+import { web3RootStore } from './root';
+import { web3InjectedStore } from './injected';
 
-export default class Web3Store {
-  constructor(
-    public readonly root: Web3Root,
-    public readonly plasma: Web3Plasma,
-    public readonly injected: Web3Injected,
-  ) {
-  }
+export class Web3Store {
+  public readonly root = web3RootStore;
+  public readonly plasma = web3PlasmaStore;
+  public readonly injected = web3InjectedStore;
 }
+
+export const web3Store = new Web3Store();

@@ -9,7 +9,7 @@ import { observable, computed } from 'mobx';
 
 const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
-export default class Slot {
+export class Slot {
   @observable
   public eventCounter: string;
   @observable

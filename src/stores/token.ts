@@ -21,13 +21,8 @@ import { erc20, erc721 } from '../utils/abis';
 import { isNFT } from '../utils';
 import { txSuccess } from '../utils/txSuccess';
 
-import Account from './account';
-import ContractStore from './contractStore';
-import Transactions from '../components/txNotification/transactions';
 import { InflightTxReceipt } from '../utils/types';
 import { range } from '../utils/range';
-import NodeStore from './node';
-import Web3Store from './web3';
 import { tokenInfo, isOurTransfer } from './utils';
 
 import {
@@ -38,17 +33,15 @@ import {
   toNumber,
   ZERO,
 } from 'jsbi-utils';
+import { ContractStore } from './contractStore';
+import { accountStore } from './account';
+import { nodeStore } from './node';
+import { web3InjectedStore } from './web3/injected';
+import { web3PlasmaStore } from './web3/plasma';
 
 const Big = require('big.js');
 
-export default class Token extends ContractStore {
-  @observable
-  public tokens: IObservableArray<Token>;
-
-  private account: Account;
-
-  public color: number;
-
+export class TokenStore extends ContractStore {
   @observable
   public name: string;
   @observable
@@ -60,32 +53,22 @@ export default class Token extends ContractStore {
   @observable.ref
   public plasmaBalance?: BigIntType | BigIntType[];
 
-  constructor(
-    account: Account,
-    transactions: Transactions,
-    address: string,
-    color: number,
-    private node: NodeStore,
-    web3: Web3Store
-  ) {
-    super(isNFT(color) ? erc721 : erc20, address, transactions, web3);
-
-    this.account = account;
-    this.color = color;
+  constructor(address: string, public color: number) {
+    super(isNFT(color) ? erc721 : erc20, address);
 
     autorun(this.loadBalance.bind(null, false));
     autorun(this.loadBalance.bind(null, true));
-    tokenInfo(this.web3, this.contract, color).then(this.setInfo);
+    tokenInfo(this.contract, color).then(this.setInfo);
 
     if (this.contract) {
       this.contract.events.Transfer({}, (_, event: EventLog) => {
-        if (isOurTransfer(event, this.account)) {
+        if (isOurTransfer(event, accountStore)) {
           this.loadBalance(false);
         }
       });
     }
 
-    reaction(() => this.node.latestBlock, this.loadBalance.bind(null, true));
+    reaction(() => nodeStore.latestBlock, this.loadBalance.bind(null, true));
   }
 
   @computed
@@ -145,13 +128,13 @@ export default class Token extends ContractStore {
   }
 
   public transfer(to: string, amount: BigIntType): Promise<any> {
-    if (!this.web3.injected.instance) {
+    if (!web3InjectedStore.instance) {
       return Promise.reject('No metamask');
     }
 
     const promiEvent = Web3PromiEvent();
-    this.web3.plasma.instance
-      .getUnspent(this.account.address)
+    web3PlasmaStore.instance
+      .getUnspent(accountStore.address)
       .then(unspent => {
         if (this.isNft) {
           const { outpoint } = unspent.find(
@@ -167,26 +150,26 @@ export default class Token extends ContractStore {
 
         const inputs = helpers.calcInputs(
           unspent,
-          this.account.address,
+          accountStore.address,
           amount as any,
           this.color
         );
         const outputs = helpers.calcOutputs(
           unspent,
           inputs,
-          this.account.address,
+          accountStore.address,
           to,
           amount as any,
           this.color
         );
         return Tx.transfer(inputs, outputs);
       })
-      .then(tx => tx.signWeb3(this.web3.injected.instance as any))
+      .then(tx => tx.signWeb3(web3InjectedStore.instance as any))
       .then(
         signedTx => {
           promiEvent.eventEmitter.emit('transactionHash', signedTx.hash());
           return {
-            futureReceipt: this.web3.plasma.instance.eth.sendSignedTransaction(
+            futureReceipt: web3PlasmaStore.instance.eth.sendSignedTransaction(
               signedTx.hex() as any
             ),
           };
@@ -223,8 +206,8 @@ export default class Token extends ContractStore {
     }
 
     return this.maybeApprove(to, value).then(() => {
-      const futureReceipt = this.web3.injected.instance.eth.sendTransaction({
-        from: this.account.address,
+      const futureReceipt = web3InjectedStore.instance.eth.sendTransaction({
+        from: accountStore.address,
         to,
         data,
       });
@@ -275,10 +258,10 @@ export default class Token extends ContractStore {
 
   @autobind
   private loadBalance(plasma = false) {
-    if (!this.account.address) {
+    if (!accountStore.address) {
       return;
     }
-    this.balanceOf(this.account.address, plasma).then(balance => {
+    this.balanceOf(accountStore.address, plasma).then(balance => {
       this.updateBalance(balance, plasma);
     });
   }
@@ -299,7 +282,7 @@ export default class Token extends ContractStore {
         .then(operator => operator === spender);
     } else {
       return this.iContract.methods
-        .allowance(this.account.address, spender)
+        .allowance(accountStore.address, spender)
         .call()
         .then(allowance => Number(allowance) >= value);
     }
@@ -321,7 +304,7 @@ export default class Token extends ContractStore {
 
       const tx = this.iContract.methods
         .approve(spender, String(this.allowanceOrTokenId(value)))
-        .send({ from: this.account.address });
+        .send({ from: accountStore.address });
 
       this.watchTx(tx, 'approve', {
         message: `Approve bridge to transfer ${this.symbol}`,

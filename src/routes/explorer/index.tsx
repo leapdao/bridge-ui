@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { Fragment } from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Route, match } from 'react-router';
 import { Link } from 'react-router-dom';
 import { observable } from 'mobx';
@@ -16,47 +16,33 @@ import { Form, Input, Button, Divider, Alert } from 'antd';
 
 import AppLayout from '../../components/appLayout';
 import HexString from '../../components/hexString';
-import ExplorerStore from '../../stores/explorer';
-import Tokens from '../../stores/tokens';
 
 import Block from './block';
 import Transaction from './transaction';
 import Address from './address';
-import Operator from '../../stores/operator';
-import ExitHandler from '../../stores/exitHandler';
-import Bridge from '../../stores/bridge';
-import Web3Store from '../../stores/web3';
+import { tokensStore } from '../../stores/tokens';
+import { explorerStore } from '../../stores/explorer';
+import { web3RootStore } from '../../stores/web3/root';
+import { bridgeStore } from '../../stores/bridge';
+import { operatorStore } from '../../stores/operator';
+import { exitHandlerStore } from '../../stores/exitHandler';
 
 interface ExplorerProps {
-  explorer: ExplorerStore;
-  bridge: Bridge;
-  operator: Operator;
-  exitHandler: ExitHandler;
-  tokens: Tokens;
-  web3: Web3Store;
   match: match<any>;
   history: any;
 }
 
-@inject('tokens', 'explorer', 'exitHandler', 'bridge', 'operator', 'web3')
 @observer
 export default class Explorer extends React.Component<ExplorerProps, any> {
   @observable
   private value = '';
 
-  private get psc() {
-    return this.props.tokens.list && this.props.tokens.list[0];
+  private get leap() {
+    return tokensStore.tokenForColor(0);
   }
 
   public render() {
-    const {
-      explorer,
-      match: routerMatch,
-      operator,
-      exitHandler,
-      bridge,
-      web3,
-    } = this.props;
+    const { match: routerMatch } = this.props;
 
     return (
       <AppLayout section="explorer">
@@ -74,9 +60,9 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
           <Form.Item className="explorer-search__button">
             <Button
               type="primary"
-              loading={explorer.searching}
+              loading={explorerStore.searching}
               onClick={() => {
-                explorer.search(this.value, this.props.history).then(
+                explorerStore.search(this.value, this.props.history).then(
                   () => {
                     this.value = '';
                   },
@@ -87,13 +73,13 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
               Go!
             </Button>
           </Form.Item>
-          {!explorer.success && !explorer.searching && (
+          {!explorerStore.success && !explorerStore.searching && (
             <Alert
               type="error"
               message="No results found for your search."
               closable
               onClose={() => {
-                explorer.success = true;
+                explorerStore.success = true;
               }}
             />
           )}
@@ -112,25 +98,25 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
         <h1>Chain info</h1>
         <dl className="info">
           <dt>Network</dt>
-          <dd>{web3.root.name}</dd>
+          <dd>{web3RootStore.name}</dd>
           <dt>Bridge contract</dt>
           <dd>
-            <HexString>{bridge.address}</HexString>
+            <HexString>{bridgeStore.address}</HexString>
           </dd>
           <dt>Operator contract</dt>
           <dd>
-            <HexString>{operator.address}</HexString>
+            <HexString>{operatorStore.address}</HexString>
           </dd>
           <dt>Exit contract</dt>
           <dd>
-            <HexString>{exitHandler.address}</HexString>
+            <HexString>{exitHandlerStore.address}</HexString>
           </dd>
-          {this.psc && (
+          {this.leap && (
             <Fragment>
               <dt>Token contract address</dt>
               <dd>
-                <Link to={`/explorer/address/${this.psc.address}`}>
-                  <HexString>{this.psc.address}</HexString>
+                <Link to={`/explorer/address/${this.leap.address}`}>
+                  <HexString>{this.leap.address}</HexString>
                 </Link>
               </dd>
             </Fragment>

@@ -1,22 +1,21 @@
 import * as React from 'react';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 
 import { shortenHex } from '../utils';
-import Web3Store from '../stores/web3';
+import { web3RootStore } from '../stores/web3/root';
 
 const { Fragment } = React;
 
 interface EtherscanLinkProps {
   value: string;
-  web3?: Web3Store;
 }
 
-const EtherscanLink: React.SFC<EtherscanLinkProps> = ({ value, web3 }) => {
-  if (!value || !web3) {
+const EtherscanLink: React.SFC<EtherscanLinkProps> = ({ value }) => {
+  if (!value) {
     return <Fragment />;
   }
 
-  const { etherscanBase } = web3.root;
+  const { etherscanBase } = web3RootStore;
 
   if (!etherscanBase) {
     return <Fragment>{shortenHex(value)}</Fragment>;
@@ -42,4 +41,4 @@ const EtherscanLink: React.SFC<EtherscanLinkProps> = ({ value, web3 }) => {
   );
 };
 
-export default inject('network')(observer(EtherscanLink));
+export default observer(EtherscanLink);

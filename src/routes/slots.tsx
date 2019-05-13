@@ -17,13 +17,12 @@ import Web3SubmitWarning from '../components/web3SubmitWarning';
 import StakeForm from '../components/stakeForm';
 import TokenValue from '../components/tokenValue';
 import AppLayout from '../components/appLayout';
-import Operator from '../stores/operator';
-import Account from '../stores/account';
-import Network from '../stores/network';
-import { match } from 'react-router';
-import Tokens from '../stores/tokens';
 
 import { BigIntType, BigInt, biMax, multiply, divide, ZERO } from 'jsbi-utils';
+import { tokensStore } from '../stores/tokens';
+import { operatorStore } from '../stores/operator';
+import { accountStore } from '../stores/account';
+import { networkStore } from '../stores/network';
 
 const addrCmp = (a1, a2) => toChecksumAddress(a1) === toChecksumAddress(a2);
 
@@ -48,14 +47,8 @@ const thCellStyle = Object.assign(
   cellStyle
 ) as any;
 
-interface SlotsProps {
-  operator: Operator;
-  account: Account;
-  network: Network;
-  tokens: Tokens;
-}
+interface SlotsProps {}
 
-@inject('tokens', 'operator', 'account', 'network')
 @observer
 export default class Slots extends React.Component<SlotsProps, any> {
   @observable
@@ -67,8 +60,8 @@ export default class Slots extends React.Component<SlotsProps, any> {
   @observable
   private tenderPubKey = window.localStorage.getItem('tenderPubKey');
 
-  private get psc() {
-    return this.props.tokens.list && this.props.tokens.list[0];
+  private get leap() {
+    return tokensStore.tokenForColor(0);
   }
 
   private setStake(i, stake) {
@@ -93,13 +86,12 @@ export default class Slots extends React.Component<SlotsProps, any> {
   }
 
   private handleBet(slotId) {
-    const { operator } = this.props;
     const signerAddr = this.signerAddr;
     const tenderPubKey = this.tenderPubKey;
-    const stake = this.psc.toCents(this.stakes[slotId]);
+    const stake = this.leap.toCents(this.stakes[slotId]);
 
-    operator
-      .bet(this.psc, slotId, stake, signerAddr, tenderPubKey)
+    operatorStore
+      .bet(this.leap, slotId, stake, signerAddr, tenderPubKey)
       .then(({ futureReceipt }) => {
         futureReceipt.once('transactionHash', betTxHash => {
           console.log('bet', betTxHash); // eslint-disable-line
@@ -114,13 +106,12 @@ export default class Slots extends React.Component<SlotsProps, any> {
     newKey?: string,
     renderer?: (value: any) => any
   ) {
-    const { operator } = this.props;
     return (
       <tr key={key}>
         <th style={cellStyle}>
           <div style={{ width: 80 }}>{title}</div>
         </th>
-        {operator.slots.map((slot, i) => {
+        {operatorStore.slots.map((slot, i) => {
           const willChange = slot.willChange && newKey;
           const currentValuesStyle = {
             display: 'block',
@@ -150,18 +141,17 @@ export default class Slots extends React.Component<SlotsProps, any> {
     const signerAddr = this.signerAddr;
     const stakes = this.stakes;
     const tenderPubKey = this.tenderPubKey;
-    const { account, network, operator } = this.props;
 
     return (
       <table style={{ borderCollapse: 'collapse' }}>
         <thead>
           <tr>
             <th style={thCellStyle} />
-            {operator.slots.map((slot, i) => (
+            {operatorStore.slots.map((slot, i) => (
               <th style={thCellStyle} key={i}>
                 Slot {i}{' '}
-                {account.address &&
-                  addrCmp(slot.owner, account.address) &&
+                {accountStore.address &&
+                  addrCmp(slot.owner, accountStore.address) &&
                   '(owner)'}
               </th>
             ))}
@@ -205,30 +195,30 @@ export default class Slots extends React.Component<SlotsProps, any> {
             <TokenValue value={val} color={0} />
           ))}
           {this.renderRow('Act. epoch', 'activationEpoch')}
-          {this.psc && this.psc.ready && (
+          {this.leap && this.leap.ready && (
             <tr>
               <th style={formCellStyle} />
-              {operator.slots.map((slot, i) => {
+              {operatorStore.slots.map((slot, i) => {
                 const minStake = divide(
                   multiply(biMax(slot.stake, slot.newStake), BigInt(105)),
                   BigInt(100)
                 ); // * 1.05
-                const ownStake = addrCmp(slot.owner, account.address || '')
+                const ownStake = addrCmp(slot.owner, accountStore.address || '')
                   ? minStake
                   : ZERO;
 
                 return (
                   <td key={i} style={formCellStyle}>
-                    {network && network.canSubmit && (
+                    {networkStore.canSubmit && (
                       <StakeForm
                         value={stakes[i]}
-                        token={this.psc}
+                        token={this.leap}
                         onChange={value => this.setStake(i, value)}
                         disabled={!signerAddr}
                         onSubmit={() => this.handleBet(i)}
                         minValue={minStake}
                         ownStake={ownStake}
-                        maxValue={this.psc.balance as BigIntType}
+                        maxValue={this.leap.balance as BigIntType}
                       />
                     )}
                   </td>
@@ -242,8 +232,6 @@ export default class Slots extends React.Component<SlotsProps, any> {
   }
 
   public render() {
-    const { operator } = this.props;
-
     const slotsTable = this.renderSlots();
 
     return (
@@ -270,10 +258,11 @@ export default class Slots extends React.Component<SlotsProps, any> {
           </Form.Item>
         </Form>
         <Divider />
-        {operator.lastCompleteEpoch !== undefined && (
+        {operatorStore.lastCompleteEpoch !== undefined && (
           <Fragment>
             <p>
-              <strong>Last complete epoch:</strong> {operator.lastCompleteEpoch}
+              <strong>Last complete epoch:</strong>{' '}
+              {operatorStore.lastCompleteEpoch}
             </p>
             <Divider />
           </Fragment>

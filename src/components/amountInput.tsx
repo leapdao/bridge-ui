@@ -1,16 +1,15 @@
 import * as React from 'react';
 import { Fragment } from 'react';
 import { computed } from 'mobx';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Form, Select, Input } from 'antd';
 import autobind from 'autobind-decorator';
-import Tokens from '../stores/tokens';
 import { isNFT, nftDisplayValue } from '../utils';
-import { BigIntType, bi } from 'jsbi-utils';
+import { BigIntType } from 'jsbi-utils';
+import { tokensStore } from '../stores/tokens';
 
 interface AmountInputProps {
   color: number;
-  tokens?: Tokens;
   plasma?: boolean;
   onChange: (newValue: string | number) => void;
   onBlur?: (e: React.FocusEvent) => void;
@@ -22,7 +21,6 @@ interface AmountInputProps {
 type HTMLProps = React.HtmlHTMLAttributes<HTMLInputElement>;
 type HTMLPropsWithoutColor = Pick<HTMLProps, Exclude<keyof HTMLProps, 'color'>>;
 
-@inject('tokens')
 @observer
 export default class AmountInput extends React.Component<
   AmountInputProps & HTMLPropsWithoutColor,
@@ -43,8 +41,8 @@ export default class AmountInput extends React.Component<
 
   @computed
   get token() {
-    const { tokens, color } = this.props;
-    return tokens && tokens.tokenForColor(color);
+    const { color } = this.props;
+    return tokensStore.tokenForColor(color);
   }
 
   @autobind
@@ -85,7 +83,7 @@ export default class AmountInput extends React.Component<
   }
 
   private renderColorsSelect() {
-    const { tokens, color } = this.props;
+    const { color } = this.props;
     return (
       <Select
         value={color}
@@ -94,7 +92,7 @@ export default class AmountInput extends React.Component<
         }}
         onChange={this.handleColorChange}
       >
-        {tokens.list.map(token => (
+        {tokensStore.list.map(token => (
           <Select.Option key={String(token.color)} value={token.color}>
             {token.symbol}
           </Select.Option>

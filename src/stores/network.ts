@@ -7,28 +7,25 @@
 
 import { observable, computed, reaction } from 'mobx';
 import autobind from 'autobind-decorator';
+import { web3InjectedStore } from './web3/injected';
+import { web3RootStore } from './web3/root';
+import { accountStore } from './account';
 
-import Account from './account';
-import Web3Store from './web3/';
-
-export default class Network {
+export class NetworkStore {
   @observable
   private _mmNetwork: string;
 
-  constructor(
-    private readonly account: Account,
-    private readonly web3: Web3Store
-  ) {
-    if (this.web3.injected.instance) {
+  constructor() {
+    if (web3InjectedStore.instance) {
       this.fetchNetwork();
     } else {
-      reaction(() => this.web3.injected.instance, this.fetchNetwork);
+      reaction(() => web3InjectedStore.instance, this.fetchNetwork);
     }
   }
 
   @autobind
   private fetchNetwork() {
-    this.web3.injected.instance.eth.net.getId().then(mmNetwork => {
+    web3InjectedStore.instance.eth.net.getId().then(mmNetwork => {
       this._mmNetwork = String(mmNetwork);
     });
   }
@@ -49,9 +46,9 @@ export default class Network {
   public get canSubmit() {
     return (
       (!!(window as any).web3 || !!(window as any).ethereum) &&
-      !!this.account.address &&
-      this.web3.root &&
-      this.isSameNetwork(this.web3.root.networkId, this.mmNetwork)
+      !!accountStore.address &&
+      web3RootStore &&
+      this.isSameNetwork(web3RootStore.networkId, this.mmNetwork)
     );
   }
 
@@ -59,8 +56,10 @@ export default class Network {
   public get wrongNetwork() {
     return (
       this.mmNetwork &&
-      this.web3.root &&
-      !this.isSameNetwork(this.web3.root.networkId, this.mmNetwork)
+      web3RootStore &&
+      !this.isSameNetwork(web3RootStore.networkId, this.mmNetwork)
     );
   }
 }
+
+export const networkStore = new NetworkStore();

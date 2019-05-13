@@ -1,24 +1,18 @@
 import * as React from 'react';
 import { Fragment } from 'react';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Alert, Button } from 'antd';
-import Network from '../stores/network';
-import Web3Store from '../stores/web3/';
-import Account from '../stores/account';
+import { web3InjectedStore } from '../stores/web3/injected';
+import { networkStore } from '../stores/network';
+import { web3RootStore } from '../stores/web3/root';
+import { accountStore } from '../stores/account';
 
-interface Web3SubmitWarningProps {
-  network?: Network;
-  account?: Account;
-  web3?: Web3Store;
-}
+interface Web3SubmitWarningProps {}
 
-@inject('network', 'account', 'web3')
 @observer
 class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
   public render() {
-    const { network, account, web3 } = this.props;
-
-    if (!web3.injected.available) {
+    if (!web3InjectedStore.available) {
       return (
         <Alert
           type="warning"
@@ -28,7 +22,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
       );
     }
 
-    if (!web3.injected.instance) {
+    if (!web3InjectedStore.instance) {
       return (
         <Alert
           type="warning"
@@ -36,7 +30,7 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
           message={
             <Fragment>
               To be able to send transactions you need to{' '}
-              <Button onClick={() => web3.injected.enable()}>
+              <Button onClick={() => web3InjectedStore.enable()}>
                 connect MetaMask{' '}
                 <span role="img" aria-label="fox">
                   🦊
@@ -48,19 +42,19 @@ class Web3SubmitWarning extends React.Component<Web3SubmitWarningProps, any> {
       );
     }
 
-    if (network.wrongNetwork) {
+    if (networkStore.wrongNetwork) {
       return (
         <Alert
           type="warning"
           style={{ marginBottom: 10 }}
           message={`To be able to send transactions you need to switch MetaMask to ${
-            web3.root.name
+            web3RootStore.name
           }`}
         />
       );
     }
 
-    if (!account.address) {
+    if (!accountStore.address) {
       return (
         <Alert
           style={{ marginBottom: 10 }}

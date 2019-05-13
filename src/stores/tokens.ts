@@ -9,36 +9,25 @@ import { observable, action, computed, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
 import { range, NFT_COLOR_BASE, isNFT } from '../utils';
-import Account from './account';
-import Token from './token';
-import ExitHandler from './exitHandler';
-import Transactions from '../components/txNotification/transactions';
-import { Output } from 'leap-core';
-import NodeStore from './node';
-import Web3Store from './web3/';
+import { TokenStore } from './token';
+import { exitHandlerStore } from './exitHandler';
 
-export default class Tokens {
+export class TokensStore {
   @observable
-  public list: IObservableArray<Token>;
+  public list: IObservableArray<TokenStore>;
 
   private erc20TokenCount: number;
   private nftTokenCount: number;
 
-  constructor(
-    private account: Account,
-    private exitHandler: ExitHandler,
-    private txs: Transactions,
-    private node: NodeStore,
-    private web3: Web3Store
-  ) {
+  constructor() {
     this.erc20TokenCount = 0;
     this.nftTokenCount = 0;
 
-    reaction(() => this.exitHandler.contract, this.init);
+    reaction(() => exitHandlerStore.contract, this.init);
     reaction(
-      () => this.exitHandler.contract,
+      () => exitHandlerStore.contract,
       () => {
-        this.exitHandler.contract.events.NewToken(
+        exitHandlerStore.contract.events.NewToken(
           {},
           this.loadTokens.bind(this)
         );
@@ -53,7 +42,7 @@ export default class Tokens {
 
   @autobind
   @action
-  private addTokens(tokens: Token[]) {
+  private addTokens(tokens: TokenStore[]) {
     if (!this.list) {
       this.list = observable.array([]);
     }
@@ -80,7 +69,7 @@ export default class Tokens {
     );
   }
 
-  public tokenForAddress(address: string) {
+  public tokenForAddress(address: string): TokenStore {
     const index = this.tokenIndexForAddress(address);
     if (index < 0 || index >= this.list.length) {
       return undefined;
@@ -108,31 +97,24 @@ export default class Tokens {
     return this.list[index];
   }
 
-  private loadTokenColorRange(from: number, to: number): Array<Promise<Token>> {
+  private loadTokenColorRange(from: number, to: number) {
     return (range(from, to) as number[]).map(color => {
-      return this.exitHandler.contract.methods
+      return exitHandlerStore.contract.methods
         .tokens(color)
         .call()
         .then(({ 0: address }) => {
-          return new Token(
-            this.account,
-            this.txs,
-            address,
-            color,
-            this.node,
-            this.web3
-          );
+          return new TokenStore(address, color);
         });
     });
   }
 
   public loadTokens() {
     return Promise.all([
-      this.exitHandler.contract.methods
+      exitHandlerStore.contract.methods
         .erc20TokenCount()
         .call()
         .then(r => Number(r)),
-      this.exitHandler.contract.methods
+      exitHandlerStore.contract.methods
         .nftTokenCount()
         .call()
         .then(r => Number(r)),
@@ -156,3 +138,5 @@ export default class Tokens {
       .then(this.addTokens);
   }
 }
+
+export const tokensStore = new TokensStore();

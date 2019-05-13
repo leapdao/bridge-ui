@@ -61,8 +61,9 @@ export default class Monitor extends React.Component<
   MonitorProps,
   MonitorState
 > {
-  constructor(props) {
+  constructor(props: MonitorProps) {
     super(props);
+
     this.state = {
       nodesInfo: {},
     };

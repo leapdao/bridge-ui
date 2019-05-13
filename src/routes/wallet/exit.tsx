@@ -9,42 +9,33 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { Link } from 'react-router-dom';
 import { computed } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Button, Table, Tooltip } from 'antd';
 import { bufferToHex } from 'ethereumjs-util';
+import { BigInt } from 'jsbi-utils';
 
 import TokenValue from '../../components/tokenValue';
 import FinalizeExitButton from '../../components/finalizeExitButton';
-
 import { shortenHex } from '../../utils';
-import { BigInt } from 'jsbi-utils';
-import Tokens from '../../stores/tokens';
-import Unspents from '../../stores/unspents';
-import ExitHandler from '../../stores/exitHandler';
-
 import { CONFIG } from '../../config';
+import { tokensStore } from '../../stores/tokens';
+import { unspentsStore } from '../../stores/unspents';
 
 interface ExitProps {
-  tokens?: Tokens;
-  unspents?: Unspents;
-  exitHandler?: ExitHandler;
   color: number;
 }
 
-@inject('tokens', 'exitHandler', 'network', 'unspents')
 @observer
 export default class Exit extends React.Component<ExitProps, any> {
   @computed
   private get selectedToken() {
-    const { tokens, color } = this.props;
-    return tokens.tokenForColor(color);
+    const { color } = this.props;
+    return tokensStore.tokenForColor(color);
   }
 
   public render() {
-    const { unspents, exitHandler } = this.props;
-
-    const utxoList =
-      unspents && unspents.listForColor(this.selectedToken.color);
+    const utxoList = unspentsStore.listForColor(this.selectedToken.color);
+    const { pendingFastExits } = unspentsStore;
 
     if (!utxoList) {
       return null;
@@ -59,7 +50,9 @@ export default class Exit extends React.Component<ExitProps, any> {
               {' '}
               <Button
                 size="small"
-                onClick={() => unspents.consolidate(this.selectedToken.color)}
+                onClick={() =>
+                  unspentsStore.consolidate(this.selectedToken.color)
+                }
                 style={{ marginLeft: 10 }}
               >
                 Consolidate {this.selectedToken.symbol}
@@ -111,16 +104,12 @@ export default class Exit extends React.Component<ExitProps, any> {
                                 ⚡ Fast exit
                                 <br />
                                 <br />
-                                {unspents.pendingFastExits[inputHash].sig ===
-                                  '' && 'Signature required'}
-                                {unspents.pendingFastExits[inputHash].sig !==
-                                  '' && (
+                                {pendingFastExits[inputHash].sig === '' &&
+                                  'Signature required'}
+                                {pendingFastExits[inputHash].sig !== '' && (
                                   <Fragment>
                                     Waiting for block{' '}
-                                    {
-                                      unspents.pendingFastExits[inputHash]
-                                        .effectiveBlock
-                                    }{' '}
+                                    {pendingFastExits[inputHash].effectiveBlock}{' '}
                                     to payout.
                                   </Fragment>
                                 )}
@@ -129,12 +118,12 @@ export default class Exit extends React.Component<ExitProps, any> {
                           >
                             <span>🕐 Exiting</span>
                           </Tooltip>
-                          {unspents.pendingFastExits[inputHash].sig === '' && (
+                          {pendingFastExits[inputHash].sig === '' && (
                             <Button
                               size="small"
                               style={{ marginLeft: '10px' }}
                               onClick={() => {
-                                unspents.signFastExit(u);
+                                unspentsStore.signFastExit(u);
                               }}
                             >
                               🔑 Sign
@@ -146,21 +135,21 @@ export default class Exit extends React.Component<ExitProps, any> {
                         <Fragment>
                           <Tooltip
                             title={
-                              unspents.periodBlocksRange[0] <=
+                              unspentsStore.periodBlocksRange[0] <=
                               u.transaction.blockNumber
                                 ? 'Exit can be started after height ' +
-                                  unspents.periodBlocksRange[1]
+                                  unspentsStore.periodBlocksRange[1]
                                 : ''
                             }
                           >
                             <Button
                               size="small"
                               disabled={
-                                unspents.periodBlocksRange[0] <=
+                                unspentsStore.periodBlocksRange[0] <=
                                 u.transaction.blockNumber
                               }
                               onClick={() => {
-                                unspents.exitUnspent(u);
+                                unspentsStore.exitUnspent(u);
                               }}
                             >
                               🐌Normal
@@ -171,7 +160,7 @@ export default class Exit extends React.Component<ExitProps, any> {
                             style={{ marginLeft: '10px' }}
                             disabled={CONFIG.exitMarketMaker === ''}
                             onClick={() => {
-                              unspents.fastExitUnspent(u);
+                              unspentsStore.fastExitUnspent(u);
                             }}
                           >
                             ⚡Fast
@@ -185,7 +174,7 @@ export default class Exit extends React.Component<ExitProps, any> {
           />
         </div>
 
-        <FinalizeExitButton token={this.selectedToken}/>
+        <FinalizeExitButton token={this.selectedToken} />
       </Fragment>
     );
   }

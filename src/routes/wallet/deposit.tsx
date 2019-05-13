@@ -7,35 +7,28 @@
 
 import * as React from 'react';
 import { computed, observable, reaction, autorun } from 'mobx';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Form, Button, Table } from 'antd';
 import autobind from 'autobind-decorator';
-
+import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
 import { EventLog } from 'web3/types';
 
 import TokenValue from '../../components/tokenValue';
 import AmountInput from '../../components/amountInput';
-import Tokens from '../../stores/tokens';
-import Network from '../../stores/network';
-import ExitHandler from '../../stores/exitHandler';
-import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
-import PlasmaConfig from '../../stores/plasmaConfig';
-import Unspents from '../../stores/unspents';
 import storage from '../../utils/storage';
-import Web3Store from '../../stores/web3';
 import EtherscanLink from '../../components/etherscanLink';
 import HexString from '../../components/hexString';
+import { tokensStore } from '../../stores/tokens';
+import { plasmaConfigStore } from '../../stores/plasmaConfig';
+import { unspentsStore } from '../../stores/unspents';
+import { exitHandlerStore } from '../../stores/exitHandler';
+import { networkStore } from '../../stores/network';
+import { web3RootStore } from '../../stores/web3/root';
 
 const { Fragment } = React;
 
 interface DepositProps {
-  tokens?: Tokens;
-  network?: Network;
-  exitHandler?: ExitHandler;
   color: number;
-  plasmaConfig?: PlasmaConfig;
-  unspents?: Unspents;
-  web3?: Web3Store;
   onColorChange: (color: number) => void;
 }
 
@@ -46,13 +39,12 @@ type PendingDeposit = {
   blockNumber?: number;
 };
 
-@inject('tokens', 'exitHandler', 'network', 'plasmaConfig', 'unspents', 'web3')
 @observer
 export default class Deposit extends React.Component<DepositProps, any> {
   @computed
   get selectedToken() {
-    const { tokens, color } = this.props;
-    return tokens && tokens.tokenForColor(color);
+    const { color } = this.props;
+    return tokensStore.tokenForColor(color);
   }
 
   @observable
@@ -63,13 +55,13 @@ export default class Deposit extends React.Component<DepositProps, any> {
 
   private storageKey: string;
 
-  constructor(props) {
+  constructor(props: DepositProps) {
     super(props);
 
-    this.storageKey = `pendingDeposits-${props.exitHandler.address}`;
-    props.exitHandler.contract.events.NewDeposit({}, this.handleNewDeposit);
+    this.storageKey = `pendingDeposits-${exitHandlerStore.address}`;
+    exitHandlerStore.contract.events.NewDeposit({}, this.handleNewDeposit);
 
-    reaction(() => props.unspents.list, () => this.checkPendingDeposits());
+    reaction(() => unspentsStore.list, () => this.checkPendingDeposits());
 
     this.loadPendingDeposits();
     reaction(() => this.selectedToken, this.loadPendingDeposits);
@@ -96,14 +88,14 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   private checkPendingDeposits() {
-    const { rootEventDelay } = this.props.plasmaConfig;
+    const { rootEventDelay } = plasmaConfigStore;
     const maturedDeposits = Object.values(this.pendingDeposits)
       .filter(
         pending => this.blocksSince(pending.blockNumber) >= rootEventDelay
       )
       .sort((a, b) => b.blockNumber - a.blockNumber);
 
-    const utxos = this.props.unspents.list;
+    const utxos = unspentsStore.list;
     for (let i = 0; i < utxos.length && maturedDeposits.length > 0; i++) {
       const depIndex = maturedDeposits.findIndex(
         dep => dep.value === utxos[i].output.value
@@ -126,9 +118,9 @@ export default class Deposit extends React.Component<DepositProps, any> {
   @autobind
   private handleSubmit(e) {
     e.preventDefault();
-    const { exitHandler, color } = this.props;
+    const { color } = this.props;
     const value = this.selectedToken.toCents(this.value);
-    exitHandler
+    exitHandlerStore
       .deposit(this.selectedToken, String(value))
       .then(({ futureReceipt }) => {
         futureReceipt.once('transactionHash', depositTxHash => {
@@ -143,9 +135,8 @@ export default class Deposit extends React.Component<DepositProps, any> {
   }
 
   private canSubmitValue(value: BigIntType) {
-    const { network } = this.props;
     return (
-      network.canSubmit &&
+      networkStore.canSubmit &&
       value &&
       greaterThan(bi(value), ZERO) &&
       (this.selectedToken.isNft ||
@@ -158,16 +149,16 @@ export default class Deposit extends React.Component<DepositProps, any> {
       return 0;
     }
     const blocksSince = Math.min(
-      this.props.plasmaConfig.rootEventDelay,
-      this.props.web3.root.latestBlockNum - blockNumber
+      plasmaConfigStore.rootEventDelay,
+      web3RootStore.latestBlockNum - blockNumber
     );
     return Math.max(0, blocksSince);
   }
 
   public render() {
-    const { tokens, color, onColorChange, plasmaConfig } = this.props;
+    const { color, onColorChange } = this.props;
 
-    const { rootEventDelay } = plasmaConfig;
+    const { rootEventDelay } = plasmaConfigStore;
 
     return (
       <Fragment>
@@ -191,7 +182,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
               color={color}
               onColorChange={newColor => {
                 onColorChange(newColor);
-                this.value = tokens.tokenForColor(newColor).isNft
+                this.value = tokensStore.tokenForColor(newColor).isNft
                   ? ''
                   : this.value;
               }}

@@ -7,22 +7,20 @@
 
 import * as React from 'react';
 import { computed, observable, reaction } from 'mobx';
-import { inject, observer } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Button } from 'antd';
-import ExitHandler from '../stores/exitHandler';
-import Token from '../stores/token';
 import autobind from 'autobind-decorator';
+import { TokenStore } from '../stores/token';
+import { exitHandlerStore } from '../stores/exitHandler';
 
 interface FinalizeExitButtonProps {
-  token: Token;
-  exitHandler?: ExitHandler;
+  token: TokenStore;
 }
 
 interface FinalizeExitButtonState {
   exitQueueSize: number;
 }
 
-@inject('exitHandler')
 @observer
 export default class FinalizeExitButton extends React.Component<
   FinalizeExitButtonProps,
@@ -31,7 +29,7 @@ export default class FinalizeExitButton extends React.Component<
   @observable
   private exitQueueSize: number = 0;
 
-  constructor(props) {
+  constructor(props: FinalizeExitButtonProps) {
     super(props);
 
     reaction(() => this.props.token, this.loadQueueSize);
@@ -40,8 +38,8 @@ export default class FinalizeExitButton extends React.Component<
 
   @autobind
   private loadQueueSize() {
-    const { exitHandler, token } = this.props;
-    exitHandler.exitQueueSize(token.color).then(size => {
+    const { token } = this.props;
+    exitHandlerStore.exitQueueSize(token.color).then(size => {
       this.exitQueueSize = Number(size);
     });
   }
@@ -53,8 +51,8 @@ export default class FinalizeExitButton extends React.Component<
 
   @autobind
   private finalize() {
-    const { exitHandler, token } = this.props;
-    return exitHandler.finalizeExits(token.color);
+    const { token } = this.props;
+    return exitHandlerStore.finalizeExits(token.color);
   }
 
   public render() {

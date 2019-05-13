@@ -6,10 +6,11 @@
  */
 
 import * as React from 'react';
-import { observer, inject } from 'mobx-react';
+import { observer } from 'mobx-react';
 import { Spin, Icon, notification } from 'antd';
 
 import { TxStatus } from './types';
+import { transactionsStore } from './transactions';
 
 const statusDetails = {
   [TxStatus.CREATED]: {
@@ -31,10 +32,8 @@ const statusDetails = {
   },
 };
 
-const TxNotification: React.SFC<{
-  transactions?: any;
-}> = ({ transactions }) => {
-  transactions.map.observe(txChange => {
+const TxNotification: React.FC = () => {
+  transactionsStore.map.observe(txChange => {
     if (txChange.type === 'delete') {
       notification.close(txChange.name);
       return;
@@ -62,4 +61,4 @@ const TxNotification: React.SFC<{
   return null;
 };
 
-export default inject('transactions')(observer(TxNotification));
+export default observer(TxNotification);
