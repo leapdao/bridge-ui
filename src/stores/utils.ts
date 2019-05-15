@@ -7,7 +7,7 @@
 
 import { EventLog } from 'web3/types';
 import Contract from 'web3/eth/contract';
-import { isNFT } from '../utils';
+import { isNFT, isNST } from '../utils';
 
 import { web3RootStore } from './web3/root';
 import { AccountStore } from './account';
@@ -20,6 +20,18 @@ function hexToAscii(hex) {
   }
   return result;
 }
+
+const defaultSymbol = (color, addr) => {
+  if (isNST(color)) {
+    return `NST${addr.substring(2, 5)}`;
+  }
+
+  if (isNFT(color)) {
+    return `NFT${addr.substring(2, 5)}`;
+  }
+
+  return `T${addr.substring(2, 5)}`;
+};
 
 const bytesTokenABI = [
   {
@@ -56,7 +68,13 @@ const tokenValue = (token: Contract, method: string) => {
           .call()
           .then(hexToAscii);
       }
-    );
+    )
+    .catch(e => {
+      console.warn(
+        `Error executing method '${method}'. Probably ABI mismatches the bytecode`
+      );
+      return Promise.reject();
+    });
 };
 
 export const tokenInfo = (
@@ -64,9 +82,13 @@ export const tokenInfo = (
   color: number
 ): Promise<[string, string, string]> => {
   return Promise.all([
-    tokenValue(token, 'symbol'),
+    tokenValue(token, 'symbol').catch(_ =>
+      defaultSymbol(color, token.options.address)
+    ),
     isNFT(color) ? Promise.resolve(0) : token.methods.decimals().call(),
-    tokenValue(token, 'name'),
+    tokenValue(token, 'name').catch(_ =>
+      defaultSymbol(color, token.options.address)
+    ),
   ]);
 };
 
