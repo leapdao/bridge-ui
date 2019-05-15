@@ -55,7 +55,7 @@ export default class Exit extends React.Component<ExitProps, any> {
                 }
                 style={{ marginLeft: 10 }}
               >
-                Consolidate {this.selectedToken.symbol}
+                Consolidate&nbsp;{this.selectedToken.symbol}
               </Button>
             </Fragment>
           )}
