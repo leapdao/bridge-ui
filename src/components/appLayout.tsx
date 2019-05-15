@@ -17,7 +17,7 @@ import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
 import { CONFIG } from '../config';
 import AppLogo from './appLogo';
 import Message from './message';
-import TokenValue from './tokenValue';
+import TokenBalances from './tokenBalances';
 
 import '../style.css';
 
@@ -121,6 +121,12 @@ class AppLayout extends Component<AppLayoutProps, any> {
           <MediaQuery minWidth={1049}>{menu(true)}</MediaQuery>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <span className="balance">
+              {web3InjectedStore.available && web3InjectedStore.instance && (
+                <div style={{ lineHeight: '21px' }}>
+                  <TokenBalances color={selectedTokenStore.color} />
+                </div>
+              )}
+
               {web3InjectedStore.available && !web3InjectedStore.instance && (
                 <Button
                   onClick={() => {

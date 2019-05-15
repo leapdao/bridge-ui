@@ -13,6 +13,7 @@ import TransactionList from './txList';
 import { BigInt } from 'jsbi-utils';
 import { shortenHex } from '../../utils';
 import { tokensStore } from '../../stores/tokens';
+import ColorBadge from '../../components/colorBadge';
 
 interface AddressRouteProps {
   match: match<{
@@ -103,7 +104,10 @@ class Address extends React.Component<AddressRouteProps, any> {
             <h3>Token</h3>
             <dl className="info">
               <dt>Name</dt>
-              <dd>{this.account.token.name}</dd>
+              <dd>
+                {this.account.token.name}{' '}
+                <ColorBadge address={this.account.address} />
+              </dd>
               <dt>Symbol</dt>
               <dd>{this.account.token.symbol}</dd>
               <dt>Decimals</dt>

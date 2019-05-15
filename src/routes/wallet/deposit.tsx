@@ -13,11 +13,9 @@ import autobind from 'autobind-decorator';
 import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
 import { EventLog } from 'web3/types';
 
-import TokenValue from '../../components/tokenValue';
 import AmountInput from '../../components/amountInput';
 import storage from '../../utils/storage';
 import EtherscanLink from '../../components/etherscanLink';
-import HexString from '../../components/hexString';
 import { tokensStore } from '../../stores/tokens';
 import { plasmaConfigStore } from '../../stores/plasmaConfig';
 import { unspentsStore } from '../../stores/unspents';
@@ -29,7 +27,7 @@ const { Fragment } = React;
 
 interface DepositProps {
   color: number;
-  onColorChange: (color: number) => void;
+  onColorChange?: (color: number) => void;
 }
 
 type PendingDeposit = {
@@ -162,8 +160,6 @@ export default class Deposit extends React.Component<DepositProps, any> {
 
     return (
       <Fragment>
-        <h2>Make a deposit</h2>
-
         {this.selectedToken.isNft && (
           <p>
             {this.selectedToken.name} is non-fungible token. Please enter
@@ -180,12 +176,6 @@ export default class Deposit extends React.Component<DepositProps, any> {
                 this.value = value;
               }}
               color={color}
-              onColorChange={newColor => {
-                onColorChange(newColor);
-                this.value = tokensStore.tokenForColor(newColor).isNft
-                  ? ''
-                  : this.value;
-              }}
             />
           </div>
 
@@ -202,28 +192,6 @@ export default class Deposit extends React.Component<DepositProps, any> {
           </Form.Item>
         </Form>
 
-        <dl className="info" style={{ marginTop: 10 }}>
-          <dt>Token name</dt>
-          <dd>{this.selectedToken.name}</dd>
-          <dt>Token contract address</dt>
-          <dd>
-            <HexString>{this.selectedToken.address}</HexString>
-          </dd>
-          <dt>Token balance</dt>
-          <dd>
-            <TokenValue
-              value={this.selectedToken.balance}
-              color={this.selectedToken.color}
-            />
-          </dd>
-          <dt>Plasma balance</dt>
-          <dd>
-            <TokenValue
-              value={this.selectedToken.plasmaBalance}
-              color={this.selectedToken.color}
-            />
-          </dd>
-        </dl>
         {Object.values(this.pendingDeposits).length > 0 && (
           <Fragment>
             <h2 style={{ alignItems: 'center', display: 'flex' }}>

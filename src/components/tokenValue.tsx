@@ -7,12 +7,22 @@ import { tokensStore } from '../stores/tokens';
 interface TokenValueProps {
   value: BigIntType | BigIntType[];
   color: number;
+  precision?: number;
   tokenLink?: boolean;
 }
 
-const TokenValue: React.SFC<TokenValueProps> = ({
+const round = (n: number, precision?: number) => {
+  if (precision === undefined) {
+    return n;
+  }
+  const dec = 10 ** precision;
+  return Math.round(n * dec) / dec;
+};
+
+const TokenValue: React.FC<TokenValueProps> = ({
   value,
   color,
+  precision,
   tokenLink,
 }) => {
   const token = tokensStore.tokenForColor(color);
@@ -25,7 +35,7 @@ const TokenValue: React.SFC<TokenValueProps> = ({
     <React.Fragment>
       {token.isNft
         ? (value as BigIntType[]).length
-        : token.toTokens(value as BigIntType).toString()}{' '}
+        : round(token.toTokens(value as BigIntType), precision)}{' '}
       {!tokenLink && token.symbol}
       {tokenLink && (
         <Link to={`/explorer/address/${token.address}`}>{token.symbol}</Link>

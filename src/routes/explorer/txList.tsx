@@ -5,6 +5,8 @@ import { Button } from 'antd';
 import { Tx } from 'leap-core';
 import TransactionListComponent from '../../components/transactionList';
 import { CONFIG } from '../../config';
+import { observable } from 'mobx';
+import { observer } from 'mobx-react';
 
 type TransactionListProps = {
   from?: string;
@@ -12,18 +14,16 @@ type TransactionListProps = {
   color?: string;
 };
 
+@observer
 class TransactionList extends React.Component<TransactionListProps> {
-  public state: {
-    txs: any[];
-    nextToken?: string;
-  };
-  constructor(props: TransactionListProps) {
-    super(props);
-    this.state = {
-      txs: [],
-      nextToken: undefined,
-    };
-  }
+  @observable.shallow
+  private txs: any[] = [];
+
+  @observable
+  private nextToken?: string;
+
+  @observable
+  private loading = false;
 
   public componentDidMount() {
     this.fetchStuff(this.props);
@@ -47,6 +47,7 @@ class TransactionList extends React.Component<TransactionListProps> {
       return;
     }
 
+    this.loading = true;
     const qs = [
       from && `from=${from}`,
       to && `to=${to}`,
@@ -58,21 +59,22 @@ class TransactionList extends React.Component<TransactionListProps> {
     fetch(url)
       .then(r => r.json())
       .then(response => {
-        this.setState({
-          txs: response.transactions.map(tx => ({
-            ...tx,
-            ...Tx.fromRaw(tx.raw),
-          })),
-          nextToken: response.nextToken,
-        });
+        this.txs = response.transactions.map(tx => ({
+          ...tx,
+          ...Tx.fromRaw(tx.raw),
+        }));
+        this.nextToken = response.nextToken;
+      })
+      .finally(() => {
+        this.loading = false;
       });
   }
 
   public render() {
     return (
       <>
-        <TransactionListComponent txs={this.state.txs} />
-        {this.state.nextToken && <Button>Load more</Button>}
+        <TransactionListComponent txs={this.txs} loading={this.loading} />
+        {this.nextToken && <Button>Load more</Button>}
       </>
     );
   }

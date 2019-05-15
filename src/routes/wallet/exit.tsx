@@ -43,23 +43,24 @@ export default class Exit extends React.Component<ExitProps, any> {
 
     return (
       <Fragment>
-        <h2 style={{ alignItems: 'center', display: 'flex' }}>
-          Unspents ({this.selectedToken.symbol})
+        <div>
           {utxoList.length > 1 && (
             <Fragment>
-              {' '}
               <Button
                 size="small"
                 onClick={() =>
                   unspentsStore.consolidate(this.selectedToken.color)
                 }
-                style={{ marginLeft: 10 }}
+                style={{ marginRight: 10 }}
               >
                 Consolidate&nbsp;{this.selectedToken.symbol}
               </Button>
             </Fragment>
           )}
-        </h2>
+          <Fragment>
+            <FinalizeExitButton token={this.selectedToken} />
+          </Fragment>
+        </div>
         <div className="leap-table">
           <Table
             style={{ marginTop: 15 }}
@@ -173,8 +174,6 @@ export default class Exit extends React.Component<ExitProps, any> {
               })}
           />
         </div>
-
-        <FinalizeExitButton token={this.selectedToken} />
       </Fragment>
     );
   }

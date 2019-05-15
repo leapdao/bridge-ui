@@ -31,7 +31,6 @@ export default class Transfer extends React.Component<TransferProps, any> {
   public render() {
     return (
       <Fragment>
-        <h2>Transfer tokens</h2>
         <TransferForm
           color={this.selectedToken.color}
           onSubmit={(addr, amount) =>

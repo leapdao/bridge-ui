@@ -18,6 +18,7 @@ import AppLayout from '../components/appLayout';
 import { CONFIG } from '../config';
 import { TokenStore } from '../stores/token';
 import { tokensStore } from '../stores/tokens';
+import ColorBadge from '../components/colorBadge';
 
 const Item: React.FC<{ item: TokenStore }> = observer(({ item }) => (
   <List.Item key={item.address}>
@@ -32,6 +33,7 @@ const Item: React.FC<{ item: TokenStore }> = observer(({ item }) => (
               title="Non-fungible token"
             />
           )}
+          <ColorBadge address={item.address} />
         </Fragment>
       }
       description={
@@ -57,7 +59,7 @@ export default class RegisterToken extends React.Component<RegisterTokenProps> {
   public render() {
     return (
       <AppLayout section="registerToken">
-        <h1 style={{ marginBottom: 16, marginTop: 32 }}>Registered tokens:</h1>
+        <h1>Registered tokens</h1>
         <List
           itemLayout="vertical"
           size="small"

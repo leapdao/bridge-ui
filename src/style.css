@@ -28,8 +28,12 @@ h2:first-child {
   margin-right: 20px;
 }
 
+.info {
+  color: #000;
+}
+
 .info dt {
-  font-weight: bold;
+  opacity: 0.4;
 }
 
 .explorer-nav {
@@ -147,6 +151,10 @@ h2:first-child {
   max-width: 450px;
 }
 
+.wallet-input .ant-form-item {
+  margin-top: 0;
+}
+
 .wallet-input .ant-select:not(.ant-input-group-addon .ant-select) {
   width: 100% !important;
 }
@@ -220,4 +228,21 @@ h2:first-child {
 .tokens-list .ant-list-item-meta-title,
 .tokens-list .ant-list-item-meta {
   margin-bottom: 0;
+}
+
+.info-cols {
+  display: flex;
+}
+
+.info-col + .info-col {
+  margin-left: 15px;
+}
+
+.token-select .ant-select-selection--single {
+  height: 70px;
+}
+
+.token-select .ant-select-selection__rendered {
+  line-height: 21px;
+  padding-top: 5px;
 }
