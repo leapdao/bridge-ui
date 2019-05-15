@@ -23,6 +23,7 @@ import { accountStore } from '../../stores/account';
 import { selectedTokenStore } from '../../stores/selectedToken';
 import { colorFromAddr } from '../../utils';
 import ColorBadge from '../../components/colorBadge';
+import TokenBalances from '../../components/tokenBalances';
 
 interface WalletProps {}
 
@@ -104,56 +105,7 @@ export default class Wallet extends React.Component<WalletProps, any> {
                 )}
                 <ColorBadge address={token.address} />
                 <br />
-                <span
-                  style={{
-                    position: 'relative',
-                    marginRight: 10,
-                    fontWeight: 'normal',
-                    display: 'inline-flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <TokenValue
-                    value={token.balance}
-                    color={token.color}
-                    precision={3}
-                  />
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 'normal',
-                      opacity: 0.4,
-                      marginTop: -5,
-                    }}
-                  >
-                    Ethereum
-                  </span>
-                </span>
-                <span
-                  style={{
-                    position: 'relative',
-                    marginRight: 10,
-                    fontWeight: 'normal',
-                    display: 'inline-flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <TokenValue
-                    value={token.plasmaBalance}
-                    color={token.color}
-                    precision={3}
-                  />
-                  <span
-                    style={{
-                      fontSize: 12,
-                      fontWeight: 'normal',
-                      opacity: 0.4,
-                      marginTop: -5,
-                    }}
-                  >
-                    Plasma
-                  </span>
-                </span>
+                <TokenBalances color={token.color} />
               </Select.Option>
             ))}
           </Select>
