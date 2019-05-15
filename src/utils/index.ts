@@ -15,3 +15,9 @@ export const swapObject = (object: { [key: string]: any }) => {
     {}
   );
 };
+
+export const colorFromAddr = (addr: string, s = 93, l = 80) => {
+  const base = 24;
+  const h = parseInt(addr.slice(base, base + 13), 16) % 360;
+  return `hsl(${h}, ${s}%, ${l}%)`;
+};

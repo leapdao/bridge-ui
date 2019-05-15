@@ -37,10 +37,6 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
   @observable
   private value = '';
 
-  private get leap() {
-    return tokensStore.tokenForColor(0);
-  }
-
   public render() {
     const { match: routerMatch } = this.props;
 
@@ -111,16 +107,6 @@ export default class Explorer extends React.Component<ExplorerProps, any> {
           <dd>
             <HexString>{exitHandlerStore.address}</HexString>
           </dd>
-          {this.leap && (
-            <Fragment>
-              <dt>Token contract address</dt>
-              <dd>
-                <Link to={`/explorer/address/${this.leap.address}`}>
-                  <HexString>{this.leap.address}</HexString>
-                </Link>
-              </dd>
-            </Fragment>
-          )}
         </dl>
       </AppLayout>
     );

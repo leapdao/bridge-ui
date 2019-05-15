@@ -72,15 +72,6 @@ export class TokenStore extends ContractStore {
   }
 
   @computed
-  public get decimalsBalance(): number {
-    if (this.isNft) {
-      return (this.balance as BigIntType[]).length;
-    }
-
-    return this.balance && this.toTokens(this.balance as BigIntType);
-  }
-
-  @computed
   public get ready() {
     return !!this.symbol;
   }

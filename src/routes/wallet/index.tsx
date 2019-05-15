@@ -6,10 +6,11 @@
  */
 
 import * as React from 'react';
-import { observable, computed } from 'mobx';
 import { observer } from 'mobx-react';
+import { Select, Icon, Tabs } from 'antd';
 
 import Web3SubmitWarning from '../../components/web3SubmitWarning';
+import TokenValue from '../../components/tokenValue';
 
 import Deposit from './deposit';
 import Transfer from './transfer';
@@ -20,6 +21,8 @@ import TransactionsList from '../../routes/explorer/txList';
 import { tokensStore } from '../../stores/tokens';
 import { accountStore } from '../../stores/account';
 import { selectedTokenStore } from '../../stores/selectedToken';
+import { colorFromAddr } from '../../utils';
+import ColorBadge from '../../components/colorBadge';
 
 interface WalletProps {}
 
@@ -55,16 +58,128 @@ export default class Wallet extends React.Component<WalletProps, any> {
     return (
       <AppLayout section="wallet">
         <Web3SubmitWarning />
-        My address: <HexString>{accountStore.address}</HexString>
-        <Deposit
-          color={selectedTokenStore.color}
-          onColorChange={color => {
-            selectedTokenStore.color = color;
+        <div
+          style={{
+            marginBottom: 30,
+            marginTop: -20,
+            marginLeft: -20,
+            marginRight: -20,
+            padding: 20,
+            borderBottomColor: colorFromAddr(
+              selectedTokenStore.token.address,
+              80,
+              50
+            ),
+            borderBottomWidth: 2,
+            borderBottomStyle: 'solid',
           }}
-        />
-        <Transfer color={selectedTokenStore.color} />
-        <Exit color={selectedTokenStore.color} />
-        <h2>Transactions ({selectedTokenStore.token.symbol})</h2>
+        >
+          <Select
+            value={selectedTokenStore.color}
+            style={{
+              maxWidth: '100%',
+              width: 400,
+            }}
+            className="token-select"
+            onChange={v => {
+              selectedTokenStore.color = v;
+            }}
+          >
+            {tokensStore.list.map(token => (
+              <Select.Option
+                style={{
+                  height: 70,
+                }}
+                key={String(token.color)}
+                value={token.color}
+              >
+                <span style={{ fontWeight: 'bold', fontSize: 16 }}>
+                  {token.name}
+                </span>
+                {token.isNft && (
+                  <Icon
+                    type="trophy"
+                    style={{ color: 'lightgray', marginLeft: '5px' }}
+                  />
+                )}
+                <ColorBadge address={token.address} />
+                <br />
+                <span
+                  style={{
+                    position: 'relative',
+                    marginRight: 10,
+                    fontWeight: 'normal',
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <TokenValue
+                    value={token.balance}
+                    color={token.color}
+                    precision={3}
+                  />
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 'normal',
+                      opacity: 0.4,
+                      marginTop: -5,
+                    }}
+                  >
+                    Ethereum
+                  </span>
+                </span>
+                <span
+                  style={{
+                    position: 'relative',
+                    marginRight: 10,
+                    fontWeight: 'normal',
+                    display: 'inline-flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <TokenValue
+                    value={token.plasmaBalance}
+                    color={token.color}
+                    precision={3}
+                  />
+                  <span
+                    style={{
+                      fontSize: 12,
+                      fontWeight: 'normal',
+                      opacity: 0.4,
+                      marginTop: -5,
+                    }}
+                  >
+                    Plasma
+                  </span>
+                </span>
+              </Select.Option>
+            ))}
+          </Select>
+        </div>
+
+        <Tabs defaultActiveKey="0">
+          <Tabs.TabPane tab="Deposit" key="0">
+            <Deposit color={selectedTokenStore.color} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Transfer" key="1">
+            <Transfer color={selectedTokenStore.color} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Exit" key="2">
+            <Exit color={selectedTokenStore.color} />
+          </Tabs.TabPane>
+          <Tabs.TabPane tab="Token info" key="3">
+            <dl className="info">
+              <dt>Token contract address</dt>
+              <dd>
+                <HexString>{selectedTokenStore.token.address}</HexString>
+              </dd>
+            </dl>
+          </Tabs.TabPane>
+        </Tabs>
+
+        <h2>Transactions</h2>
         <TransactionsList
           from={accountStore.address}
           to={accountStore.address}

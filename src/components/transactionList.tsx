@@ -8,7 +8,12 @@ import { shortenHex, swapObject } from '../utils';
 
 const TYPES = swapObject(Type);
 
-const TransactionList = ({ txs }) => {
+type TransactionListProps = {
+  txs: any[];
+  loading?: boolean;
+};
+
+const TransactionList: React.FC<TransactionListProps> = ({ txs, loading }) => {
   const transactions = txs.map(tx => {
     return {
       key: tx.hash,
@@ -47,7 +52,8 @@ const TransactionList = ({ txs }) => {
         if (outputs && outputs.length) {
           return outputs.map((output, i) => (
             <div key={i}>
-              <TokenValue {...output} /> → <Link to={`/explorer/address/${output.address}`}>
+              <TokenValue {...output} /> →{' '}
+              <Link to={`/explorer/address/${output.address}`}>
                 {shortenHex(output.address)}
               </Link>
             </div>
@@ -70,7 +76,7 @@ const TransactionList = ({ txs }) => {
 
   return (
     <div className="leap-table">
-      <Table dataSource={transactions} columns={columns} />
+      <Table dataSource={transactions} columns={columns} loading={loading} />
     </div>
   );
 };
