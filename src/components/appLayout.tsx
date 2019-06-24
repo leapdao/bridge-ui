@@ -107,22 +107,6 @@ class AppLayout extends Component<AppLayoutProps, any> {
 
     return (
       <Layout style={{ minHeight: '100vh' }}>
-        {CONFIG.bridgeDisabled && (
-          <Alert
-            message={
-              <Fragment>
-                Network will be revamped on 27 July 2019 12:00 UTC. Do not
-                transact after that date. Exits and deposits are temporary
-                disabled. See our{' '}
-                <a href="https://leapdao.org/blog/Mainnet-Revamp/">blog post</a>{' '}
-                for details
-              </Fragment>
-            }
-            type="warning"
-            banner
-          />
-        )}
-
         <Layout.Header
           style={{
             backgroundColor: '#FFF',
@@ -179,6 +163,23 @@ class AppLayout extends Component<AppLayoutProps, any> {
             </MediaQuery>
           </div>
         </Layout.Header>
+
+        {CONFIG.bridgeDisabled && (
+          <Alert
+            message="Network will be revamped on 27 July 2019 12:00 UTC."
+            description={
+              <Fragment>
+                Do not transact after that date. Exits and deposits are
+                temporary disabled. See our{' '}
+                <a href="https://leapdao.org/blog/Mainnet-Revamp/">blog post</a>{' '}
+                for details
+              </Fragment>
+            }
+            type="warning"
+            showIcon
+          />
+        )}
+
         <Layout.Content
           style={{
             display: 'flex',
