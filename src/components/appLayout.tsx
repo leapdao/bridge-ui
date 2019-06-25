@@ -171,7 +171,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
               <Fragment>
                 Do not transact after that date. Exits and deposits are
                 temporary disabled. See our{' '}
-                <a href="https://leapdao.org/blog/Mainnet-Revamp/">blog post</a>{' '}
+                <a href="https://leapdao.org/blog/mainnet-revamp/">blog post</a>{' '}
                 for details
               </Fragment>
             }
