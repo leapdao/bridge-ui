@@ -166,7 +166,7 @@ class AppLayout extends Component<AppLayoutProps, any> {
 
         {CONFIG.announceMigration && (
           <Alert
-            message="Network will be revamped on 27 July 2019 12:00 UTC."
+            message="Network will be revamped on 27 July 2019 14:00 UTC."
             description={
               <Fragment>
                 Do not transact after that date. See our{' '}
