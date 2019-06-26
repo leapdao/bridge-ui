@@ -94,7 +94,7 @@ export default class Exit extends React.Component<ExitProps, any> {
                     </Fragment>
                   ),
                   height: u.transaction.blockNumber,
-                  exit: (
+                  exit: !CONFIG.bridgeDisabled && (
                     <Fragment>
                       {u.pendingFastExit && (
                         <Fragment>

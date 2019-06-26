@@ -31,3 +31,6 @@ export {
 export {
   default as RightOutline,
 } from '@ant-design/icons/lib/outline/RightOutline';
+export {
+  default as ExclamationCircleOutline,
+} from '@ant-design/icons/lib/outline/ExclamationCircleOutline';

@@ -8,7 +8,7 @@
 import * as React from 'react';
 import { computed, observable, reaction, autorun } from 'mobx';
 import { observer } from 'mobx-react';
-import { Form, Button, Table } from 'antd';
+import { Form, Button, Table, Alert } from 'antd';
 import autobind from 'autobind-decorator';
 import { BigIntType, bi, ZERO, greaterThan, lessThanOrEqual } from 'jsbi-utils';
 import { EventLog } from 'web3/types';
@@ -24,6 +24,7 @@ import { unspentsStore } from '../../stores/unspents';
 import { exitHandlerStore } from '../../stores/exitHandler';
 import { networkStore } from '../../stores/network';
 import { web3RootStore } from '../../stores/web3/root';
+import { CONFIG } from '../../config';
 
 const { Fragment } = React;
 
@@ -136,6 +137,7 @@ export default class Deposit extends React.Component<DepositProps, any> {
 
   private canSubmitValue(value: BigIntType) {
     return (
+      !CONFIG.bridgeDisabled &&
       networkStore.canSubmit &&
       value &&
       greaterThan(bi(value), ZERO) &&
@@ -164,6 +166,10 @@ export default class Deposit extends React.Component<DepositProps, any> {
       <Fragment>
         <h2>Make a deposit</h2>
 
+        {CONFIG.bridgeDisabled && (
+          <Alert message="Deposits are temporary disabled." type="warning" />
+        )}
+
         {this.selectedToken.isNft && (
           <p>
             {this.selectedToken.name} is non-fungible token. Please enter
@@ -171,36 +177,38 @@ export default class Deposit extends React.Component<DepositProps, any> {
           </p>
         )}
 
-        <Form onSubmit={this.handleSubmit} layout="inline">
-          <div className="wallet-input">
-            <AmountInput
-              placeholder="Amount to deposit"
-              value={this.value}
-              onChange={value => {
-                this.value = value;
-              }}
-              color={color}
-              onColorChange={newColor => {
-                onColorChange(newColor);
-                this.value = tokensStore.tokenForColor(newColor).isNft
-                  ? ''
-                  : this.value;
-              }}
-            />
-          </div>
+        {!CONFIG.bridgeDisabled && (
+          <Form onSubmit={this.handleSubmit} layout="inline">
+            <div className="wallet-input">
+              <AmountInput
+                placeholder="Amount to deposit"
+                value={this.value}
+                onChange={value => {
+                  this.value = value;
+                }}
+                color={color}
+                onColorChange={newColor => {
+                  onColorChange(newColor);
+                  this.value = tokensStore.tokenForColor(newColor).isNft
+                    ? ''
+                    : this.value;
+                }}
+              />
+            </div>
 
-          <Form.Item>
-            <Button
-              htmlType="submit"
-              type="primary"
-              disabled={
-                !this.canSubmitValue(this.selectedToken.toCents(this.value))
-              }
-            >
-              Deposit
-            </Button>
-          </Form.Item>
-        </Form>
+            <Form.Item>
+              <Button
+                htmlType="submit"
+                type="primary"
+                disabled={
+                  !this.canSubmitValue(this.selectedToken.toCents(this.value))
+                }
+              >
+                Deposit
+              </Button>
+            </Form.Item>
+          </Form>
+        )}
 
         <dl className="info" style={{ marginTop: 10 }}>
           <dt>Token name</dt>

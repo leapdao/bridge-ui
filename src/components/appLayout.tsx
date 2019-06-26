@@ -12,7 +12,7 @@ import { observable } from 'mobx';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
 import MediaQuery from 'react-responsive';
-import { Dropdown, Icon, Layout, Menu, Spin, Button } from 'antd';
+import { Dropdown, Icon, Layout, Menu, Spin, Button, Alert } from 'antd';
 
 import { CONFIG } from '../config';
 import AppLogo from './appLogo';
@@ -163,6 +163,23 @@ class AppLayout extends Component<AppLayoutProps, any> {
             </MediaQuery>
           </div>
         </Layout.Header>
+
+        {CONFIG.bridgeDisabled && (
+          <Alert
+            message="Network will be revamped on 27 July 2019 12:00 UTC."
+            description={
+              <Fragment>
+                Do not transact after that date. Exits and deposits are
+                temporary disabled. See our{' '}
+                <a href="https://leapdao.org/blog/mainnet-revamp/">blog post</a>{' '}
+                for details
+              </Fragment>
+            }
+            type="warning"
+            showIcon
+          />
+        )}
+
         <Layout.Content
           style={{
             display: 'flex',
