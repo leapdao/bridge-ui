@@ -167,7 +167,17 @@ export default class Deposit extends React.Component<DepositProps, any> {
         <h2>Make a deposit</h2>
 
         {CONFIG.bridgeDisabled && (
-          <Alert message="Deposits are temporary disabled." type="warning" />
+          <Alert
+            message="Deposits and exits are temporary disabled."
+            description={
+              <Fragment>
+                See our{' '}
+                <a href="https://leapdao.org/blog/mainnet-revamp/">blog post</a>{' '}
+                for details
+              </Fragment>
+            }
+            type="warning"
+          />
         )}
 
         {this.selectedToken.isNft && (
