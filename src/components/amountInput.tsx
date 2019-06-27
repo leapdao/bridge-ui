@@ -104,10 +104,10 @@ export default class AmountInput extends React.Component<
   public render() {
     const { onColorChange, value, width = 250, plasma, ...rest } = this.props;
     const balance = plasma ? this.token.plasmaBalance : this.token.balance;
-
+    const enumerableNft = this.token.isNft && balance && balance[0];
     return (
       <Fragment>
-        {this.token.isNft && (
+        {enumerableNft && (
           <Fragment>
             <Form.Item>
               <Select
@@ -132,7 +132,7 @@ export default class AmountInput extends React.Component<
             )}
           </Fragment>
         )}
-        {!this.token.isNft && (
+        {!enumerableNft && (
           <Form.Item>
             <Input
               {...rest as any}
