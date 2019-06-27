@@ -164,13 +164,12 @@ class AppLayout extends Component<AppLayoutProps, any> {
           </div>
         </Layout.Header>
 
-        {CONFIG.bridgeDisabled && (
+        {CONFIG.announceMigration && (
           <Alert
-            message="Network will be revamped on 27 July 2019 12:00 UTC."
+            message="Network will be revamped on 27 July 2019 14:00 UTC."
             description={
               <Fragment>
-                Do not transact after that date. Exits and deposits are
-                temporary disabled. See our{' '}
+                Do not transact after that date. See our{' '}
                 <a href="https://leapdao.org/blog/mainnet-revamp/">blog post</a>{' '}
                 for details
               </Fragment>

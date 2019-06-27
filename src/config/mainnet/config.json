@@ -3,6 +3,7 @@
   "title": "LeapDAO Mainnet",
   "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
   "consensus": "poa",
+  "announceMigration": true,
   "bridgeDisabled": false,
   "nodes": ["wss://mainnet-node1.leapdao.org:1443"],
   "tokenFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSedGkkbHD6sdvdnnhJOg5bgLj0XsjU2caIsqyHQyzwmMjyZ9A/viewform?embedded=true",
