@@ -93,7 +93,7 @@ h2:first-child {
 }
 
 .governanceProposal .ant-collapse > .ant-collapse-item > .ant-collapse-header {
-  padding: 0 0 0 16px;
+  padding: 0 0 0 32px;
   margin-top: 12px;
   line-height: 12px;
   color: rgba(0, 0, 0, 0.45);
