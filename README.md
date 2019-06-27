@@ -4,22 +4,20 @@
 
 You can:
 
-- View and buy slots (if PoS plasma contract is set)
-- Make deposit
+- Deposit tokens on plasma
 - Transfer plasma tokens
-- Exit UTXOs
+- Exit UTXOs from plasma to the root chain
 - Browse network with block explorer
 - Register token contract
 - Get some tokens
+- View pending [governance](https://leapdao.org/blog/Minimal-Viable-Governance/) proposals
 - ...
 
 ## Links
 
-Dev: http://bridge-dev.leapdao.org/
+Testnet: https://testnet.leapdao.org/
 
-Testnet: http://testnet.leapdao.org/
-
-Mainnet: http://mainnet.leapdao.org/
+Mainnet: https://mainnet.leapdao.org/
 
 ## Install
 
@@ -41,12 +39,12 @@ This will use config from `presets/localnet/config.json`
 
 Testnet:
 ```
-CONFIG=testnet yarn build
+yarn build:testnet
 yarn deploy:testnet
 ```
 
 Mainnet:
 ```
-CONFIG=mainnet yarn build
+yarn build:mainnet
 yarn deploy:mainnet
 ```
