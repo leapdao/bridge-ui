@@ -8,7 +8,7 @@
 import { observable, action, computed, reaction, IObservableArray } from 'mobx';
 import autobind from 'autobind-decorator';
 
-import { range, NFT_COLOR_BASE, isNFT } from '../utils';
+import { range, NFT_COLOR_BASE, NST_COLOR_BASE, isNFT, isNST } from '../utils';
 import { TokenStore } from './token';
 import { exitHandlerStore } from './exitHandler';
 
@@ -18,10 +18,12 @@ export class TokensStore {
 
   private erc20TokenCount: number;
   private nftTokenCount: number;
+  private nstTokenCount: number;
 
   constructor() {
     this.erc20TokenCount = 0;
     this.nftTokenCount = 0;
+    this.nstTokenCount = 0;
 
     reaction(() => exitHandlerStore.contract, this.init);
     reaction(
@@ -83,9 +85,15 @@ export class TokensStore {
       return -1;
     }
 
-    return isNFT(color)
-      ? this.erc20TokenCount + (color - NFT_COLOR_BASE)
-      : color;
+    let index = color;
+    if (isNFT(color)) {
+      index = this.erc20TokenCount + (color - NFT_COLOR_BASE);
+    }
+    if (isNST(color)) {
+      index =
+        this.erc20TokenCount + this.nftTokenCount + (color - NST_COLOR_BASE);
+    }
+    return index;
   }
 
   public tokenForColor(color: number) {
@@ -118,8 +126,12 @@ export class TokensStore {
         .nftTokenCount()
         .call()
         .then(r => Number(r)),
+      exitHandlerStore.contract.methods
+        .nstTokenCount()
+        .call()
+        .then(r => Number(r)),
     ])
-      .then(([erc20TokenCount, nftTokenCount]) => {
+      .then(([erc20TokenCount, nftTokenCount, nstTokenCount]) => {
         // load new tokens for ERC20 and ERC721 color ranges
         const tokens = Promise.all([
           ...this.loadTokenColorRange(
@@ -130,9 +142,14 @@ export class TokensStore {
             NFT_COLOR_BASE + this.nftTokenCount,
             NFT_COLOR_BASE + nftTokenCount - 1
           ),
+          ...this.loadTokenColorRange(
+            NST_COLOR_BASE + this.nstTokenCount,
+            NST_COLOR_BASE + nstTokenCount - 1
+          ),
         ]);
         this.erc20TokenCount = erc20TokenCount;
         this.nftTokenCount = nftTokenCount;
+        this.nstTokenCount = nstTokenCount;
         return tokens;
       })
       .then(this.addTokens);
