@@ -89,6 +89,10 @@ export class TokenStore extends ContractStore {
     return isNFT(this.color) || isNST(this.color);
   }
 
+  public get isNst() {
+    return isNST(this.color);
+  }
+
   /**
    * Converts given amount of tokens to token cents according to this token decimals.
    * Returns given value unchanged if this token is NFT.
@@ -137,11 +141,24 @@ export class TokenStore extends ContractStore {
       .getUnspent(accountStore.address)
       .then(unspent => {
         if (this.isNft) {
-          const { outpoint } = unspent.find(
-            ({ output }) =>
+          let data;
+          const { outpoint } = unspent.find(({ output }) => {
+            if (
               Number(output.color) === Number(this.color) &&
               equal(bi(output.value), bi(amount))
-          );
+            ) {
+              data = output.data;
+              return true;
+            } else {
+              return false;
+            }
+          });
+          if (this.isNst) {
+            return Tx.transfer(
+              [new Input(outpoint)],
+              [new Output(amount as any, to, this.color, data)]
+            );
+          }
           return Tx.transfer(
             [new Input(outpoint)],
             [new Output(amount as any, to, this.color)]
