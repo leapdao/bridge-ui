@@ -3,7 +3,7 @@
     "experimentalDecorators": true,
     "allowSyntheticDefaultImports": true,
     "allowJs": true,
-    "lib": ["dom"],
+    "lib": ["dom", "esnext.array"],
     "target": "es2018",
     "module": "commonjs",
     "jsx": "react"
