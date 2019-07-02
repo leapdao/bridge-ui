@@ -191,7 +191,11 @@ export default class Deposit extends React.Component<DepositProps, any> {
           <Form onSubmit={this.handleSubmit} layout="inline">
             <div className="wallet-input">
               <AmountInput
-                placeholder="Amount to deposit"
+                placeholder={
+                  this.selectedToken.isNft
+                    ? 'Token id to deposit'
+                    : 'Amount to deposit'
+                }
                 value={this.value}
                 onChange={value => {
                   this.value = value;
