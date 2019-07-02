@@ -96,8 +96,9 @@ export const isOurTransfer = (
   event: EventLog,
   ourAccount: AccountStore
 ): boolean => {
+  const address = ourAccount.address || '';
   return (
-    event.returnValues[0].toLowerCase() === ourAccount.address.toLowerCase() ||
-    event.returnValues[1].toLowerCase() === ourAccount.address.toLowerCase()
+    event.returnValues[0].toLowerCase() === address.toLowerCase() ||
+    event.returnValues[1].toLowerCase() === address.toLowerCase()
   );
 };
