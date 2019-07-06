@@ -54,7 +54,7 @@ export class TokenStore extends ContractStore {
   public plasmaBalance?: BigIntType | BigIntType[];
 
   constructor(address: string, public color: number) {
-    super(isNFT(color) || isNST(color) ? erc721 : erc20, address);
+    super(isNFT(color) ? erc721 : erc20, address);
 
     autorun(this.loadBalance.bind(null, false));
     autorun(this.loadBalance.bind(null, true));
@@ -86,7 +86,7 @@ export class TokenStore extends ContractStore {
   }
 
   public get isNft() {
-    return isNFT(this.color) || isNST(this.color);
+    return isNFT(this.color);
   }
 
   public get isNst() {
