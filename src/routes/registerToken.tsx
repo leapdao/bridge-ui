@@ -10,10 +10,11 @@ import { Fragment } from 'react';
 import Iframe from 'react-iframe';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { List, Icon } from 'antd';
+import { List, Icon, Tag } from 'antd';
 
 import HexString from '../components/hexString';
 import CopyToClipboard from '../components/copyToClipboard';
+import TokenBadge from '../components/tokenBadge';
 import AppLayout from '../components/appLayout';
 import { CONFIG } from '../config';
 import { TokenStore } from '../stores/token';
@@ -24,14 +25,7 @@ const Item: React.FC<{ item: TokenStore }> = observer(({ item }) => (
     <List.Item.Meta
       title={
         <Fragment>
-          {item.name} ({item.symbol})
-          {item.isNft && (
-            <Icon
-              type="trophy"
-              style={{ color: 'lightgray', marginLeft: '5px' }}
-              title="Non-fungible token"
-            />
-          )}
+          {item.name} ({item.symbol}) <TokenBadge token={item} />
         </Fragment>
       }
       description={
