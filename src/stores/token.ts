@@ -265,6 +265,11 @@ export class TokenStore extends ContractStore {
                   .call()
                   .then(v => bi(v))
               )
+              // assuming that exception happens due to missing `tokenOfOwnerByIndex`
+              // which is only for ERC721Enumerable. For non-enumerable NFTs let's return
+              // an array with proper size and no values
+            ).catch(
+              () => new Array<BigIntType>(parseInt(balance, 10))
             ) as Promise<BigIntType[]>;
           }
 

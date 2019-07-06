@@ -75,7 +75,7 @@ export default class Governance extends React.Component<GovernanceProps, any> {
     return <span key={value}>{String(value)}</span>;
   }
 
-  private formatParams(values) {
+  private formatParams(values = []) {
     return values
       .map(this.formatValue)
       .map(v => [', ', v])

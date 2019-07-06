@@ -255,7 +255,7 @@ export class UnspentsStore {
         rawTx = txObj;
         tx = Tx.fromRaw(txObj.raw);
         const utxoId = new Outpoint(tx.hash(), 0).getUtxoId();
-        sigHashBuff = Exit.sigHashBuff(utxoId, amount);
+        sigHashBuff = Exit.sigHashBuff(utxoId, amount as any);
 
         // create pending exit after the first sig, so that we can continue
         // the process if the user mistakingly rejects the second sig or closes the browser

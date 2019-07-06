@@ -164,16 +164,10 @@ class AppLayout extends Component<AppLayoutProps, any> {
           </div>
         </Layout.Header>
 
-        {CONFIG.announceMigration && (
+        {CONFIG.announcement && (
           <Alert
-            message="Network will be revamped on 27 July 2019 14:00 UTC."
-            description={
-              <Fragment>
-                Do not transact after that date. See our{' '}
-                <a href="https://leapdao.org/blog/mainnet-revamp/">blog post</a>{' '}
-                for details
-              </Fragment>
-            }
+            message=""
+            description={<Fragment />}
             type="warning"
             showIcon
           />
