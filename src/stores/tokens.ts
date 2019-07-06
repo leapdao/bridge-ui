@@ -85,15 +85,17 @@ export class TokensStore {
       return -1;
     }
 
-    let index = color;
-    if (isNFT(color)) {
-      index = this.erc20TokenCount + (color - NFT_COLOR_BASE);
-    }
     if (isNST(color)) {
-      index =
-        this.erc20TokenCount + this.nftTokenCount + (color - NST_COLOR_BASE);
+      return (
+        this.erc20TokenCount + this.nftTokenCount + (color - NST_COLOR_BASE)
+      );
     }
-    return index;
+
+    if (isNFT(color)) {
+      return this.erc20TokenCount + (color - NFT_COLOR_BASE);
+    }
+
+    return color;
   }
 
   public tokenForColor(color: number) {
