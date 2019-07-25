@@ -294,58 +294,17 @@ export class UnspentsStore {
 
   @autobind
   public consolidate(color: number) {
-    const list = this.listForColor(color);
-    const chunks = list.reduce(
-      (acc, u) => {
-        const currentChunk = acc[acc.length - 1];
-        currentChunk.push(u);
-        if (currentChunk.length === 15) {
-          acc.push([] as UnspentWithTx[]);
-        }
-
-        return acc;
-      },
-      [[]] as UnspentWithTx[][]
-    );
-
-    const consolidates = chunks.reduce(
-      (txs, chunk) => {
-        const inputs = chunk.reduce(
-          (acc, u) => {
-            const index = acc.findIndex(
-              input =>
-                input.prevout.hash.compare(u.outpoint.hash) === 0 &&
-                input.prevout.index === u.outpoint.index
-            );
-
-            if (index === -1) {
-              acc.push(new Input(u.outpoint));
-            }
-
-            return acc;
-          },
-          [] as Input[]
-        );
-        const value = chunk.reduce((v, u) => add(v, bi(u.output.value)), ZERO);
-        txs.push(
-          Tx.transfer(inputs, [
-            new Output(value, accountStore.address, Number(color)),
-          ])
-        );
-        return txs;
-      },
-      [] as Array<Tx<Type.TRANSFER>>
-    );
-
-    consolidates.forEach(tx =>
-      tx
-        .signWeb3(web3InjectedStore.instance as any)
-        .then(signedTx =>
-          web3PlasmaStore.instance.eth.sendSignedTransaction(
-            signedTx.hex() as any
+    helpers
+      .consolidateUTXOs(this.listForColor(color))
+      .forEach(tx =>
+        tx
+          .signWeb3(web3InjectedStore.instance as any)
+          .then(signedTx =>
+            web3PlasmaStore.instance.eth.sendSignedTransaction(
+              signedTx.hex() as any
+            )
           )
-        )
-    );
+      );
   }
 }
 
