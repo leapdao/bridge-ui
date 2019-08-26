@@ -9,8 +9,6 @@ import { observable, reaction, computed, when } from 'mobx';
 import {
   Unspent,
   Tx,
-  Input,
-  Output,
   Outpoint,
   OutpointJSON,
   Type,
@@ -20,7 +18,7 @@ import {
 } from 'leap-core';
 import { bufferToHex, toBuffer } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
-import { add, bi, ZERO } from 'jsbi-utils';
+import { bi } from 'jsbi-utils';
 
 import { CONFIG } from '../config';
 import storage from '../utils/storage';
@@ -294,17 +292,15 @@ export class UnspentsStore {
 
   @autobind
   public consolidate(color: number) {
-    helpers
-      .consolidateUTXOs(this.listForColor(color))
-      .forEach(tx =>
-        tx
-          .signWeb3(web3InjectedStore.instance as any)
-          .then(signedTx =>
-            web3PlasmaStore.instance.eth.sendSignedTransaction(
-              signedTx.hex() as any
-            )
+    Tx.consolidateUTXOs(this.listForColor(color)).forEach(tx =>
+      tx
+        .signWeb3(web3InjectedStore.instance as any)
+        .then(signedTx =>
+          web3PlasmaStore.instance.eth.sendSignedTransaction(
+            signedTx.hex() as any
           )
-      );
+        )
+    );
   }
 }
 
