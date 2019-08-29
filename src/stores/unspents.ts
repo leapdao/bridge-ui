@@ -128,13 +128,14 @@ export class UnspentsStore {
   }
 
   private exitDeposit(unspentDeposit: UnspentWithTx, signer: string) {
-    return getProof(
-      web3PlasmaStore.instance,
-      unspentDeposit.transaction,
-      0, // TODO: get this some-how
-      signer
-    ).then(txProof =>
-      exitHandlerStore.startExit([], txProof, unspentDeposit.outpoint.index, 0)
+    return getProof(web3PlasmaStore.instance, unspentDeposit.transaction).then(
+      txProof =>
+        exitHandlerStore.startExit(
+          [],
+          txProof,
+          unspentDeposit.outpoint.index,
+          0
+        )
     );
   }
 
@@ -151,8 +152,8 @@ export class UnspentsStore {
     getYoungestInputTx(web3PlasmaStore.instance, tx)
       .then(inputTx =>
         Promise.all([
-          getProof(web3PlasmaStore.instance, unspent.transaction, 0, signer),
-          getProof(web3PlasmaStore.instance, inputTx.tx, 0, signer),
+          getProof(web3PlasmaStore.instance, unspent.transaction),
+          getProof(web3PlasmaStore.instance, inputTx.tx),
           inputTx.index,
         ])
       )
@@ -210,8 +211,8 @@ export class UnspentsStore {
       ])
     );
     return Promise.all([
-      getProof(web3PlasmaStore.instance, rawTx, 0, signer),
-      getProof(web3PlasmaStore.instance, unspent.transaction, 0, signer),
+      getProof(web3PlasmaStore.instance, rawTx),
+      getProof(web3PlasmaStore.instance, unspent.transaction),
       0,
     ]).then(([txProof, inputProof, inputIndex]) => {
       // call api
