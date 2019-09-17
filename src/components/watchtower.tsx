@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { observable, reaction, autorun } from 'mobx';
+import { observable, reaction } from 'mobx';
 import { Input, Outpoint, Tx } from 'leap-core';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -138,7 +138,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
 
   constructor(props: WatchtowerProps) {
     super(props);
-    autorun(this.getData);
+    reaction(() => tokensStore.ready, () => this.getData());
   }
 
   @observable
