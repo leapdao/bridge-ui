@@ -14,6 +14,7 @@ import {
   Type,
   LeapTransaction,
   helpers,
+  Period,
   Exit,
 } from 'leap-core';
 import { bufferToHex, toBuffer } from 'ethereumjs-util';
@@ -31,7 +32,7 @@ import { web3PlasmaStore } from './web3/plasma';
 import { tokensStore } from './tokens';
 import { web3InjectedStore } from './web3/injected';
 
-const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
+const { getYoungestInputTx, getProof } = helpers;
 
 type UnspentWithTx = Unspent & {
   transaction: LeapTransaction;
@@ -89,7 +90,7 @@ export class UnspentsStore {
   @computed
   public get periodBlocksRange() {
     if (this.latestBlock) {
-      return periodBlockRange(this.latestBlock);
+      return Period.periodBlockRange(this.latestBlock);
     }
 
     return undefined;
@@ -262,7 +263,7 @@ export class UnspentsStore {
           unspent,
           sig: '',
           rawTx,
-          effectiveBlock: periodBlockRange(rawTx.blockNumber)[1],
+          effectiveBlock: Period.periodBlockRange(rawTx.blockNumber)[1],
           sigHashBuff: `0x${sigHashBuff.toString('hex')}`,
         };
         this.storePendingFastExits();

@@ -165,13 +165,13 @@ export class TokenStore extends ContractStore {
           );
         }
 
-        const inputs = helpers.calcInputs(
+        const inputs = Tx.calcInputs(
           unspent,
           accountStore.address,
           amount as any,
           this.color
         );
-        const outputs = helpers.calcOutputs(
+        const outputs = Tx.calcOutputs(
           unspent,
           inputs,
           accountStore.address,
