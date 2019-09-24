@@ -186,7 +186,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
       })
     );
 
-    const uTxos = await web3PlasmaStore.instance.getUnspentAll();
+    const uTxos = await web3PlasmaStore.instance.getUnspent();
     const addresses = Object.values(
       await web3PlasmaStore.instance.getColors()
     ).flat();
