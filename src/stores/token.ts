@@ -138,15 +138,12 @@ export class TokenStore extends ContractStore {
 
     const promiEvent = Web3PromiEvent();
     web3PlasmaStore.instance
-      .getUnspent(accountStore.address)
+      .getUnspent(accountStore.address, this.color)
       .then(unspent => {
         if (this.isNft) {
           let data;
           const { outpoint } = unspent.find(({ output }) => {
-            if (
-              Number(output.color) === Number(this.color) &&
-              equal(bi(output.value), bi(amount))
-            ) {
+            if (equal(bi(output.value), bi(amount))) {
               data = output.data;
               return true;
             } else {
@@ -165,13 +162,13 @@ export class TokenStore extends ContractStore {
           );
         }
 
-        const inputs = helpers.calcInputs(
+        const inputs = Tx.calcInputs(
           unspent,
           accountStore.address,
           amount as any,
           this.color
         );
-        const outputs = helpers.calcOutputs(
+        const outputs = Tx.calcOutputs(
           unspent,
           inputs,
           accountStore.address,

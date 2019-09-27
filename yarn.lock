@@ -5108,9 +5108,10 @@ lcid@^2.0.0:
   dependencies:
     invert-kv "^2.0.0"
 
-leap-core@0.33.0:
-  version "0.33.0"
-  resolved "https://registry.yarnpkg.com/leap-core/-/leap-core-0.33.0.tgz#5ee36f4eb46746a2edd3af8a03bc17ba0e644bcd"
+leap-core@0.36.1:
+  version "0.36.1"
+  resolved "https://registry.yarnpkg.com/leap-core/-/leap-core-0.36.1.tgz#c19713d60eac8e9bfcc2880524fed28c8db6341f"
+  integrity sha512-QP+z1oWHI7FaPw/hjqDU4KTwq18tvCOZ7ZtsviiGRhOYaMnUevzc+Yu6itmBX1eLwjs1MSnJyJVp4ulo2qDySg==
   dependencies:
     "@types/web3" "^1.0.18"
     ethereumjs-util "6.0.0"

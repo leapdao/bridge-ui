@@ -9,18 +9,17 @@ import { observable, reaction, computed, when } from 'mobx';
 import {
   Unspent,
   Tx,
-  Input,
-  Output,
   Outpoint,
   OutpointJSON,
   Type,
   LeapTransaction,
   helpers,
+  Period,
   Exit,
 } from 'leap-core';
 import { bufferToHex, toBuffer } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
-import { add, bi, ZERO } from 'jsbi-utils';
+import { bi } from 'jsbi-utils';
 
 import { CONFIG } from '../config';
 import storage from '../utils/storage';
@@ -33,7 +32,7 @@ import { web3PlasmaStore } from './web3/plasma';
 import { tokensStore } from './tokens';
 import { web3InjectedStore } from './web3/injected';
 
-const { periodBlockRange, getYoungestInputTx, getProof } = helpers;
+const { getYoungestInputTx, getProof } = helpers;
 
 type UnspentWithTx = Unspent & {
   transaction: LeapTransaction;
@@ -91,7 +90,7 @@ export class UnspentsStore {
   @computed
   public get periodBlocksRange() {
     if (this.latestBlock) {
-      return periodBlockRange(this.latestBlock);
+      return Period.periodBlockRange(this.latestBlock);
     }
 
     return undefined;
@@ -130,13 +129,14 @@ export class UnspentsStore {
   }
 
   private exitDeposit(unspentDeposit: UnspentWithTx, signer: string) {
-    return getProof(
-      web3PlasmaStore.instance,
-      unspentDeposit.transaction,
-      0, // TODO: get this some-how
-      signer
-    ).then(txProof =>
-      exitHandlerStore.startExit([], txProof, unspentDeposit.outpoint.index, 0)
+    return getProof(web3PlasmaStore.instance, unspentDeposit.transaction).then(
+      txProof =>
+        exitHandlerStore.startExit(
+          [],
+          txProof,
+          unspentDeposit.outpoint.index,
+          0
+        )
     );
   }
 
@@ -153,8 +153,8 @@ export class UnspentsStore {
     getYoungestInputTx(web3PlasmaStore.instance, tx)
       .then(inputTx =>
         Promise.all([
-          getProof(web3PlasmaStore.instance, unspent.transaction, 0, signer),
-          getProof(web3PlasmaStore.instance, inputTx.tx, 0, signer),
+          getProof(web3PlasmaStore.instance, unspent.transaction),
+          getProof(web3PlasmaStore.instance, inputTx.tx),
           inputTx.index,
         ])
       )
@@ -212,8 +212,8 @@ export class UnspentsStore {
       ])
     );
     return Promise.all([
-      getProof(web3PlasmaStore.instance, rawTx, 0, signer),
-      getProof(web3PlasmaStore.instance, unspent.transaction, 0, signer),
+      getProof(web3PlasmaStore.instance, rawTx),
+      getProof(web3PlasmaStore.instance, unspent.transaction),
       0,
     ]).then(([txProof, inputProof, inputIndex]) => {
       // call api
@@ -263,7 +263,7 @@ export class UnspentsStore {
           unspent,
           sig: '',
           rawTx,
-          effectiveBlock: periodBlockRange(rawTx.blockNumber)[1],
+          effectiveBlock: Period.periodBlockRange(rawTx.blockNumber)[1],
           sigHashBuff: `0x${sigHashBuff.toString('hex')}`,
         };
         this.storePendingFastExits();
@@ -294,17 +294,15 @@ export class UnspentsStore {
 
   @autobind
   public consolidate(color: number) {
-    helpers
-      .consolidateUTXOs(this.listForColor(color))
-      .forEach(tx =>
-        tx
-          .signWeb3(web3InjectedStore.instance as any)
-          .then(signedTx =>
-            web3PlasmaStore.instance.eth.sendSignedTransaction(
-              signedTx.hex() as any
-            )
+    Tx.consolidateUTXOs(this.listForColor(color)).forEach(tx =>
+      tx
+        .signWeb3(web3InjectedStore.instance as any)
+        .then(signedTx =>
+          web3PlasmaStore.instance.eth.sendSignedTransaction(
+            signedTx.hex() as any
           )
-      );
+        )
+    );
   }
 }
 

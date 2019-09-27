@@ -6,7 +6,7 @@
  */
 
 import * as React from 'react';
-import { observable, reaction, autorun } from 'mobx';
+import { observable, reaction } from 'mobx';
 import { Input, Outpoint, Tx } from 'leap-core';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
@@ -138,7 +138,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
 
   constructor(props: WatchtowerProps) {
     super(props);
-    autorun(this.getData);
+    reaction(() => tokensStore.ready, () => this.getData());
   }
 
   @observable
@@ -186,8 +186,10 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
       })
     );
 
-    const uTxos = await web3PlasmaStore.instance.getUnspentAll();
-    const addresses = await web3PlasmaStore.instance.getColors();
+    const uTxos = await web3PlasmaStore.instance.getUnspent();
+    const addresses = Object.values(
+      await web3PlasmaStore.instance.getColors()
+    ).flat();
     const colors = await Promise.all(
       addresses.map(async addr => {
         return web3PlasmaStore.instance.getColor(addr);
