@@ -150,11 +150,17 @@ export class UnspentsStore {
       return this.exitDeposit(unspent, signer);
     }
 
+    const fallbackPeriodData = { slotId: 0, validatorAddress: signer };
+
     getYoungestInputTx(web3PlasmaStore.instance, tx)
       .then(inputTx =>
         Promise.all([
-          getProof(web3PlasmaStore.instance, unspent.transaction),
-          getProof(web3PlasmaStore.instance, inputTx.tx),
+          getProof(
+            web3PlasmaStore.instance,
+            unspent.transaction,
+            fallbackPeriodData
+          ),
+          getProof(web3PlasmaStore.instance, inputTx.tx, fallbackPeriodData),
           inputTx.index,
         ])
       )
