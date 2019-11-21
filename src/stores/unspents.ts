@@ -16,6 +16,7 @@ import {
   helpers,
   Period,
   Exit,
+  PeriodData,
 } from 'leap-core';
 import { bufferToHex, toBuffer } from 'ethereumjs-util';
 import autobind from 'autobind-decorator';
@@ -128,15 +129,16 @@ export class UnspentsStore {
       });
   }
 
-  private exitDeposit(unspentDeposit: UnspentWithTx, signer: string) {
-    return getProof(web3PlasmaStore.instance, unspentDeposit.transaction).then(
-      txProof =>
-        exitHandlerStore.startExit(
-          [],
-          txProof,
-          unspentDeposit.outpoint.index,
-          0
-        )
+  private exitDeposit(
+    unspentDeposit: UnspentWithTx,
+    fallbackPeriodData: PeriodData
+  ) {
+    return getProof(
+      web3PlasmaStore.instance,
+      unspentDeposit.transaction,
+      fallbackPeriodData
+    ).then(txProof =>
+      exitHandlerStore.startExit([], txProof, unspentDeposit.outpoint.index, 0)
     );
   }
 
@@ -146,11 +148,11 @@ export class UnspentsStore {
 
     const { signer } = operatorStore.slots[0];
 
-    if (tx.type === Type.DEPOSIT) {
-      return this.exitDeposit(unspent, signer);
-    }
-
     const fallbackPeriodData = { slotId: 0, validatorAddress: signer };
+
+    if (tx.type === Type.DEPOSIT) {
+      return this.exitDeposit(unspent, fallbackPeriodData);
+    }
 
     getYoungestInputTx(web3PlasmaStore.instance, tx)
       .then(inputTx =>
