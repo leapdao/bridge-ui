@@ -253,22 +253,17 @@ export class UnspentsStore {
     unspent = objectify(unspent);
 
     const token = tokensStore.tokenForColor(unspent.output.color);
-
     const amount = bi(unspent.output.value);
-
-    let tx;
-    let sigHashBuff;
-    let rawTx;
-
     const unspentHash = bufferToHex(unspent.outpoint.hash);
+
     return token
       .transfer(exitHandlerStore.address, amount)
       .then(data => data.futureReceipt)
       .then(txObj => {
-        rawTx = txObj;
-        tx = Tx.fromRaw(txObj.raw);
+        const rawTx = txObj;
+        const tx = Tx.fromRaw(txObj.raw);
         const utxoId = new Outpoint(tx.hash(), 0).getUtxoId();
-        sigHashBuff = Exit.sigHashBuff(utxoId, amount as any);
+        const sigHashBuff = Exit.sigHashBuff(utxoId, amount as any);
 
         // create pending exit after the first sig, so that we can continue
         // the process if the user mistakingly rejects the second sig or closes the browser
