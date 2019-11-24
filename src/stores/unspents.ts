@@ -208,6 +208,7 @@ export class UnspentsStore {
   private finalizeFastExit(exit) {
     console.log('Finalizing fast exit', exit, operatorStore.slots);
     const { signer } = operatorStore.slots[0];
+    const fallbackPeriodData = { slotId: 0, validatorAddress: signer };
     const { unspent, sig, rawTx, sigHashBuff } = exit;
     const vBuff = Buffer.alloc(32);
     vBuff.writeInt8(sig.v, 31);
@@ -220,8 +221,12 @@ export class UnspentsStore {
       ])
     );
     return Promise.all([
-      getProof(web3PlasmaStore.instance, rawTx),
-      getProof(web3PlasmaStore.instance, unspent.transaction),
+      getProof(web3PlasmaStore.instance, rawTx, fallbackPeriodData),
+      getProof(
+        web3PlasmaStore.instance,
+        unspent.transaction,
+        fallbackPeriodData
+      ),
       0,
     ]).then(([txProof, inputProof, inputIndex]) => {
       // call api
