@@ -5,7 +5,7 @@
   "consensus": "poa",
   "nodes": ["wss://testnet-node1.leapdao.org:1443"],
   "tokenFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSdFAezroU_uxvWWQmMxs_DWAasl5UwC_nQXIy0CtOfmgDVE2w/viewform?embedded=true",
-  "exitMarketMaker": "https://cok43k06u1.execute-api.eu-west-1.amazonaws.com/v0/sellExit",
+  "exitMarketMaker": "https://2nuxsb25he.execute-api.eu-west-1.amazonaws.com/testnet/sellExit",
   "tokenFaucet": "https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet",
   "denverFaucet": "https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet/address",
   "txStorage": "https://57scxrw3ql.execute-api.eu-west-1.amazonaws.com/v0"
