@@ -177,12 +177,12 @@ export class UnspentsStore {
 
     const exitingUtxoId = unspent.outpoint.hex();
 
-    return Exit.fastSellUTXO(
+    return (Exit.fastSellUTXO(
       unspent,
       web3PlasmaStore.instance,
       web3InjectedStore.instance,
       CONFIG.exitMarketMaker
-    )
+    ) as any)
       .on('transfer', fastSellRequest => {
         this.list.remove(unspent);
         this.pendingFastExits[exitingUtxoId] = {
