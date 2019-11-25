@@ -75,8 +75,9 @@ export default class Exit extends React.Component<ExitProps, any> {
               )
               .map(u => {
                 const inputHash = bufferToHex(u.outpoint.hash);
+                const utxoId = u.outpoint.hex();
                 return {
-                  key: u.outpoint.hex(),
+                  key: utxoId,
                   value: (
                     <TokenValue
                       {...{
@@ -104,21 +105,14 @@ export default class Exit extends React.Component<ExitProps, any> {
                                 ⚡ Fast exit
                                 <br />
                                 <br />
-                                {pendingFastExits[inputHash].sig === '' &&
+                                {!pendingFastExits[utxoId].sig &&
                                   'Signature required'}
-                                {pendingFastExits[inputHash].sig !== '' && (
-                                  <Fragment>
-                                    Waiting for block{' '}
-                                    {pendingFastExits[inputHash].effectiveBlock}{' '}
-                                    to payout.
-                                  </Fragment>
-                                )}
                               </Fragment>
                             }
                           >
                             <span>🕐 Exiting</span>
                           </Tooltip>
-                          {pendingFastExits[inputHash].sig === '' && (
+                          {!pendingFastExits[utxoId].sig && (
                             <Button
                               size="small"
                               style={{ marginLeft: '10px' }}
