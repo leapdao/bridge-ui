@@ -43,13 +43,11 @@ type UnspentWithTx = Unspent & {
   pendingFastExit?: boolean;
 };
 
-const objectify = (unspent: UnspentWithTx): UnspentWithTx => {
-  if (!unspent.outpoint.toJSON) {
-    unspent.outpoint = Outpoint.fromJSON(
-      (unspent.outpoint as any) as OutpointJSON
-    );
+const objectify = (outpoint: Outpoint): Outpoint => {
+  if (!outpoint.toJSON) {
+    return Outpoint.fromJSON((outpoint as any) as OutpointJSON);
   }
-  return unspent;
+  return outpoint;
 };
 
 export class UnspentsStore {
@@ -173,9 +171,9 @@ export class UnspentsStore {
 
   @autobind
   public fastExitUnspent(unspent: UnspentWithTx) {
-    unspent = objectify(unspent);
+    const outpoint = objectify(unspent.outpoint);
 
-    const exitingUtxoId = unspent.outpoint.hex();
+    const exitingUtxoId = outpoint.hex();
 
     return (Exit.fastSellUTXO(
       unspent,
@@ -196,7 +194,7 @@ export class UnspentsStore {
   }
 
   public signFastExit(unspent: UnspentWithTx) {
-    const exitingUtxoId = objectify(unspent).outpoint.hex();
+    const exitingUtxoId = objectify(unspent.outpoint).hex();
     const fastSellRequest = this.pendingFastExits[exitingUtxoId];
     fastSellRequest.sigHashBuff = Buffer.from(fastSellRequest.sigHashBuff);
     return Exit.signAndSendFastSellRequest(
@@ -214,7 +212,11 @@ export class UnspentsStore {
       .concat(
         Object.values(this.pendingFastExits)
           .filter((v: any) => v.unspent.transaction.color === color)
-          .map((v: any) => ({ ...objectify(v.unspent), pendingFastExit: true }))
+          .map((v: any) => ({
+            ...v.unspent,
+            outpoint: objectify(v.unspent.outpoint),
+            pendingFastExit: true,
+          }))
       );
   }
 
