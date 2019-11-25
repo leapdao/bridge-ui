@@ -105,14 +105,14 @@ export default class Exit extends React.Component<ExitProps, any> {
                                 ⚡ Fast exit
                                 <br />
                                 <br />
-                                {!pendingFastExits[utxoId].sig &&
+                                {!pendingFastExits[utxoId].sent &&
                                   'Signature required'}
                               </Fragment>
                             }
                           >
                             <span>🕐 Exiting</span>
                           </Tooltip>
-                          {!pendingFastExits[utxoId].sig && (
+                          {!pendingFastExits[utxoId].sent && (
                             <Button
                               size="small"
                               style={{ marginLeft: '10px' }}

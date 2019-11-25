@@ -189,7 +189,7 @@ export class UnspentsStore {
         };
       })
       .then(() => {
-        delete this.pendingFastExits[exitingUtxoId];
+        this.pendingFastExits[exitingUtxoId].sent = true;
       });
   }
 
@@ -202,12 +202,12 @@ export class UnspentsStore {
       web3InjectedStore.instance,
       CONFIG.exitMarketMaker
     ).then(() => {
-      delete this.pendingFastExits[exitingUtxoId];
+      this.pendingFastExits[exitingUtxoId].sent = true;
     });
   }
 
   public listForColor(color: number) {
-    return this.list
+    const utxos = this.list
       .filter(u => u.output.color === color)
       .concat(
         Object.values(this.pendingFastExits)
@@ -218,6 +218,32 @@ export class UnspentsStore {
             pendingFastExit: true,
           }))
       );
+
+    this.updatePendingFastExits(color);
+    return utxos;
+  }
+
+  public updatePendingFastExits(color: number) {
+    return fetch(
+      `${CONFIG.exitMarketMaker}/../exits/${accountStore.address}/${color}`,
+      { method: 'GET', mode: 'cors' }
+    )
+      .then(response => response.json())
+      .then(pendingExits => {
+        const exitingUtxos = pendingExits.map(exit => {
+          const [hash, index] = exit.utxoId.split(':');
+          return new Outpoint(hash, Number(index)).hex();
+        });
+
+        Object.keys(this.pendingFastExits).forEach(utxo => {
+          if (
+            exitingUtxos.indexOf(utxo) < 0 &&
+            !!this.pendingFastExits[utxo].sent
+          ) {
+            delete this.pendingFastExits[utxo];
+          }
+        });
+      });
   }
 
   @autobind
