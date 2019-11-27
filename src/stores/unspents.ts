@@ -248,7 +248,8 @@ export class UnspentsStore {
 
   @autobind
   public consolidate(color: number) {
-    Tx.consolidateUTXOs(this.listForColor(color)).forEach(tx =>
+    const utxos = this.listForColor(color).filter(u => !u.pendingFastExit);
+    Tx.consolidateUTXOs(utxos).forEach(tx =>
       tx
         .signWeb3(web3InjectedStore.instance as any)
         .then(signedTx =>
