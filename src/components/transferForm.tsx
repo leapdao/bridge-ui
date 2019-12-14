@@ -116,7 +116,9 @@ class TransferForm extends React.Component<TransferFormProps, any> {
             color={color}
             onChange={this.handleChange}
             value={this.value}
-            placeholder="Amount to transfer"
+            placeholder={
+              this.token.isNft ? 'Token id to transfer' : 'Amount to transfer'
+            }
           />
         </div>
         {this.showErrors && this.valueError && (
