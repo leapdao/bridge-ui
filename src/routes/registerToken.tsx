@@ -10,7 +10,7 @@ import { Fragment } from 'react';
 import Iframe from 'react-iframe';
 import { observer } from 'mobx-react';
 import { Link } from 'react-router-dom';
-import { List, Icon, Tag } from 'antd';
+import { List, Icon, Tag, Spin } from 'antd';
 
 import HexString from '../components/hexString';
 import CopyToClipboard from '../components/copyToClipboard';
@@ -52,13 +52,17 @@ export default class RegisterToken extends React.Component<RegisterTokenProps> {
     return (
       <AppLayout section="registerToken">
         <h1 style={{ marginBottom: 16, marginTop: 32 }}>Registered tokens:</h1>
-        <List
-          itemLayout="vertical"
-          size="small"
-          className="tokens-list"
-          dataSource={tokensStore.ready ? tokensStore.list : undefined}
-          renderItem={item => <Item item={item} />}
-        />
+        {tokensStore.ready ? (
+          <List
+            itemLayout="vertical"
+            size="small"
+            className="tokens-list"
+            dataSource={tokensStore.ready ? tokensStore.list : undefined}
+            renderItem={item => <Item item={item} />}
+          />
+        ) : (
+          <Spin />
+        )}
 
         <h1 style={{ marginBottom: 16, marginTop: 32 }}>
           Propose a new ERC20/ERC721 token:
