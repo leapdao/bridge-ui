@@ -61,7 +61,10 @@ export default class RegisterToken extends React.Component<RegisterTokenProps> {
             renderItem={item => <Item item={item} />}
           />
         ) : (
-          <Spin />
+          <div className="tokens-loading">
+            <span>Loading tokens. Please wait...</span>
+            <Spin />
+          </div>
         )}
 
         <h1 style={{ marginBottom: 16, marginTop: 32 }}>

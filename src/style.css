@@ -221,3 +221,9 @@ h2:first-child {
 .tokens-list .ant-list-item-meta {
   margin-bottom: 0;
 }
+
+.tokens-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
