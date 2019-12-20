@@ -3,7 +3,7 @@
   "title": "LeapDAO Testnet — The Raft release",
   "description": "Plasma network running transfer-only MoreVP governed by LeapDAO",
   "consensus": "poa",
-  "nodes": ["wss://testnet-node1.leapdao.org:1443"],
+  "nodes": ["https://testnet-node1.leapdao.org"],
   "tokenFormUrl": "https://docs.google.com/forms/d/e/1FAIpQLSdFAezroU_uxvWWQmMxs_DWAasl5UwC_nQXIy0CtOfmgDVE2w/viewform?embedded=true",
   "exitMarketMaker": "https://2nuxsb25he.execute-api.eu-west-1.amazonaws.com/testnet/sellExit",
   "tokenFaucet": "https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet",
