@@ -62,8 +62,8 @@ export default class RegisterToken extends React.Component<RegisterTokenProps> {
           />
         ) : (
           <div className="tokens-loading">
-            <span>Loading tokens. Please wait...</span>
             <Spin />
+            Loading tokens. Please wait...
           </div>
         )}
 
