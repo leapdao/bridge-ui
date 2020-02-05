@@ -111,11 +111,13 @@ export default class AmountInput extends React.Component<
           <Fragment>
             <Form.Item>
               <Select
+                {...rest as any}
                 value={value}
                 style={{ width }}
                 onChange={this.handleNFTChange}
                 notFoundContent="No tokens"
                 allowClear
+                showSearch
               >
                 {((balance as BigIntType[]) || []).map(id => (
                   <Select.Option
