@@ -2,14 +2,14 @@ import * as React from 'react';
 import { Fragment } from 'react';
 import { Tooltip } from 'antd';
 
-interface PeriodHeartbeatBadgeProps {
+interface HeartbeatBadgeProps {
   periodNumber: number;
   hasHeartbeat: boolean;
 }
 
 const bgColor = hasHeartbeat => (hasHeartbeat ? 'limegreen' : 'orangered');
 
-const PeriodHeartbeatBadge: React.FC<PeriodHeartbeatBadgeProps> = ({
+const HeartbeatBadge: React.FC<HeartbeatBadgeProps> = ({
   periodNumber,
   hasHeartbeat,
 }) => {
@@ -37,4 +37,4 @@ const PeriodHeartbeatBadge: React.FC<PeriodHeartbeatBadgeProps> = ({
   );
 };
 
-export default PeriodHeartbeatBadge;
+export default HeartbeatBadge;

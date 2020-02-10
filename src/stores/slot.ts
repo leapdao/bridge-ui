@@ -11,6 +11,8 @@ const EMPTY_ADDRESS = '0x0000000000000000000000000000000000000000';
 
 export class Slot {
   @observable
+  public id: number;
+  @observable
   public eventCounter: string;
   @observable
   public owner: string;

@@ -19,10 +19,11 @@ import { TokenStore } from './token';
 
 const poaDefaults = { owner: '0x', stake: 0, newOwner: '0x', newStake: 0 };
 
-const mapSlot = (slotData): Slot => {
+const mapSlot = (slotData, slotId): Slot => {
   const slot = Object.assign({}, poaDefaults, slotData);
   return new Slot({
     ...slot,
+    id: slotId,
     stake: Number(slot.stake),
     activationEpoch: Number(slot.activationEpoch),
     newStake: Number(slot.newStake),
