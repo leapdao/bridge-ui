@@ -1,16 +1,8 @@
 import { bufferToHex } from 'ethereumjs-util';
-import {
-  observable,
-  when,
-  reaction,
-  IObservableArray,
-  autorun,
-  toJS,
-} from 'mobx';
+import { observable, reaction, autorun, toJS } from 'mobx';
 import autobind from 'autobind-decorator';
 import { web3PlasmaStore } from '../../stores/web3/plasma';
 import { operatorStore } from '../../stores/operator';
-import { nodeStore } from '../../stores/node';
 import storage from '../../utils/storage';
 import { range } from '../../utils/range';
 
