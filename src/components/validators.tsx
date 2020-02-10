@@ -45,7 +45,7 @@ export default class Validators extends React.Component<
       <List
         dataSource={operatorStore.slots}
         renderItem={slot => (
-          <List.Item key={slot.id}>
+          <List.Item key={'slot' + slot.id}>
             <SlotHeartbeats
               slot={slot}
               heartbeatColor={this.heartbeatColor}

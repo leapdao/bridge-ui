@@ -112,8 +112,6 @@ export default class SlotHeartbeats extends React.Component<
     const toPeriod = this.lastPeriodNumber || periodsToShow;
     const fromPeriod = toPeriod >= periodsToShow ? toPeriod - periodsToShow : 1;
 
-    console.log({ fromPeriod, toPeriod });
-
     const hasHeartbeat = period => {
       if (!this.periodsWithHeartbeat) {
         return null;
@@ -133,10 +131,11 @@ export default class SlotHeartbeats extends React.Component<
             }}
           />
         )}
-        {range(fromPeriod, toPeriod).map(period => (
+        {range(fromPeriod, toPeriod).map((period, i) => (
           <PeriodHeartbeatBadge
             hasHeartbeat={hasHeartbeat(period)}
             periodNumber={period}
+            key={i + period}
           />
         ))}
       </div>
