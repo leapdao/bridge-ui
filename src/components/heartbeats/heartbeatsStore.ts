@@ -7,10 +7,12 @@ import storage from '../../utils/storage';
 import { range } from '../../utils/range';
 
 import { Tx, LeapTransaction } from 'leap-core';
+import { explorerStore } from '../../stores/explorer';
 
 type SlotHeartbeatsData = {
   periods: Set<number>;
   lastPeriodChecked: number;
+  lastUtxo?: Buffer;
   owner: string;
 };
 
@@ -53,16 +55,16 @@ export class HeartbeatsStore {
     let storedData = storage.load(this.storageKey);
     storedData = storedData.length ? storedData : [];
 
-    return [
-      // add stored slots if any
-      ...storedData.map(s => ({ ...s, periods: new Set(s.periods) })),
-      // add new slots without heartbeat data if needed
-      ...range(storedData.length, operatorStore.slots.length - 1).map(i => ({
+    return operatorStore.slots.map((s, i) => {
+      if (storedData[i] && storedData[i].owner === s.owner) {
+        return { ...storedData[i], periods: new Set(storedData[i].periods) };
+      }
+      return {
         periods: new Set(),
         lastPeriodChecked: 0,
         owner: operatorStore.slots[i].owner,
-      })),
-    ];
+      };
+    });
   }
 
   @autobind
@@ -117,30 +119,71 @@ export class HeartbeatsStore {
     );
   }
 
-  private async loadHeartbeatsForSlot(slotId) {
-    const [heartbeatUtxo] = await web3PlasmaStore.instance.getUnspent(
-      this.heartbeats[slotId].owner,
-      this.heartbeatColor
-    );
-
-    if (!heartbeatUtxo) {
+  private async loadHeartbeatsForSlot(slotId, latestHeartbeatUtxo) {
+    if (!latestHeartbeatUtxo) {
       return;
     }
 
+    const slotData = this.heartbeats[slotId];
     const latestPlasmaHeight = await web3PlasmaStore.instance.eth.getBlockNumber();
 
+    const periodForTx = Math.floor(latestHeartbeatUtxo.blockNumber / 32) + 1;
+    slotData.periods.add(periodForTx);
+
     await this.loadHeartbeatPeriodsRecursive(
-      this.heartbeats[slotId],
-      heartbeatUtxo.outpoint.hash
+      slotData,
+      latestHeartbeatUtxo.inputs[0].prevout.hash
     );
-    this.heartbeats[slotId].lastPeriodChecked =
-      Math.floor(latestPlasmaHeight / 32) + 1;
+    slotData.lastPeriodChecked = Math.floor(latestPlasmaHeight / 32) + 1;
+  }
+
+  private async scanForLatestHeartbeatUTXOs(utxoPerSlot, blockHeight) {
+    // stop when nothing to scan or we collected data for all the slots
+    const foundUtxosForAllSlots = !Object.values(utxoPerSlot).filter(u => !u)
+      .length;
+    if (blockHeight === 0 || foundUtxosForAllSlots) {
+      return utxoPerSlot;
+    }
+
+    // go through block's txs and find ones of heartbeat color
+    const block = await explorerStore.getBlock(blockHeight);
+    const slotOwners = Object.keys(utxoPerSlot);
+    utxoPerSlot = block.transactions.reduce((s, tx: LeapTransaction) => {
+      if (tx.color !== Number(this.heartbeatColor)) {
+        return s;
+      }
+      const txOwner = tx.to.toLowerCase();
+
+      // skip non-active validators
+      if (slotOwners.indexOf(txOwner) < 0) {
+        return s;
+      }
+
+      s[txOwner] = Tx.fromRaw(tx.raw);
+      return s;
+    }, utxoPerSlot);
+
+    return this.scanForLatestHeartbeatUTXOs(utxoPerSlot, blockHeight - 1);
   }
 
   @autobind
   private async loadHeartbeats() {
-    this.heartbeats.forEach((_, slotId) => {
-      this.loadHeartbeatsForSlot(slotId);
+    const latestPlasmaHeight = await web3PlasmaStore.instance.eth.getBlockNumber();
+    const latestUtxos = await this.scanForLatestHeartbeatUTXOs(
+      this.heartbeats
+        .filter(h => h.owner !== '0x0000000000000000000000000000000000000000')
+        .reduce((s, e) => {
+          s[e.owner.toLowerCase()] = null;
+          return s;
+        }, {}),
+      latestPlasmaHeight
+    );
+
+    this.heartbeats.forEach((slotData, slotId) => {
+      this.loadHeartbeatsForSlot(
+        slotId,
+        latestUtxos[slotData.owner.toLowerCase()]
+      );
     });
   }
 }
