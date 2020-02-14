@@ -3,6 +3,48 @@ import { ABIDefinition } from 'web3/eth/abi';
 export default [
   {
     constant: true,
+    inputs: [],
+    name: 'heartbeatColor',
+    outputs: [
+      {
+        name: '',
+        type: 'uint16',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'casChallengeDuration',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
+    name: 'takenSlots',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
     inputs: [
       {
         name: '',
@@ -59,6 +101,20 @@ export default [
   {
     constant: true,
     inputs: [],
+    name: 'minimumPulse',
+    outputs: [
+      {
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
     name: 'lastCompleteEpoch',
     outputs: [
       {
@@ -87,11 +143,52 @@ export default [
   {
     constant: true,
     inputs: [],
+    name: 'implementation',
+    outputs: [
+      {
+        name: 'impl',
+        type: 'address',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [],
     name: 'lastEpochBlockHeight',
     outputs: [
       {
         name: '',
         type: 'uint256',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'beatChallenges',
+    outputs: [
+      {
+        name: 'challenger',
+        type: 'address',
+      },
+      {
+        name: 'openTime',
+        type: 'uint256',
+      },
+      {
+        name: 'openPeriodHash',
+        type: 'bytes32',
       },
     ],
     payable: false,
@@ -301,9 +398,14 @@ export default [
         type: 'uint256',
       },
       {
-        indexed: false,
+        indexed: true,
         name: 'owner',
         type: 'address',
+      },
+      {
+        indexed: false,
+        name: 'casBitmap',
+        type: 'bytes32',
       },
       {
         indexed: false,
@@ -329,8 +431,30 @@ export default [
         name: '_epochLength',
         type: 'uint256',
       },
+      {
+        name: '_casChallengeDuration',
+        type: 'uint256',
+      },
     ],
     name: 'initialize',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_minimumPulse',
+        type: 'uint256',
+      },
+      {
+        name: '_heartbeatColor',
+        type: 'uint16',
+      },
+    ],
+    name: 'setHeartbeatParams',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
@@ -401,8 +525,220 @@ export default [
         name: '_blocksRoot',
         type: 'bytes32',
       },
+      {
+        name: '_casBitmap',
+        type: 'bytes32',
+      },
+    ],
+    name: 'submitPeriodWithCas',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+      {
+        name: '_prevHash',
+        type: 'bytes32',
+      },
+      {
+        name: '_blocksRoot',
+        type: 'bytes32',
+      },
     ],
     name: 'submitPeriod',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: true,
+    inputs: [
+      {
+        name: '_period',
+        type: 'bytes32',
+      },
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+    ],
+    name: 'getChallenge',
+    outputs: [
+      {
+        name: '',
+        type: 'address',
+      },
+      {
+        name: '',
+        type: 'uint256',
+      },
+      {
+        name: '',
+        type: 'address',
+      },
+    ],
+    payable: false,
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_casChallengeDuration',
+        type: 'uint256',
+      },
+    ],
+    name: 'setCasChallengeDuration',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_casBitmap',
+        type: 'bytes32',
+      },
+      {
+        name: '_validatorRoot',
+        type: 'bytes32',
+      },
+      {
+        name: '_consensusRoot',
+        type: 'bytes32',
+      },
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+    ],
+    name: 'challengeCas',
+    outputs: [],
+    payable: true,
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_consensusRoot',
+        type: 'bytes32',
+      },
+      {
+        name: '_casRoot',
+        type: 'bytes32',
+      },
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+      {
+        name: '_v',
+        type: 'uint8',
+      },
+      {
+        name: '_r',
+        type: 'bytes32',
+      },
+      {
+        name: '_s',
+        type: 'bytes32',
+      },
+      {
+        name: '_msgSender',
+        type: 'address',
+      },
+    ],
+    name: 'respondCas',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_period',
+        type: 'bytes32',
+      },
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+    ],
+    name: 'timeoutCas',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [],
+    name: 'rebuildTakenSlots',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+    ],
+    name: 'challengeBeat',
+    outputs: [],
+    payable: true,
+    stateMutability: 'payable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_inclusionProof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_walkProof',
+        type: 'bytes32[]',
+      },
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+    ],
+    name: 'respondBeat',
+    outputs: [],
+    payable: false,
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    constant: false,
+    inputs: [
+      {
+        name: '_slotId',
+        type: 'uint256',
+      },
+    ],
+    name: 'timeoutBeat',
     outputs: [],
     payable: false,
     stateMutability: 'nonpayable',
