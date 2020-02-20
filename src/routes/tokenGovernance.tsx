@@ -1,16 +1,11 @@
 import * as React from 'react';
-import { observer } from 'mobx-react';
-import { List, Collapse, Icon, Tabs } from 'antd';
-import TimeAgo from 'react-timeago';
-import Web3 from 'web3';
+import { Tabs } from 'antd';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
 
-import EtherscanLink from '../components/etherscanLink';
-import { shortenHex } from '../utils';
-import { Button, Menu, Form, Input, Row, Col } from 'antd';
-import { reaction } from 'mobx';
+import { Button, Form, Input, Row, Col } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
+import { keccak256 } from 'ethereumjs-util';
 
 const { Fragment } = React;
 const { TabPane } = Tabs;
@@ -27,6 +22,11 @@ export default class TokenGovernance extends React.Component {
 
   public handleSubmit(e: any) {
     e.preventDefault();
+    const proposalHashBuffer = keccak256(
+      `${this.state.title}::${this.state.description}`
+    );
+    const proposalHash = `0x${Buffer.from(proposalHashBuffer).toString('hex')}`;
+    console.log(proposalHash);
   }
 
   public state = {
@@ -62,7 +62,7 @@ export default class TokenGovernance extends React.Component {
             Content of Tab 3
           </TabPane>
           <TabPane tab="Submit a proposal" key="4">
-            <Form onSubmit={e => this.handleSubmit(e)}>
+            <Form>
               <Row gutter={28}>
                 <Col span={10}>
                   <h3>Proposal Title</h3>
@@ -91,7 +91,9 @@ export default class TokenGovernance extends React.Component {
                 </Col>
               </Row>
               <Form.Item>
-                <Button type="primary">Submit Proposal</Button>
+                <Button type="primary" onClick={e => this.handleSubmit(e)}>
+                  Submit Proposal
+                </Button>
               </Form.Item>
             </Form>
           </TabPane>
