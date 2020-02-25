@@ -6,11 +6,16 @@ import Web3SubmitWarning from '../components/web3SubmitWarning';
 import { Button, Form, Input, Row, Col } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import { keccak256 } from 'ethereumjs-util';
+import Web3 from '../stores/web3/ts_workaround';
+import { tokenGovernanceContractStore } from '../stores/tokenGovernanceContract';
 
 const { Fragment } = React;
 const { TabPane } = Tabs;
 
 export default class TokenGovernance extends React.Component {
+  public state: { title: string; description: string };
+  public sendProposal: any;
+
   constructor(props: {}) {
     super(props);
 
@@ -19,19 +24,6 @@ export default class TokenGovernance extends React.Component {
       description: '',
     };
   }
-
-  public handleSubmit(e: any) {
-    e.preventDefault();
-    const proposalHashBuffer = keccak256(
-      `${this.state.title}::${this.state.description}`
-    );
-    const proposalHash = `0x${Buffer.from(proposalHashBuffer).toString('hex')}`;
-    console.log(proposalHash);
-  }
-
-  public state = {
-    current: 'open',
-  };
 
   public handleClick = e => {
     this.setState({
@@ -43,6 +35,9 @@ export default class TokenGovernance extends React.Component {
     function callback(key) {
       console.log(key);
     }
+
+    const tokenGovernanceContract = tokenGovernanceContractStore;
+    const { sendProposal } = tokenGovernanceContract;
 
     console.log(this.state);
 
@@ -91,7 +86,7 @@ export default class TokenGovernance extends React.Component {
                 </Col>
               </Row>
               <Form.Item>
-                <Button type="primary" onClick={e => this.handleSubmit(e)}>
+                <Button type="primary" onClick={sendProposal}>
                   Submit Proposal
                 </Button>
               </Form.Item>
