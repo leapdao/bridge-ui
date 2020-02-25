@@ -133,16 +133,13 @@ export class TokenGovernanceContractStore extends ContractStore {
 
   @autobind
   public async sendProposal() {
-    console.log('Hello ?');
     const accounts = await web3InjectedStore.instance.eth.getAccounts();
 
     const proposalHashBuffer = keccak256(
       `${this.props.title}::${this.props.description}`
     );
-    console.log(proposalHashBuffer);
 
     const proposalHash = `0x${Buffer.from(proposalHashBuffer).toString('hex')}`;
-    console.log(proposalHash);
 
     const tx = this.tokenGovernanceContract.methods
       .registerProposal(proposalHash)

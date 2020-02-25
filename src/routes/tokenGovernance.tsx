@@ -39,8 +39,6 @@ export default class TokenGovernance extends React.Component {
     const tokenGovernanceContract = tokenGovernanceContractStore;
     const { sendProposal } = tokenGovernanceContract;
 
-    console.log(this.state);
-
     return (
       <Fragment>
         <h1>Token Governance</h1>
