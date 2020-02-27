@@ -2,18 +2,16 @@ import * as React from 'react';
 import { Tabs } from 'antd';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-
-import { Button, Form, Input, Row, Col } from 'antd';
+import { Button, Form, Input, Row, Col, Card, Icon } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
-import { keccak256 } from 'ethereumjs-util';
-import Web3 from '../stores/web3/ts_workaround';
 import { tokenGovernanceContractStore } from '../stores/tokenGovernanceContract';
 
 const { Fragment } = React;
 const { TabPane } = Tabs;
+const { Meta } = Card;
 
 export default class TokenGovernance extends React.Component {
-  public state: { title: string; description: string };
+  public state: { title: string; description: string; loading: true };
   public sendProposal: any;
 
   constructor(props: {}) {
@@ -22,6 +20,7 @@ export default class TokenGovernance extends React.Component {
     this.state = {
       title: '',
       description: '',
+      loading: true,
     };
   }
 
@@ -31,6 +30,10 @@ export default class TokenGovernance extends React.Component {
     });
   };
 
+  public onChange = checked => {
+    this.setState({ loading: !checked });
+  };
+
   public render() {
     function callback(key) {
       console.log(key);
@@ -38,6 +41,7 @@ export default class TokenGovernance extends React.Component {
 
     const tokenGovernanceContract = tokenGovernanceContractStore;
     const { sendProposal } = tokenGovernanceContract;
+    const { loading } = this.state;
 
     return (
       <Fragment>
@@ -46,7 +50,122 @@ export default class TokenGovernance extends React.Component {
 
         <Tabs defaultActiveKey="1" onChange={callback} type="card">
           <TabPane tab="Open for voting" key="1">
-            Content of Tab d1
+            <div className="gutter-example">
+              <Row gutter={16}>
+                <Col className="gutter-row" span={6}>
+                  <Card style={{ width: 400 }} /*loading={loading} */>
+                    <h3>This is the proposal title</h3>
+                    <Row>
+                      <p>
+                        Lorem ipsum dolor sit, amet consectetur adipisicing
+                        elit. Nihil reiciendis, facilis eius, laborum officia ex
+                        reprehenderit numquam perferendis magnam doloribus,
+                        eligendi saepe tempora! Officiis eius at dicta veniam
+                        quos consequatur? Lorem ipsum dolor sit, amet
+                        consectetur adipisicing elit. Nihil reiciendis, facilis
+                        eius, laborum officia ex reprehenderit numquam
+                        perferendis magnam doloribus, eligendi saepe tempora!
+                        Officiis eius at dicta veniam quos consequatur?
+                      </p>
+                    </Row>
+                    <Button.Group>
+                      <Button>
+                        <Icon type="check" />
+                        Yes
+                      </Button>
+                      <Button>
+                        No
+                        <Icon type="close" />
+                      </Button>
+                    </Button.Group>
+                  </Card>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                  <Card style={{ width: 400 }} /* loading={loading} */>
+                    <h3>This is the proposal title</h3>
+                    <Row>
+                      <p>
+                        Lorem ipsum dolor sit, amet consectetur adipisicing
+                        elit. Nihil reiciendis, facilis eius, laborum officia ex
+                        reprehenderit numquam perferendis magnam doloribus,
+                        eligendi saepe tempora! Officiis eius at dicta veniam
+                        quos consequatur? Lorem ipsum dolor sit, amet
+                        consectetur adipisicing elit. Nihil reiciendis, facilis
+                        eius, laborum officia ex reprehenderit numquam
+                        perferendis magnam doloribus, eligendi saepe tempora!
+                        Officiis eius at dicta veniam quos consequatur?
+                      </p>
+                    </Row>
+                    <Button.Group>
+                      <Button>
+                        <Icon type="check" />
+                        Yes
+                      </Button>
+                      <Button>
+                        No
+                        <Icon type="close" />
+                      </Button>
+                    </Button.Group>
+                  </Card>
+                </Col>
+                <Col className="gutter-row" span={6}>
+                  <Card style={{ width: 400 }} loading={loading}>
+                    <h3>This is the proposal title</h3>
+                    <Row>
+                      <p>
+                        Lorem ipsum dolor sit, amet consectetur adipisicing
+                        elit. Nihil reiciendis, facilis eius, laborum officia ex
+                        reprehenderit numquam perferendis magnam doloribus,
+                        eligendi saepe tempora! Officiis eius at dicta veniam
+                        quos consequatur? Lorem ipsum dolor sit, amet
+                        consectetur adipisicing elit. Nihil reiciendis, facilis
+                        eius, laborum officia ex reprehenderit numquam
+                        perferendis magnam doloribus, eligendi saepe tempora!
+                        Officiis eius at dicta veniam quos consequatur?
+                      </p>
+                    </Row>
+                    <Button.Group>
+                      <Button>
+                        <Icon type="check" />
+                        Yes
+                      </Button>
+                      <Button>
+                        No
+                        <Icon type="close" />
+                      </Button>
+                    </Button.Group>
+                  </Card>
+                </Col>
+                <Col className="gutter-row" span={5}>
+                  <Card style={{ width: 300 }} loading={loading}>
+                    <h3>This is the proposal title</h3>
+                    <Row>
+                      <p>
+                        Lorem ipsum dolor sit, amet consectetur adipisicing
+                        elit. Nihil reiciendis, facilis eius, laborum officia ex
+                        reprehenderit numquam perferendis magnam doloribus,
+                        eligendi saepe tempora! Officiis eius at dicta veniam
+                        quos consequatur? Lorem ipsum dolor sit, amet
+                        consectetur adipisicing elit. Nihil reiciendis, facilis
+                        eius, laborum officia ex reprehenderit numquam
+                        perferendis magnam doloribus, eligendi saepe tempora!
+                        Officiis eius at dicta veniam quos consequatur?
+                      </p>
+                    </Row>
+                    <Button.Group>
+                      <Button>
+                        <Icon type="check" />
+                        Yes
+                      </Button>
+                      <Button>
+                        No
+                        <Icon type="close" />
+                      </Button>
+                    </Button.Group>
+                  </Card>
+                </Col>
+              </Row>
+            </div>
           </TabPane>
           <TabPane tab="Ready for processing" key="2">
             Content of Tab 2
