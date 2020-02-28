@@ -6,15 +6,21 @@ import Web3SubmitWarning from '../components/web3SubmitWarning';
 import { Button, Form, Input, Row, Col } from 'antd';
 import TextArea from 'antd/lib/input/TextArea';
 import { keccak256 } from 'ethereumjs-util';
-import Web3 from '../stores/web3/ts_workaround';
-import { tokenGovernanceContractStore } from '../stores/tokenGovernanceContract';
+import { observable, computed, reaction } from 'mobx';
+import Contract from 'web3/eth/contract';
+import autobind from 'autobind-decorator';
+import { web3InjectedStore } from '../stores/web3/injected';
+import { tokenGovernance as tokenGovAbi } from '../utils/abis';
+import { governanceContractStore } from '../stores/governanceContract';
 
 const { Fragment } = React;
 const { TabPane } = Tabs;
 
 export default class TokenGovernance extends React.Component {
+  @observable
+  public key: any;
   public state: { title: string; description: string };
-  public sendProposal: any;
+  public props: any;
 
   constructor(props: {}) {
     super(props);
@@ -25,26 +31,60 @@ export default class TokenGovernance extends React.Component {
     };
   }
 
-  public handleClick = e => {
-    this.setState({
-      current: e.key,
+  @computed
+  public get tokenGovContract(): Contract | undefined {
+    if (web3InjectedStore.instance) {
+      return new web3InjectedStore.instance.eth.Contract(
+        tokenGovAbi,
+        '0x3cc955f91d645b4250f6070a8b7d71365662776f'
+      );
+    }
+  }
+
+  @autobind
+  public async sendToContract() {
+    console.log(
+      'title: ',
+      this.state.title,
+      'description: ',
+      this.state.description
+    );
+
+    const proposalHashBuffer = keccak256(
+      `${this.state.title}::${this.state.description}`
+    );
+
+    const proposalHash = `0x${Buffer.from(proposalHashBuffer).toString('hex')}`;
+    console.log('tokenGovernance', proposalHash);
+
+    const accounts = await web3InjectedStore.instance.eth.getAccounts();
+
+    console.log('proposalHash', proposalHash);
+    console.log('tokenGovernanceContract', proposalHash);
+    const tx = this.tokenGovContract.methods
+      .registerProposal(proposalHash)
+      .send({
+        from: accounts[0],
+      });
+    console.log(this.tokenGovContract.methods.registerProposal(proposalHash));
+
+    governanceContractStore.watchTx(tx, 'send..', {
+      message: 'send',
     });
-  };
+
+    return tx;
+  }
 
   public render() {
-    function callback(key) {
-      console.log(key);
-    }
-
-    const tokenGovernanceContract = tokenGovernanceContractStore;
-    const { sendProposal } = tokenGovernanceContract;
+    console.log(this.state.title);
+    console.log(this.state.description);
 
     return (
       <Fragment>
         <h1>Token Governance</h1>
         <Web3SubmitWarning />
 
-        <Tabs defaultActiveKey="1" onChange={callback} type="card">
+        <Tabs defaultActiveKey="1" type="card">
           <TabPane tab="Open for voting" key="1">
             Content of Tab d1
           </TabPane>
@@ -84,7 +124,7 @@ export default class TokenGovernance extends React.Component {
                 </Col>
               </Row>
               <Form.Item>
-                <Button type="primary" onClick={sendProposal}>
+                <Button type="primary" onClick={this.sendToContract}>
                   Submit Proposal
                 </Button>
               </Form.Item>

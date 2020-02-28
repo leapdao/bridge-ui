@@ -91,7 +91,7 @@ const governanceParams = {
 };
 
 export class GovernanceContractStore extends ContractStore {
-  private funcBySignature: Map<string, ABIDefinition>;
+  public funcBySignature: Map<string, ABIDefinition>;
 
   @observable
   public proposals: IObservableArray<Proposal>;
@@ -237,7 +237,7 @@ export class GovernanceContractStore extends ContractStore {
     );
   }
 
-  private fetch() {
+  public fetch() {
     return Promise.all([
       this.contract.methods.first().call(),
       this.contract.methods.size().call(),
@@ -283,7 +283,7 @@ export class GovernanceContractStore extends ContractStore {
     };
   }
 
-  private calculateAbiSignatures(): Map<string, ABIDefinition> {
+  public calculateAbiSignatures(): Map<string, ABIDefinition> {
     return (governableAbi as ABIDefinition[])
       .filter(m => m.type === 'function')
       .reduce<ABIDefinitionBySig>(
