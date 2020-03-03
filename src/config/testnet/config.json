@@ -8,5 +8,6 @@
   "exitMarketMaker": "https://cok43k06u1.execute-api.eu-west-1.amazonaws.com/v0/sellExit",
   "tokenFaucet": "https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet",
   "denverFaucet": "https://jw98dxp219.execute-api.eu-west-1.amazonaws.com/testnet/address",
-  "txStorage": "https://57scxrw3ql.execute-api.eu-west-1.amazonaws.com/v0"
+  "txStorage": "https://57scxrw3ql.execute-api.eu-west-1.amazonaws.com/v0",
+  "tokenGovernanceAddress": "0x3cc955f91d645b4250f6070a8b7d71365662776f"
 }
