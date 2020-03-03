@@ -52,7 +52,7 @@ export default class TokenGovernance extends React.Component {
           <TabPane tab="Open for voting" key="1">
             <div className="gutter-example">
               <Row gutter={16}>
-                <Col className="gutter-row" span={6}>
+                <Col className="gutter-row" span={8}>
                   <Card style={{ width: 400 }} /*loading={loading} */>
                     <h3>This is the proposal title</h3>
                     <Row>
@@ -80,7 +80,7 @@ export default class TokenGovernance extends React.Component {
                     </Button.Group>
                   </Card>
                 </Col>
-                <Col className="gutter-row" span={6}>
+                <Col className="gutter-row" span={8}>
                   <Card style={{ width: 400 }} /* loading={loading} */>
                     <h3>This is the proposal title</h3>
                     <Row>
@@ -108,36 +108,8 @@ export default class TokenGovernance extends React.Component {
                     </Button.Group>
                   </Card>
                 </Col>
-                <Col className="gutter-row" span={6}>
+                <Col className="gutter-row" span={8}>
                   <Card style={{ width: 400 }} loading={loading}>
-                    <h3>This is the proposal title</h3>
-                    <Row>
-                      <p>
-                        Lorem ipsum dolor sit, amet consectetur adipisicing
-                        elit. Nihil reiciendis, facilis eius, laborum officia ex
-                        reprehenderit numquam perferendis magnam doloribus,
-                        eligendi saepe tempora! Officiis eius at dicta veniam
-                        quos consequatur? Lorem ipsum dolor sit, amet
-                        consectetur adipisicing elit. Nihil reiciendis, facilis
-                        eius, laborum officia ex reprehenderit numquam
-                        perferendis magnam doloribus, eligendi saepe tempora!
-                        Officiis eius at dicta veniam quos consequatur?
-                      </p>
-                    </Row>
-                    <Button.Group>
-                      <Button>
-                        <Icon type="check" />
-                        Yes
-                      </Button>
-                      <Button>
-                        No
-                        <Icon type="close" />
-                      </Button>
-                    </Button.Group>
-                  </Card>
-                </Col>
-                <Col className="gutter-row" span={5}>
-                  <Card style={{ width: 300 }} loading={loading}>
                     <h3>This is the proposal title</h3>
                     <Row>
                       <p>
