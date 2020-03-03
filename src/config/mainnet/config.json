@@ -10,5 +10,6 @@
   "exitMarketMaker": "",
   "tokenFaucet": "https://qf7qaraa7b.execute-api.eu-west-1.amazonaws.com/mainnet",
   "denverFaucet": "https://qf7qaraa7b.execute-api.eu-west-1.amazonaws.com/mainnet/address",
-  "txStorage": "https://b1cdbjhcsi.execute-api.eu-west-1.amazonaws.com/v0"
+  "txStorage": "https://b1cdbjhcsi.execute-api.eu-west-1.amazonaws.com/v0",
+  "tokenGovernanceAddress": ""
 }
