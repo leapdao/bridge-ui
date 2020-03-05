@@ -7,10 +7,11 @@
 
 import * as React from 'react';
 import { observer } from 'mobx-react';
-import { List, Collapse, Icon } from 'antd';
+import { List, Collapse, Icon, Divider, Row } from 'antd';
 import TimeAgo from 'react-timeago';
 
 import Web3SubmitWarning from '../components/web3SubmitWarning';
+import TokenGovernance from './tokenGovernance';
 
 import AppLayout from '../components/appLayout';
 import EtherscanLink from '../components/etherscanLink';
@@ -130,45 +131,54 @@ export default class Governance extends React.Component<GovernanceProps, any> {
     } = governanceContract;
     return (
       <AppLayout section="governance">
-        <Web3SubmitWarning />
+        <Row gutter={16}>
+          <h1>Minimum Viable Governance</h1>
+          <Web3SubmitWarning />
 
-        {noGovernance && <span>No governance set up</span>}
+          {noGovernance && <span>No governance set up</span>}
 
-        {proposals && proposals.length === 0 && <span>No proposals yet</span>}
-        {proposals && proposals.length > 0 && (
-          <Fragment>
-            <h1>Proposals</h1>
-            <List
-              itemLayout="vertical"
-              size="small"
-              dataSource={proposals}
-              renderItem={item => (
-                <List.Item
-                  className="governanceProposal"
-                  extra={
-                    <div
-                      style={{
-                        minWidth: '190px',
-                        textAlign: 'center',
-                        padding: '16px',
-                      }}
-                    >
-                      {renderDate(item)}
-                    </div>
-                  }
-                >
-                  <List.Item.Meta title={item.summaryStr} />
-                  {this.renderContent(item)}
-                </List.Item>
-              )}
-            />
-          </Fragment>
-        )}
-        {canFinalize && (
-          <div style={{ paddingTop: '1rem' }}>
-            <Button onClick={finalize}>Finalize proposals</Button>
-          </div>
-        )}
+          {proposals && proposals.length === 0 && <span>No proposals yet</span>}
+          {proposals && proposals.length > 0 && (
+            <Fragment>
+              <h1>Proposals</h1>
+              <List
+                itemLayout="vertical"
+                size="small"
+                dataSource={proposals}
+                renderItem={item => (
+                  <List.Item
+                    className="governanceProposal"
+                    extra={
+                      <div
+                        style={{
+                          minWidth: '190px',
+                          textAlign: 'center',
+                          padding: '16px',
+                        }}
+                      >
+                        {renderDate(item)}
+                      </div>
+                    }
+                  >
+                    <List.Item.Meta title={item.summaryStr} />
+                    {this.renderContent(item)}
+                  </List.Item>
+                )}
+              />
+            </Fragment>
+          )}
+          {canFinalize && (
+            <div style={{ paddingTop: '1rem' }}>
+              <Button onClick={finalize}>Finalize proposals</Button>
+            </div>
+          )}
+        </Row>
+        <Row>
+          <Divider />
+        </Row>
+        <Row gutter={16}>
+          <TokenGovernance />
+        </Row>
       </AppLayout>
     );
   }

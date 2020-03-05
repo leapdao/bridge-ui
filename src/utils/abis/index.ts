@@ -8,11 +8,10 @@ import { default as proxy } from './proxy';
 
 const operator = CONFIG.consensus === 'poa' ? poaOperator : posOperator;
 
-const governable = proxy.concat(operator, bridge, exitHandler)
+const governable = proxy.concat(operator, bridge, exitHandler);
 
 export { default as erc20 } from './erc20';
 export { default as erc721 } from './erc721';
 export { default as governance } from './governance';
-export { 
-  bridge, operator, exitHandler, governable, proxy,
-};
+export { default as tokenGovernance } from './tokenGovernance';
+export { bridge, operator, exitHandler, governable, proxy };
