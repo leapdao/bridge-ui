@@ -1,7 +1,5 @@
 import { computed, observable } from 'mobx';
 
-import { proposalStore } from './proposalStore';
-
 export class Proposal {
   @observable
   private _title: string = '';
@@ -16,11 +14,6 @@ export class Proposal {
     this._title = title;
     this._description = description;
     this.ipfsHash = hash;
-  }
-
-  public async store(): Promise<string> {
-    this.ipfsHash = await proposalStore.store(this);
-    return this.ipfsHash;
   }
 
   @computed get title() {
@@ -39,6 +32,7 @@ export class Proposal {
     return JSON.stringify({
       title: this.title,
       description: this.description,
+      hash: this.ipfsHash,
     });
   }
 }

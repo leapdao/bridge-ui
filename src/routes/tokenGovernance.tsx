@@ -1,16 +1,25 @@
 import * as React from 'react';
 import { observable, computed } from 'mobx';
 import { observer } from 'mobx-react';
-import { Button, Form, Input, Row, Col, Tabs, Spin, notification } from 'antd';
+import {
+  Button,
+  Form,
+  Input,
+  Row,
+  Col,
+  Tabs,
+  Spin,
+  Icon,
+  notification,
+} from 'antd';
 
-import Contract from 'web3/eth/contract';
 import autobind from 'autobind-decorator';
 import Web3SubmitWarning from '../components/web3SubmitWarning';
-import { web3InjectedStore } from '../stores/web3/injected';
-import { tokenGovernance as tokenGovAbi } from '../utils/abis';
-import { governanceContractStore } from '../stores/governanceContract';
-import { CONFIG } from '../config';
-import { Proposal } from '../stores/governance/proposal';
+import {
+  proposalStore,
+  ProposalLifecycle,
+} from '../stores/governance/proposalStore';
+import { EventEmitter } from 'events';
 
 const { TextArea } = Input;
 const { Fragment } = React;
@@ -37,60 +46,56 @@ export default class TokenGovernance extends React.Component {
     return !this.submitting;
   }
 
-  @computed
-  public get tokenGovContract(): Contract | undefined {
-    if (web3InjectedStore.instance) {
-      return new web3InjectedStore.instance.eth.Contract(
-        tokenGovAbi,
-        CONFIG.tokenGovernanceAddress
-      );
-    }
+  private progressIndicator(): EventEmitter {
+    const progress = new EventEmitter();
+    progress
+      .on(ProposalLifecycle.IPFS_UPLOAD, ({ title }) => {
+        notification.open({
+          key: `ipfsUpload${title}`,
+          message: 'Uploading proposal to IPFS...',
+          icon: <Spin />,
+          duration: 0,
+          description: <i>{title}</i>,
+        });
+      })
+      .on(ProposalLifecycle.SUBMIT_TO_CONTRACT, ({ title }) => {
+        notification.close(`ipfsUpload${title}`);
+      })
+      .on(ProposalLifecycle.CREATED, ({ title }) => {
+        this.description = '';
+        this.title = '';
+        notification.open({
+          key: `proposal:create:success:${title}`,
+          message: 'Proposal registered',
+          icon: <Icon type="check-circle" style={{ color: 'green' }} />,
+          duration: 2,
+          description: <i>{title}</i>,
+        });
+      })
+      .on(ProposalLifecycle.FAILED_TO_CREATE, ({ title }) => {
+        notification.open({
+          key: `proposal:create:failed:${title}`,
+          message: 'Failed to create proposal',
+          icon: <Icon type="close-circle" style={{ color: 'red' }} />,
+          duration: 2,
+          description: <i>{title}</i>,
+        });
+      });
+    return progress;
   }
 
   @autobind
   public async sendToContract() {
     this.submitting = true;
 
-    notification.open({
-      key: 'ipfsUpload',
-      message: 'Uploading proposal to IPFS...',
-      icon: <Spin />,
-      duration: 0,
-      description: '',
-    });
-
     console.log('title:', this.title, 'description:', this.description);
 
-    const proposal = new Proposal(this.title, this.description);
-
-    const proposalHash = await proposal.store();
-
-    notification.close('ipfsUpload');
-
-    const accounts = await web3InjectedStore.instance.eth.getAccounts();
-
-    const tx = this.tokenGovContract.methods
-      .registerProposal(proposalHash)
-      .send({
-        from: accounts[0],
-      });
-
-    governanceContractStore.watchTx(tx, 'registerProposal', {
-      message:
-        'Registering token governance proposal. ' +
-        'A stake of 5000 LEAP will be deducted from your account',
-    });
-
-    tx.then(_ => {
-      this.submitting = false;
-      this.description = '';
-      this.title = '';
-    }).catch(e => {
-      this.submitting = false;
-      throw e;
-    });
-
-    return tx;
+    await proposalStore.create(
+      this.title,
+      this.description,
+      this.progressIndicator()
+    );
+    this.submitting = false;
   }
 
   public render() {
