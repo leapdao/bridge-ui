@@ -14,15 +14,15 @@ import {
 } from 'antd';
 
 import autobind from 'autobind-decorator';
-import Web3SubmitWarning from '../components/web3SubmitWarning';
+import AppLayout from '../../components/appLayout';
+import Web3SubmitWarning from '../../components/web3SubmitWarning';
 import {
   proposalStore,
   ProposalLifecycle,
-} from '../stores/governance/proposalStore';
+} from '../../stores/governance/proposalStore';
 import { EventEmitter } from 'events';
 
 const { TextArea } = Input;
-const { Fragment } = React;
 const { TabPane } = Tabs;
 
 @observer
@@ -100,7 +100,7 @@ export default class TokenGovernance extends React.Component {
 
   public render() {
     return (
-      <Fragment>
+      <AppLayout section="governance/token">
         <h1>Token Governance</h1>
         <Web3SubmitWarning />
 
@@ -159,7 +159,7 @@ export default class TokenGovernance extends React.Component {
             </Spin>
           </TabPane>
         </Tabs>
-      </Fragment>
+      </AppLayout>
     );
   }
 }
