@@ -11,6 +11,7 @@ import {
   Spin,
   Icon,
   notification,
+  List,
 } from 'antd';
 
 import autobind from 'autobind-decorator';
@@ -20,6 +21,7 @@ import {
   proposalStore,
   ProposalLifecycle,
 } from '../../stores/governance/proposalStore';
+import { Proposal } from '../../stores/governance/proposal';
 import { EventEmitter } from 'events';
 
 const { TextArea } = Input;
@@ -98,67 +100,96 @@ export default class TokenGovernance extends React.Component {
     this.submitting = false;
   }
 
+  @autobind
+  private renderProposal(proposal: Proposal) {
+    return (
+      <List.Item
+        className="governanceProposal"
+        extra={
+          <div
+            style={{
+              minWidth: '190px',
+              textAlign: 'center',
+              padding: '16px',
+            }}
+          >
+            <Icon type="like" style={{ fontSize: 24, width: '2rem' }} />
+            <Icon type="dislike" style={{ fontSize: 24, width: '2rem' }} />
+          </div>
+        }
+      >
+        <List.Item.Meta
+          title={proposal.title}
+          description={'created by:' + proposal.creator}
+        />
+        {proposal.description}
+      </List.Item>
+    );
+  }
+
   public render() {
     return (
       <AppLayout section="governance/token">
         <h1>Token Governance</h1>
         <Web3SubmitWarning />
-
-        <Tabs defaultActiveKey="1" type="card">
-          <TabPane tab="Open for voting" key="1">
-            Content of Tab d1
-          </TabPane>
-          <TabPane tab="Ready for processing" key="2">
-            Content of Tab 2
-          </TabPane>
-          <TabPane tab="Finalize proposals" key="3">
-            Content of Tab 3
-          </TabPane>
-          <TabPane tab="Submit a proposal" key="4">
-            <Spin size="large" spinning={!!this.submitting}>
-              <Form>
-                <Row gutter={28}>
-                  <Col span={10}>
-                    <h3>Proposal Title</h3>
-                    <Form.Item>
-                      <Input
-                        name="title"
-                        value={this.title}
-                        placeholder="Give your proposal a Title"
-                        disabled={!this.canEdit}
-                        onChange={e => (this.title = e.target.value)}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
-                <Row>
-                  <Col span={10}>
-                    <h3>Proposal Description</h3>
-                    <Form.Item>
-                      <TextArea
-                        name="description"
-                        value={this.description}
-                        rows={4}
-                        placeholder="Describe what your proposal is about..."
-                        disabled={!this.canEdit}
-                        onChange={e => (this.description = e.target.value)}
-                      />
-                    </Form.Item>
-                  </Col>
-                </Row>
+        <Button type="primary">Create new proposal</Button>
+        &nbsp;
+        <Button>Finalize proposals</Button>
+        {proposalStore.proposals ? (
+          <List
+            itemLayout="vertical"
+            size="small"
+            dataSource={proposalStore.proposals}
+            renderItem={this.renderProposal}
+          />
+        ) : (
+          <div className="tokens-loading">
+            <Spin />
+            Loading proposals...
+          </div>
+        )}
+        <Spin size="large" spinning={!!this.submitting}>
+          <Form>
+            <Row gutter={28}>
+              <Col span={10}>
+                <h3>Proposal Title</h3>
                 <Form.Item>
-                  <Button
-                    type="primary"
-                    onClick={this.sendToContract}
-                    disabled={!this.canSubmit}
-                  >
-                    Submit Proposal
-                  </Button>
+                  <Input
+                    name="title"
+                    value={this.title}
+                    placeholder="Give your proposal a Title"
+                    disabled={!this.canEdit}
+                    onChange={e => (this.title = e.target.value)}
+                  />
                 </Form.Item>
-              </Form>
-            </Spin>
-          </TabPane>
-        </Tabs>
+              </Col>
+            </Row>
+            <Row>
+              <Col span={10}>
+                <h3>Proposal Description</h3>
+                <Form.Item>
+                  <TextArea
+                    name="description"
+                    value={this.description}
+                    rows={4}
+                    placeholder="Describe what your proposal is about..."
+                    disabled={!this.canEdit}
+                    onChange={e => (this.description = e.target.value)}
+                  />
+                </Form.Item>
+              </Col>
+            </Row>
+            <Form.Item>
+              <Button
+                type="primary"
+                onClick={this.sendToContract}
+                disabled={!this.canSubmit}
+              >
+                Submit Proposal
+              </Button>
+            </Form.Item>
+          </Form>
+        </Spin>
       </AppLayout>
     );
   }

@@ -151,9 +151,7 @@ export default class Watchtower extends React.Component<WatchtowerProps, {}> {
         reaction(() => bridgeStore.address, resolve)
       );
     }
-    const fromBlock = await bridgeStore.contract.methods
-      .genesisBlockNumber()
-      .call();
+    const fromBlock = await bridgeStore.genesisBlockNumber;
     const events = await exitHandlerStore.contract.getPastEvents(
       'ExitStarted',
       {
