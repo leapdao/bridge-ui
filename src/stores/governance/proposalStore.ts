@@ -21,6 +21,9 @@ export class ProposalStore {
   @observable
   public proposals: Proposal[];
 
+  @observable
+  public loading: boolean;
+
   constructor() {
     when(() => !!bridgeStore.contract, this.loadAll);
   }
@@ -81,6 +84,7 @@ export class ProposalStore {
   @autobind
   @action
   private async loadAll() {
+    this.loading = true;
     console.log('Reading proposals..');
     const fromBlock = await bridgeStore.genesisBlockNumber;
     const events = await tokenGovernance.contract.getPastEvents(
@@ -113,6 +117,7 @@ export class ProposalStore {
         })
       )
     );
+    this.loading = false;
     console.log([...this.proposals]);
   }
 

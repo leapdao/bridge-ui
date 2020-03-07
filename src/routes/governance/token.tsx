@@ -7,11 +7,11 @@ import {
   Input,
   Row,
   Col,
-  Tabs,
   Spin,
   Icon,
   notification,
   List,
+  Radio,
 } from 'antd';
 
 import autobind from 'autobind-decorator';
@@ -26,6 +26,15 @@ import { EventEmitter } from 'events';
 
 const { TextArea } = Input;
 
+type ProposalFilter = (proposal: Proposal) => boolean;
+
+const filters = {
+  inprogress: (proposal: Proposal) => !proposal.isMature(),
+  mature: (proposal: Proposal) => proposal.isMature() && !proposal.finalized,
+  finalized: (proposal: Proposal) => proposal.finalized,
+  all: () => true,
+};
+
 @observer
 export default class TokenGovernance extends React.Component {
   @observable
@@ -36,6 +45,9 @@ export default class TokenGovernance extends React.Component {
 
   @observable
   private submitting: boolean;
+
+  @observable
+  private filterBy: string = 'inprogress';
 
   @computed
   private get canSubmit(): boolean {
@@ -99,6 +111,11 @@ export default class TokenGovernance extends React.Component {
     this.submitting = false;
   }
 
+  @computed
+  private get proposals() {
+    return (proposalStore.proposals || []).filter(filters[this.filterBy]);
+  }
+
   @autobind
   private renderProposal(proposal: Proposal) {
     return (
@@ -129,16 +146,45 @@ export default class TokenGovernance extends React.Component {
   public render() {
     return (
       <AppLayout section="governance/token">
-        <h1>Token Governance</h1>
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            marginBottom: '2rem',
+          }}
+        >
+          <div>
+            <h1>Token Governance Proposals</h1>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <Button key="finalize">Finalize</Button>
+            <Button
+              key="createProposals"
+              type="primary"
+              style={{ marginLeft: '0.5rem' }}
+            >
+              Create new proposal
+            </Button>
+          </div>
+        </div>
         <Web3SubmitWarning />
-        <Button type="primary">Create new proposal</Button>
-        &nbsp;
-        <Button>Finalize proposals</Button>
-        {proposalStore.proposals ? (
+        Show:{' '}
+        <Radio.Group
+          value={this.filterBy}
+          onChange={e => (this.filterBy = e.target.value)}
+          size="small"
+          style={{ marginBottom: '0.5rem' }}
+        >
+          <Radio.Button value="inprogress">In progress</Radio.Button>
+          <Radio.Button value="mature">Mature</Radio.Button>
+          <Radio.Button value="finalized">Finalized</Radio.Button>
+          <Radio.Button value="all">All</Radio.Button>
+        </Radio.Group>
+        {!proposalStore.loading ? (
           <List
             itemLayout="vertical"
             size="small"
-            dataSource={proposalStore.proposals}
+            dataSource={this.proposals}
             renderItem={this.renderProposal}
           />
         ) : (

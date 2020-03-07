@@ -1,5 +1,7 @@
 import { observable } from 'mobx';
 
+const SEVEN_DAYS = 604800000; // 1000 * 60 * 60 * 24 * 7 = 7 days
+
 export interface IStoredProposalData {
   title: string;
   description: string;
@@ -26,5 +28,10 @@ export class Proposal {
 
   constructor(proposalObject: IProposal) {
     Object.assign(this, proposalObject);
+  }
+
+  public isMature(): boolean {
+    const timeSinceOpen = Date.now() - this.openAt.getTime();
+    return timeSinceOpen > SEVEN_DAYS;
   }
 }
