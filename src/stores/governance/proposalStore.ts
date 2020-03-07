@@ -92,16 +92,28 @@ export class ProposalStore {
       await Promise.all(
         events.map(async ({ returnValues }) => {
           const { proposalHash, initiator } = returnValues;
+          const {
+            openTime,
+            finalized,
+            yesVotes,
+            noVotes,
+          } = await tokenGovernance.contract.methods
+            .proposals(proposalHash)
+            .call();
           const data = await this.loadFromIPFS(proposalHash);
           return new Proposal({
             ...data,
             creator: initiator,
             hash: proposalHash,
+            openAt: new Date(openTime * 1000),
+            finalized,
+            yesVotes,
+            noVotes,
           });
         })
       )
     );
-    console.log(this.proposals);
+    console.log([...this.proposals]);
   }
 
   private async loadFromIPFS(

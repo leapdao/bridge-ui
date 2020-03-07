@@ -25,7 +25,6 @@ import { Proposal } from '../../stores/governance/proposal';
 import { EventEmitter } from 'events';
 
 const { TextArea } = Input;
-const { TabPane } = Tabs;
 
 @observer
 export default class TokenGovernance extends React.Component {
