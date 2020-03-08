@@ -19,7 +19,7 @@ export enum ProposalLifecycle {
 
 export class ProposalStore {
   @observable
-  public proposals: Proposal[];
+  public proposals: Proposal[] = observable.array([]);
 
   @observable
   public loading: boolean;

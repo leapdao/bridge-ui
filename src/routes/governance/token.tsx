@@ -3,9 +3,9 @@ import { observable, computed } from 'mobx';
 import { observer } from 'mobx-react';
 import { Button, Spin, List, Radio, Card } from 'antd';
 
+import ProposalListItem from '../../components/governance/proposalListItem';
 import { proposalStore } from '../../stores/governance/proposalStore';
 import ProposalForm from '../../components/governance/proposalForm';
-import ProposalListItem from '../../components/governance/proposal';
 import Web3SubmitWarning from '../../components/web3SubmitWarning';
 import { Proposal } from '../../stores/governance/proposal';
 import AppLayout from '../../components/appLayout';
@@ -28,7 +28,7 @@ export default class TokenGovernance extends React.Component {
 
   @computed
   private get proposals() {
-    return (proposalStore.proposals || []).filter(filters[this.filterBy]);
+    return proposalStore.proposals.filter(filters[this.filterBy]);
   }
 
   @autobind
