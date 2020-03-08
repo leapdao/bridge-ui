@@ -1,7 +1,8 @@
 import * as React from 'react';
+import { Fragment } from 'react';
 import { observable, computed } from 'mobx';
 import { observer } from 'mobx-react';
-import { Button, Spin, List, Radio, Card } from 'antd';
+import { Button, Spin, List, Radio, Card, Skeleton } from 'antd';
 
 import ProposalListItem from '../../components/governance/proposalListItem';
 import { proposalStore } from '../../stores/governance/proposalStore';
@@ -36,6 +37,26 @@ export default class TokenGovernance extends React.Component {
     this.showForm = false;
   }
 
+  @autobind
+  private renderListHeader() {
+    return (
+      <Fragment>
+        Show:{' '}
+        <Radio.Group
+          value={this.filterBy}
+          onChange={e => (this.filterBy = e.target.value)}
+          size="small"
+          style={{ marginBottom: '0.5rem' }}
+        >
+          <Radio.Button value="inprogress">In progress</Radio.Button>
+          <Radio.Button value="mature">Mature</Radio.Button>
+          <Radio.Button value="finalized">Finalized</Radio.Button>
+          <Radio.Button value="all">All</Radio.Button>
+        </Radio.Group>
+      </Fragment>
+    );
+  }
+
   public render() {
     return (
       <AppLayout section="governance/token">
@@ -63,6 +84,7 @@ export default class TokenGovernance extends React.Component {
             </Button>
           </div>
         </div>
+
         <Card
           title="New proposal"
           bordered={true}
@@ -74,32 +96,40 @@ export default class TokenGovernance extends React.Component {
             onCancel={this.hideProposalForm}
           />
         </Card>
+
         <Web3SubmitWarning />
-        Show:{' '}
-        <Radio.Group
-          value={this.filterBy}
-          onChange={e => (this.filterBy = e.target.value)}
-          size="small"
-          style={{ marginBottom: '0.5rem' }}
+
+        <Spin
+          spinning={proposalStore.loading}
+          size="large"
+          tip="Loading proposals..."
         >
-          <Radio.Button value="inprogress">In progress</Radio.Button>
-          <Radio.Button value="mature">Mature</Radio.Button>
-          <Radio.Button value="finalized">Finalized</Radio.Button>
-          <Radio.Button value="all">All</Radio.Button>
-        </Radio.Group>
-        {!proposalStore.loading ? (
-          <List
-            itemLayout="vertical"
-            size="small"
-            dataSource={this.proposals}
-            renderItem={proposal => <ProposalListItem proposal={proposal} />}
+          <Skeleton
+            loading={proposalStore.loading}
+            title={true}
+            paragraph={true}
           />
-        ) : (
-          <div className="tokens-loading">
-            <Spin />
-            Loading proposals...
-          </div>
-        )}
+          <Skeleton
+            loading={proposalStore.loading}
+            title={true}
+            paragraph={true}
+          />
+          <Skeleton
+            loading={proposalStore.loading}
+            title={true}
+            paragraph={true}
+          />
+          {!proposalStore.loading && (
+            <List
+              itemLayout="vertical"
+              size="small"
+              header={this.renderListHeader()}
+              locale={{ emptyText: 'No proposals' }}
+              dataSource={this.proposals}
+              renderItem={proposal => <ProposalListItem proposal={proposal} />}
+            />
+          )}
+        </Spin>
       </AppLayout>
     );
   }

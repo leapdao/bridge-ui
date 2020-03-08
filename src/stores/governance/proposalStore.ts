@@ -22,7 +22,7 @@ export class ProposalStore {
   public proposals: Proposal[] = observable.array([]);
 
   @observable
-  public loading: boolean;
+  public loading: boolean = true;
 
   constructor() {
     when(() => !!bridgeStore.contract, this.loadAll);
