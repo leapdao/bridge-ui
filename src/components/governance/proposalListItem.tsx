@@ -11,6 +11,13 @@ import * as React from 'react';
 
 import { Proposal } from '../../stores/governance/proposal';
 
+const IconText = ({ type, text }) => (
+  <span>
+    <Icon type={type} style={{ marginRight: 8 }} />
+    {text}
+  </span>
+);
+
 interface ProposalListItemProps {
   proposal: Proposal;
 }
@@ -27,23 +34,12 @@ export default class ProposalListItem extends React.Component<
     return (
       <List.Item
         className="governanceProposal"
-        extra={
-          <div
-            style={{
-              minWidth: '190px',
-              textAlign: 'center',
-              padding: '16px',
-            }}
-          >
-            <Icon type="like" style={{ fontSize: 24, width: '2rem' }} />
-            <Icon type="dislike" style={{ fontSize: 24, width: '2rem' }} />
-          </div>
-        }
+        actions={[
+          <IconText type="like-o" text={proposal.yesVotes} />,
+          <IconText type="dislike-o" text={proposal.noVotes} />,
+        ]}
       >
-        <List.Item.Meta
-          title={proposal.title}
-          description={'created by:' + proposal.creator}
-        />
+        <List.Item.Meta title={proposal.title} />
         {proposal.description}
       </List.Item>
     );
