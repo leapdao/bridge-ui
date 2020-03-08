@@ -8,6 +8,7 @@
 import { Icon, List } from 'antd';
 import { observer } from 'mobx-react';
 import * as React from 'react';
+import * as ReactMarkdown from 'react-markdown';
 
 import { Proposal } from '../../stores/governance/proposal';
 
@@ -33,14 +34,16 @@ export default class ProposalListItem extends React.Component<
     const { proposal } = this.props;
     return (
       <List.Item
-        className="governanceProposal"
+        className="token-governance-proposal with-markdown"
         actions={[
           <IconText type="like-o" text={proposal.yesVotes} />,
           <IconText type="dislike-o" text={proposal.noVotes} />,
         ]}
       >
-        <List.Item.Meta title={proposal.title} />
-        {proposal.description}
+        <List.Item.Meta
+          title={proposal.title}
+          description={<ReactMarkdown source={proposal.description} />}
+        />
       </List.Item>
     );
   }

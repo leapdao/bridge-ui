@@ -227,3 +227,34 @@ h2:first-child {
   flex-direction: column;
   align-items: center;
 }
+
+.token-governance-proposal {
+  padding-top: 1.2rem !important;
+  padding-bottom: 1.2rem !important;
+}
+
+.token-governance-proposal .ant-list-item-meta-description {
+  color: rgba(0,0,0,.45) !important;
+}
+
+.token-governance-proposal .ant-list-item-meta {
+  margin-bottom: 0.2rem;
+}
+
+.token-governance-proposal .ant-list-item-meta-title {
+  margin-bottom: 0.5rem;
+}
+
+.with-markdown h1,
+.with-markdown h2 {
+  font-size: 0.8rem;
+  margin: 0;
+}
+
+.with-markdown ul {
+  margin-left: 1rem;
+}
+
+.with-markdown p {
+  margin-bottom: 0.5rem;
+}
