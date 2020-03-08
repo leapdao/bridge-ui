@@ -18,6 +18,7 @@ import {
   ProposalLifecycle,
 } from '../../stores/governance/proposalStore';
 
+const { Fragment } = React;
 const { TextArea } = Input;
 
 interface ProposalFormProps {
@@ -126,7 +127,17 @@ export default class ProposalForm extends React.Component<
               onChange={e => (this.title = e.target.value)}
             />
           </Form.Item>
-          <Form.Item label="Description">
+          <Form.Item
+            label="Description"
+            help={
+              <Fragment>
+                <a href="https://commonmark.org/help/" target="_blank">
+                  Markdown
+                </a>{' '}
+                is supported
+              </Fragment>
+            }
+          >
             <TextArea
               name="description"
               value={this.description}
