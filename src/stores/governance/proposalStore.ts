@@ -72,6 +72,7 @@ export class ProposalStore {
       .then(_ => {
         const proposal = new Proposal({ title, description, hash });
         progress.emit(ProposalLifecycle.CREATED, proposal);
+        this.loadAll();
         return proposal;
       })
       .catch(e => {
