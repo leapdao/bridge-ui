@@ -17,7 +17,6 @@ import { Dropdown, Icon, Layout, Menu, Spin, Button, Alert } from 'antd';
 import { CONFIG } from '../config';
 import AppLogo from './appLogo';
 import Message from './message';
-import TokenValue from './tokenValue';
 
 import '../style.css';
 
@@ -77,9 +76,15 @@ class AppLayout extends Component<AppLayoutProps, any> {
         mode={horizontal ? 'horizontal' : 'vertical'}
         style={{ lineHeight: '64px', width: '100%' }}
       >
-        <Menu.Item key="governance">
-          <Link to="/governance">Governance</Link>
-        </Menu.Item>
+        <Menu.SubMenu title="Governance">
+          <Menu.Item key="governance/plasma">
+            <Link to="/governance/plasma">Plasma Network</Link>
+          </Menu.Item>
+          <Menu.Item key="governance/token">
+            <Link to="/governance/token">Token</Link>
+          </Menu.Item>
+        </Menu.SubMenu>
+
         {CONFIG.consensus !== 'poa' && (
           <Menu.Item key="slots">
             <Link to={`/slots`}>Slots auction</Link>

@@ -1,8 +1,12 @@
-import { tokenGovernance } from '../contracts/tokenGovernance';
-import * as IPFS from '../ipfs';
-import { Proposal } from './proposal';
+import { when, observable, action } from 'mobx';
+import autobind from 'autobind-decorator';
 import { EventEmitter } from 'events';
+
+import { tokenGovernance } from '../contracts/tokenGovernance';
+import { Proposal, IStoredProposalData } from './proposal';
 import { web3InjectedStore } from '../web3/injected';
+import { bridgeStore } from '../bridge';
+import * as IPFS from '../ipfs';
 
 const { hexToCid, cidToHex } = IPFS;
 
@@ -14,6 +18,16 @@ export enum ProposalLifecycle {
 }
 
 export class ProposalStore {
+  @observable
+  public proposals: Proposal[] = observable.array([]);
+
+  @observable
+  public loading: boolean = true;
+
+  constructor() {
+    when(() => !!bridgeStore.contract, this.loadAll);
+  }
+
   private async storeToIPFS(
     title: string,
     description: string,
@@ -27,21 +41,21 @@ export class ProposalStore {
     return proposalHash;
   }
 
-  private async submitToContract(proposal: Proposal, progress: EventEmitter) {
-    progress.emit(ProposalLifecycle.SUBMIT_TO_CONTRACT, proposal);
+  private async submitToContract(
+    title: string,
+    hash: string,
+    progress: EventEmitter
+  ) {
+    progress.emit(ProposalLifecycle.SUBMIT_TO_CONTRACT, { title, hash });
     const [from] = await web3InjectedStore.instance.eth.getAccounts();
     const tx = tokenGovernance.iContract.methods
-      .registerProposal(proposal.hash)
+      .registerProposal(hash)
       .send({ from });
 
     tokenGovernance.watchTx(tx, 'registerProposal', {
       message:
         'Registering token governance proposal. ' +
         'A stake of 5000 LEAP will be deducted from your account',
-    });
-
-    tx.then(_ => {
-      progress.emit(ProposalLifecycle.CREATED, proposal);
     });
 
     return tx;
@@ -52,23 +66,70 @@ export class ProposalStore {
     description: string,
     progress: EventEmitter = new EventEmitter()
   ): Promise<Proposal> {
-    const proposalHash = await this.storeToIPFS(title, description, progress);
-    const proposal = new Proposal(title, description, proposalHash);
-    await this.submitToContract(proposal, progress).catch(e => {
-      console.error(e);
-      progress.emit(ProposalLifecycle.FAILED_TO_CREATE, { title });
-    });
+    const hash = await this.storeToIPFS(title, description, progress);
 
-    return proposal;
+    return this.submitToContract(title, hash, progress)
+      .then(_ => {
+        const proposal = new Proposal({ title, description, hash });
+        progress.emit(ProposalLifecycle.CREATED, proposal);
+        this.loadAll();
+        return proposal;
+      })
+      .catch(e => {
+        console.error(e);
+        progress.emit(ProposalLifecycle.FAILED_TO_CREATE, { title });
+        return null;
+      });
   }
 
-  public async load(proposalHash: string): Promise<Proposal> {
+  @autobind
+  @action
+  private async loadAll() {
+    this.loading = true;
+    console.log('Reading proposals..');
+    const fromBlock = await bridgeStore.genesisBlockNumber;
+    const events = await tokenGovernance.contract.getPastEvents(
+      'ProposalRegistered',
+      { fromBlock }
+    );
+
+    this.proposals = observable.array(
+      await Promise.all(
+        events.map(async ({ returnValues }) => {
+          const { proposalHash, initiator } = returnValues;
+          const {
+            openTime,
+            finalized,
+            yesVotes,
+            noVotes,
+          } = await tokenGovernance.contract.methods
+            .proposals(proposalHash)
+            .call();
+          const data = await this.loadFromIPFS(proposalHash);
+          return new Proposal({
+            ...data,
+            creator: initiator,
+            hash: proposalHash,
+            openAt: new Date(openTime * 1000),
+            finalized,
+            yesVotes,
+            noVotes,
+          });
+        })
+      )
+    );
+    this.loading = false;
+    console.log([...this.proposals]);
+  }
+
+  private async loadFromIPFS(
+    proposalHash: string
+  ): Promise<IStoredProposalData> {
     const ipfsHash = hexToCid(proposalHash);
     console.log('Retrieving from IPFS', { proposalHash, ipfsHash });
     const rawData = await IPFS.get(ipfsHash);
     console.log('Retrieved', { rawData });
-    const proposal = JSON.parse(rawData.toString());
-    return new Proposal(proposal.title, proposal.description, proposalHash);
+    return JSON.parse(rawData.toString());
   }
 }
 

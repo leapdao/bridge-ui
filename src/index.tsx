@@ -23,7 +23,8 @@ import Wallet from './routes/wallet';
 import Slots from './routes/slots';
 import RegisterToken from './routes/registerToken';
 import Status from './routes/status';
-import Governance from './routes/governance';
+import PlasmaGovernance from './routes/governance/plasma';
+import TokenGovernance from './routes/governance/token';
 
 const Home = require('./config/' + CONFIG_NAME + '/home.tsx').default;
 
@@ -32,7 +33,9 @@ ReactDOM.render(
     <Fragment>
       <TxNotification />
       <Route path="/" exact component={Home} />
-      <Route path="/governance" component={Governance} />
+      <Route path="/governance" exact component={PlasmaGovernance} />
+      <Route path="/governance/plasma" component={PlasmaGovernance} />
+      <Route path="/governance/token" component={TokenGovernance} />
       <Route path="/slots" component={Slots} />
       <Route path="/:bridgeAddr(0x[0-9a-fA-f]{40})" exact component={Slots} />
       <Route path="/registerToken" exact component={RegisterToken} />
