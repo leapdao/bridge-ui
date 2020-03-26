@@ -129,15 +129,10 @@ export class UnspentsStore {
       });
   }
 
-  private exitDeposit(
-    unspentDeposit: UnspentWithTx,
-    fallbackPeriodData: PeriodData
-  ) {
-    return getProof(
-      web3PlasmaStore.instance,
-      unspentDeposit.transaction,
-      fallbackPeriodData
-    ).then(txProof =>
+  private exitDeposit(unspentDeposit: UnspentWithTx) {
+    return getProof(web3PlasmaStore.instance, unspentDeposit.transaction, {
+      excludePrevHashFromProof: true,
+    }).then(txProof =>
       exitHandlerStore.startExit([], txProof, unspentDeposit.outpoint.index, 0)
     );
   }
@@ -146,23 +141,19 @@ export class UnspentsStore {
   public exitUnspent(unspent: UnspentWithTx) {
     const tx = Tx.fromRaw(unspent.transaction.raw);
 
-    const { signer } = operatorStore.slots[0];
-
-    const fallbackPeriodData = { slotId: 0, validatorAddress: signer };
-
     if (tx.type === Type.DEPOSIT) {
-      return this.exitDeposit(unspent, fallbackPeriodData);
+      return this.exitDeposit(unspent);
     }
 
     getYoungestInputTx(web3PlasmaStore.instance, tx)
       .then(inputTx =>
         Promise.all([
-          getProof(
-            web3PlasmaStore.instance,
-            unspent.transaction,
-            fallbackPeriodData
-          ),
-          getProof(web3PlasmaStore.instance, inputTx.tx, fallbackPeriodData),
+          getProof(web3PlasmaStore.instance, unspent.transaction, {
+            excludePrevHashFromProof: true,
+          }),
+          getProof(web3PlasmaStore.instance, inputTx.tx, {
+            excludePrevHashFromProof: true,
+          }),
           inputTx.index,
         ])
       )
@@ -207,7 +198,6 @@ export class UnspentsStore {
   @autobind
   private finalizeFastExit(exit) {
     console.log('Finalizing fast exit', exit, operatorStore.slots);
-    const { signer } = operatorStore.slots[0];
     const { unspent, sig, rawTx, sigHashBuff } = exit;
     const vBuff = Buffer.alloc(32);
     vBuff.writeInt8(sig.v, 31);
@@ -220,8 +210,12 @@ export class UnspentsStore {
       ])
     );
     return Promise.all([
-      getProof(web3PlasmaStore.instance, rawTx),
-      getProof(web3PlasmaStore.instance, unspent.transaction),
+      getProof(web3PlasmaStore.instance, rawTx, {
+        excludePrevHashFromProof: true,
+      }),
+      getProof(web3PlasmaStore.instance, unspent.transaction, {
+        excludePrevHashFromProof: true,
+      }),
       0,
     ]).then(([txProof, inputProof, inputIndex]) => {
       // call api
